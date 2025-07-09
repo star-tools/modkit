@@ -1,0 +1,163 @@
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-family: sans-serif;
+    }
+
+    header {
+      padding: 10px;
+      background: #1e1e1e;
+      color: white;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    header button {
+      padding: 10px 20px;
+      font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #007acc;
+      color: white;
+      transition: background 0.2s ease;
+    }
+
+    header button:hover {
+      background-color: #005a9e;
+    }
+
+    .editor-container {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .main{
+      flex: 1;
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+      flex-direction: column;
+    }
+    .editor {
+      flex: 1;
+      border: 1px solid #ccc;
+    }
+
+     
+    header button, header input[type="file"] {
+      padding: 10px 15px;
+      font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #007acc;
+      color: white;
+    }
+
+    header input[type="file"] {
+      background: none;
+      color: white;
+    }
+
+    #file-list {
+      padding: 5px;
+      border-right: 1px solid #ccc;
+      width: 200px;
+      overflow-y: auto;
+      background: #f9f9f9;
+    }
+
+    #file-list div {
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    #file-list div:hover {
+      background-color: #ddd;
+    }
+
+  .main {
+    display: flex;
+    height: 100vh;
+  }
+
+  #file-list {
+    width: 200px;
+    background: #1e1e1e;
+    color: white;
+    overflow-y: auto;
+  }
+
+  .editor-container {
+    flex: 1;
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .editor {
+    flex: 1;
+    border: 1px solid #ccc;
+  }
+
+  header {
+    padding: 10px;
+    background: #1e1e1e;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  header button {
+    padding: 8px 16px;
+    background: #007acc;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  header button:hover {
+    background: #005fa3;
+  }
+
+  input[type="file"] {
+    color: white;
+  }
+
+  .upload-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+
+.upload-btn:hover {
+  background-color: #218838;
+}
+
+.upload-info {
+  margin-left: 15px;
+  font-size: 14px;
+  color: #ccc;
+  align-self: center;
+}

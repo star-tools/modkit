@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JSON/XML Viewer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+</head>
+<body>
+
+<header>
+  <button onclick="convertXmlToJson()">Convert XML → JSON</button>
+  <button onclick="convertJsonToXml()">Convert JSON → XML</button>
+  <button onclick="resetEditors()">Reset</button>
+
+<label class="upload-btn">
+  Upload XML or ZIP
+  <input type="file" id="fileInput" accept=".xml,.zip" hidden>
+</label>
+<span id="uploadInfo" class="upload-info"></span>
+
+</header>
+
+<script type="text/xml" id="sc2-xml">
+<Catalog>
+  <CActorUnit default="1" id="GenericUnitMinimal">
+    <StatusColors index="Shields" BackgroundColor="255,0,0,0" EmptyColor="255,80,80,80">
+      <ColorArray value="255,0,0,255"/>
+    </StatusColors>
+  </CActorUnit>
+</Catalog>
+</script>
+
+<script type="application/json" id="sc2-json">
+{
+  "Catalog": [
+    {
+      "id": "Ghost",
+      "Race": "Terr",
+      "AbilArray": [
+        { "Link": "stop" },
+        { "Link": "attack" }
+      ],
+      "class": "CUnit"
+    }
+  ]
+}
+</script>
+
+<div class="main">
+  <div id="file-list" style="padding:10px; border-right:1px solid #444; width:200px; overflow-y:auto;"></div>
+  <div class="editor-container">
+    <div class="editor" id="editor-xml"></div>
+    <div class="editor" id="editor-json"></div>
+  </div>
+</div>
+
+<script type="module">
+  import JSZipComponentReader from '../src/readers/scmod-reader-jszip.js';
+  import SC2JSON from '../src/converter/SC2XMLJSON.js';
+  import '../src/schema/catalog.js';
+
+  const converter = new SC2JSON();
+  let editorXML, editorJSON;
+  let zipReader = null;
+  let currentZipFile = null;
+  let currentFileName = null;
+
+  const defaultXML = document.getElementById('sc2-xml').textContent.trim();
+  const defaultJSON = document.getElementById('sc2-json').textContent.trim();
+
+  require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+
+  require(['vs/editor/editor.main'], function () {
+    editorXML = monaco.editor.create(document.getElementById('editor-xml'), {
+      value: localStorage.getItem('sc2-xml') || defaultXML,
+      language: 'xml',
+      theme: 'vs-dark',
+      automaticLayout: true
+    });
+
+    editorJSON = monaco.editor.create(document.getElementById('editor-json'), {
+      value: localStorage.getItem('sc2-json') || defaultJSON,
+      language: 'json',
+      theme: 'vs-dark',
+      automaticLayout: true
+    });
+
+    editorXML.onDidChangeModelContent(() => {
+      localStorage.setItem('sc2-xml', editorXML.getValue());
+    });
+
+    editorJSON.onDidChangeModelContent(() => {
+      localStorage.setItem('sc2-json', editorJSON.getValue());
+    });
+  });
+
+  window.convertXmlToJson = function () {
+    try {
+      const xmlText = editorXML.getValue();
+      const json = converter.toJSON(xmlText);
+      editorJSON.setValue(JSON.stringify(json, null, 2));
+    } catch (e) {
+      alert("Invalid XML: " + e.message);
+    }
+  };
+
+  window.convertJsonToXml = function () {
+    try {
+      const jsonText = editorJSON.getValue();
+      const json = JSON.parse(jsonText);
+      const xml = converter.toXML(json, 'Catalog');
+      editorXML.setValue(xml);
+    } catch (e) {
+      alert("Invalid JSON: " + e.message);
+    }
+  };
+
+  window.resetEditors = function () {
+    if (confirm("Reset editors to default content?")) {
+      editorXML.setValue(defaultXML);
+      editorJSON.setValue(defaultJSON);
+      localStorage.removeItem('sc2-xml');
+      localStorage.removeItem('sc2-json');
+    }
+  };
+
+
+  
+document.getElementById('fileInput').addEventListener('change', async (event) => {
+  const file = event.target.files[0];
+  const uploadInfo = document.getElementById('uploadInfo');
+  if (!file) return;
+
+  uploadInfo.textContent = `Loaded: ${file.name}`;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+
+
+    const fileListDiv = document.getElementById('file-list');
+    fileListDiv.innerHTML = ''; // reset
+
+
+    if (ext === 'xml') {
+      const text = await file.text();
+      editorXML.setValue(text);
+      editorJSON.setValue('');
+      currentFileName = null;
+      zipReader = null;
+    } else if (ext === 'zip') {
+      zipReader = new JSZipComponentReader();
+      await zipReader.load(file);
+      const { files } = zipReader.getFiles('', true);
+
+      currentZipFile = file;
+
+
+
+      
+      // Display each .xml file
+      files
+        .filter(f => f.endsWith('.xml'))
+        .filter(f => JSZipComponentReader.DATA_FILES.includes(f.split("/").pop().replace("data.xml","") ))
+        .forEach((filename, index) => {
+          const div = document.createElement('div');
+          div.textContent = filename.split("/").pop().replace("data.xml","")
+          div.style.cursor = 'pointer';
+          div.style.padding = '5px';
+          div.style.borderBottom = '1px solid #444';
+          div.style.background = index === 0 ? '#333' : '';
+          div.onclick = async () => {
+            if (filename === currentFileName) return;
+            await saveCurrentXml();
+            const xml = await zipReader.read(filename);
+            editorXML.setValue(xml);
+            editorJSON.setValue('');
+            currentFileName = filename;
+
+            // highlight current
+            [...fileListDiv.children].forEach(c => c.style.background = '');
+            div.style.background = '#333';
+          };
+          fileListDiv.appendChild(div);
+
+          // Auto-load the first file
+          if (index === 0) div.click();
+        });
+    } else {
+      alert('Unsupported file type');
+    }
+
+    event.target.value = ''; // reset input
+  });
+
+  async function saveCurrentXml() {
+    if (zipReader && currentFileName) {
+      const currentContent = editorXML.getValue();
+      await zipReader.writeTextFile(currentFileName, currentContent);
+    }
+  }
+</script>
+</body>
+</html>
