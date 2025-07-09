@@ -189,6 +189,7 @@ export class CEnum extends CDataType {
    */
   static validate(val) {
     if (!this.enum.length) return true;
+    if(val === "Unknown") return true; //is it correct?
     if(!this.enum.includes(val)){
       console.log(`value ${val} is missing in Enum ` + this.name)
     return false
@@ -614,7 +615,7 @@ export class CFileImage extends CFile {static extensions = ["dds","png","tga","j
 export class CFileMovie extends CFile {static extensions = ["ogv"]}
 export class CFileMap extends CFile {static extensions = ["sc2map"]}
 export class CFileModel extends CFile {static extensions = ["m3"]}
-export class CFileCutcsene extends CFile {static extensions = ["sc2cutscene","stormcutscene"]}
+export class CFileCutscene extends CFile {static extensions = ["sc2cutscene","stormcutscene"]}
 export class CFileFontStyle extends CFile {static extensions = ["sc2style"]}
 export class CFileLayout extends CFile {static extensions = ["sc2layout"]}
 export class CFileSound extends CFile {static extensions = ["ogg","mp3","wav"]}
@@ -906,7 +907,7 @@ export class CDataEntryPath extends CDataType  {
         Shape: CShapeLink,
         TextureSheet: CTextureSheetLink,
         HeroAbil: CHeroAbilLink,
-        Strng: CStringLink,
+        String: CStringLink,
         Hotkey: CHotkeyLink,
         Bank: CBankLink
     }
@@ -916,7 +917,7 @@ export class CDataEntryPath extends CDataType  {
       Movie: CFileMovie,
       Map: CFileMap,
       Model: CFileModel,
-      Cutcsene: CFileCutcsene,
+      Cutscene: CFileCutscene,
       Font: CFileFont,
       FontStyle: CFileFontStyle,
       Layout: CFileLayout,
@@ -939,6 +940,29 @@ export class CDataEntryPath extends CDataType  {
 
 
 SCSchema.types = {
+  CString,
+  CString4,
+  CString32,
+  CString50,
+  CString80,
+  CReals,
+  CInts,
+  CWords,
+  Int,
+  Real,
+  Real32,
+  Link,
+  Bit,
+  Int8,
+  Int16,
+  Int32,
+  UInt,
+  UInt8,
+  UInt16,
+  UInt32,
+
+  CTexturePath: CFileImage,
+  CImagePath: CFileImage,
   CUnitLink,
   CValidatorLink,
   CAlertLink,

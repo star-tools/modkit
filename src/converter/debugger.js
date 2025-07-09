@@ -1,6 +1,3 @@
-import fs from 'fs/promises';
-import { performance } from 'perf_hooks';
-import { JSONStringifyWithInlineArrays } from '../lib/util.js';
 
 /**
  * SC2JSONDebugger collects debug metadata while parsing SC2 XML data.
@@ -12,7 +9,7 @@ import { JSONStringifyWithInlineArrays } from '../lib/util.js';
  * 
  * It supports saving/loading debug info from disk, and prevents duplicates using Set structures.
  */
-export class SC2JSONDebugger {
+export default class SC2JSONDebugger {
   /**
    * @param {Object} options
    * @param {string} [options.file='./debug.json'] Path to debug data file
@@ -41,25 +38,15 @@ export class SC2JSONDebugger {
   }
   /** Start timing the execution */
   start(stage) {
-    this.timers[stage] = {start: performance.now()}
     this.trace = []
   }
-
   /** Finish timing the execution and record duration */
   finish(stage) {
-    this.timers[stage].end = performance.now()
-    this.timers[stage].time = this.timers[stage].end - this.timers[stage].start
     this.trace = []
-  }
-  performace(){
-    return this.timers
   }
 
   /** Reset all data and timers */
   reset() {
-    this.startTime = null;
-    this.endTime = null;
-    this.executionDurationMs = null;
     this.data = {
       missingSchema: {},
       unknownEnumIndex: {},
@@ -98,11 +85,12 @@ export class SC2JSONDebugger {
    * @param {Array<Object>} trace Array of objects with `.tagName`
    * @param {string|number} value Missing enum value
    */
-  missingEnum(trace, value) {
-    const tag = trace.map(i => i.tagName).join('.');
+  missingEnum(value) {
+    const tag = this.trace.map(i => i.tagName).join('.');
     const target = this.data.missingEnum;
     if (!target[tag]) {
       target[tag] = new Set();
+      console.log('Missing index for indexed array:', this.trace.join("."));
     }
     target[tag].add(value);
   }
@@ -113,8 +101,8 @@ export class SC2JSONDebugger {
    * @param {Object} entry Parsed object entry
    * @param {string} field Missing field name
    */
-  missingSchema(trace, entry, field) {
-    const tag = [...trace.map(i => i.tagName), field].join('.');
+  missingSchema(entry, field) {
+    const tag = [...this.trace.map(i => i), field].join('.');
     const value = entry[field];
 
     const parts = tag.split('.');
@@ -127,8 +115,7 @@ export class SC2JSONDebugger {
       if (i === parts.length - 1) {
         if (!current[part]) {
           current[part] = new Set();
-        } else if (!(current[part] instanceof Set)) {
-          current[part] = new Set([current[part]]);
+          console.log('No schema found for tag: ', tag);
         }
 
         if (value !== undefined) {
@@ -144,64 +131,4 @@ export class SC2JSONDebugger {
     }
   }
 
-  /**
-   * Save the collected debug data to disk as JSON
-   * @param {string} [file=this.options.file] Output path
-   */
-  async save(file = this.options.file) {
-    // Recursively convert Sets into arrays for serialization
-    const serializeSets = (obj) => {
-      if (obj instanceof Set) {
-        return [...obj];
-      } else if (typeof obj === 'object' && obj !== null) {
-        const result = {};
-        for (const key in obj) {
-          result[key] = serializeSets(obj[key]);
-        }
-        return result;
-      }
-      return obj;
-    };
-
-    try {
-      const json = JSONStringifyWithInlineArrays(serializeSets(this.data), 1);
-      await fs.writeFile(file, json, 'utf8');
-    } catch (err) {
-      console.error('Error saving debug data:', err);
-      throw err;
-    }
-  }
-
-  /**
-   * Load debug data from disk and restore Set structures
-   * @param {string} [file=this.options.file] Input path
-   */
-  async load(file = this.options.file) {
-    try {
-      const json = await fs.readFile(file, 'utf8');
-      const loaded = JSON.parse(json);
-
-      const restoreSets = (obj) => {
-        if (Array.isArray(obj)) return new Set(obj);
-        if (typeof obj === 'object' && obj !== null) {
-          const restored = {};
-          for (const key in obj) {
-            restored[key] = restoreSets(obj[key]);
-          }
-          return restored;
-        }
-        return obj;
-      };
-
-      this.data = {
-        missingSchema: restoreSets(loaded.missingSchema || {}),
-        unknownEnumIndex: restoreSets(loaded.unknownEnumIndex || {}),
-        missingEnum: restoreSets(loaded.missingEnum || {})
-      };
-    } catch (err) {
-      if (err.code === 'ENOENT') return null; // No file to load
-      console.error('Error loading debug data:', err);
-      throw err;
-    }
-  }
 }

@@ -54,9 +54,6 @@ export default class SC2JSON {
   getSchema(tag, schema = SCSchema) {
     if (schema[tag]) return { schema: schema[tag], field: tag };
     if (schema['%' + tag]) return { schema: schema['%' + tag], field: tag };
-
-    
-
     for (let key in schema) {
       if (key[0] === '*' && schema[key][0]?.[tag]) {
         const subSchema = schema[key][0][tag];
@@ -66,8 +63,6 @@ export default class SC2JSON {
         };
       }
     }
-
-    console.log('No schema found for tag:', tag);
     return { schema: null, field: null };
   }
 
@@ -161,6 +156,9 @@ export default class SC2JSON {
 
   _applySchemaForChild(obj, child, schema) {
     const { field, schema: subSchema } = this.getSchema(child.tag, schema);
+
+    if(!subSchema && schema)this.debugger?.missingSchema(obj, child.tag);
+
     const fieldName = field || child.tag || '_';
     const isArray = !subSchema || Array.isArray(subSchema);
     const schemaClass = isArray ? subSchema?.[0] : subSchema;
@@ -176,7 +174,9 @@ export default class SC2JSON {
       value = child;
     } else {
       if (typeof schemaClass !== 'object') {
-        value = schemaClass?.parse(child.attributes?.value);
+        if(child.attributes?.value){
+          value = schemaClass?.parse(child.attributes?.value);
+        }
       } else {
         this._applySchema(child, schemaClass);
         value = child;
@@ -185,17 +185,21 @@ export default class SC2JSON {
       if (isIndexedArray) {
         const removed = child.attributes?.removed ? +child.attributes.removed : 0;
         if (!index) {
-          console.log('Missing index for indexed array:', child);
+          this.debugger?.missingEnum(child);
           index = '_';
         }
-        if (!enumIndex) console.log('Missing enum for indexed array');
+        if (!enumIndex) {
+          // console.log('Missing enum for indexed array');
+        }
         const enumName = enumIndex ? this._getEnumName(index, enumIndex) : index;
         if (removed) value = { value, removed };
         obj[fieldName] = obj[fieldName] || {};
         obj[fieldName][enumName] = value;
         return;
       } else {
-        value = schemaClass?.parse(child.attributes?.value);
+        if(child.attributes?.value){
+          value = schemaClass?.parse(child.attributes?.value);
+        }
       }
     }
     this._writeValue(obj, fieldName, value, isArray);
@@ -205,7 +209,7 @@ export default class SC2JSON {
     if (isInteger(index)) {
       const i = +index;
       if (enumClass.enum[i]) return enumClass.enum[i];
-      console.log('Enum index OOB:', index);
+      // console.log('Enum index OOB:', index);
     } else if (!enumClass.enum.includes(index)) {
       this.debugger?.unknownEnumIndex(enumClass.name, index);
     }

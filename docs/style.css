@@ -1,163 +1,225 @@
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      font-family: sans-serif;
-    }
-
-    header {
-      padding: 10px;
-      background: #1e1e1e;
-      color: white;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
-
-    header button {
-      padding: 10px 20px;
-      font-size: 14px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      background-color: #007acc;
-      color: white;
-      transition: background 0.2s ease;
-    }
-
-    header button:hover {
-      background-color: #005a9e;
-    }
-
-    .editor-container {
-      flex: 1;
-      display: flex;
-      gap: 10px;
-      padding: 10px;
-      box-sizing: border-box;
-    }
-
-    .main{
-      flex: 1;
-      display: flex;
-      gap: 10px;
-      padding: 10px;
-      box-sizing: border-box;
-      flex-direction: column;
-    }
-    .editor {
-      flex: 1;
-      border: 1px solid #ccc;
-    }
-
-     
-    header button, header input[type="file"] {
-      padding: 10px 15px;
-      font-size: 14px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      background-color: #007acc;
-      color: white;
-    }
-
-    header input[type="file"] {
-      background: none;
-      color: white;
-    }
-
-    #file-list {
-      padding: 5px;
-      border-right: 1px solid #ccc;
-      width: 200px;
-      overflow-y: auto;
-      background: #f9f9f9;
-    }
-
-    #file-list div {
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-
-    #file-list div:hover {
-      background-color: #ddd;
-    }
-
-  .main {
-    display: flex;
-    height: 100vh;
-  }
-
-  #file-list {
-    width: 200px;
-    background: #1e1e1e;
-    color: white;
-    overflow-y: auto;
-  }
-
-  .editor-container {
-    flex: 1;
-    display: flex;
-    gap: 10px;
-    padding: 10px;
-    box-sizing: border-box;
-  }
-
-  .editor {
-    flex: 1;
-    border: 1px solid #ccc;
-  }
-
-  header {
-    padding: 10px;
-    background: #1e1e1e;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  header button {
-    padding: 8px 16px;
-    background: #007acc;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-
-  header button:hover {
-    background: #005fa3;
-  }
-
-  input[type="file"] {
-    color: white;
-  }
-
-  .upload-btn {
-  display: inline-block;
-  padding: 10px 20px;
-  background-color: #28a745;
+/* ===== Global Layout ===== */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  background: #1e1e1e;
   color: white;
-  border-radius: 5px;
-  font-size: 14px;
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.2s ease;
+  display: flex;
+  flex-direction: column;
 }
 
-.upload-btn:hover {
-  background-color: #218838;
+/* ===== Toolbar Header ===== */
+header.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 10px 4px 4px;
+  background: #1f1f1f;
+  border-bottom: 1px solid #333;
+}
+
+header.toolbar button,
+header.toolbar .upload-btn {
+  background: #2d2d2d;
+  border: none;
+  color: white;
+  font-size: 18px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+header.toolbar button:hover,
+header.toolbar .upload-btn:hover {
+  background: #3c3c3c;
+}
+
+.upload-btn input[type="file"] {
+  display: none;
 }
 
 .upload-info {
-  margin-left: 15px;
-  font-size: 14px;
+  margin-left: auto;
+  font-size: 13px;
+  color: #aaa;
+}
+
+.diff-toggle-label {
+  margin-left: 20px;
+  font-size: 13px;
   color: #ccc;
-  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ===== Main Layout ===== */
+.main {
+  flex: 1;
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.editor-container {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.editor {
+  flex: 1;
+}
+
+/* ===== File Bar ===== */
+.file-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  min-width: 200px;
+  background: #1f1f1f;
+  border-right: 1px solid #333;
+  overflow: hidden;
+}
+
+.scroll-btn {
+  display: none; /* optional for vertical layout */
+}
+
+.file-bar {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 13px;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  border-right: 1px solid #333;
+  user-select: none;
+}
+
+.file-bar div {
+  padding: 4px 12px;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  border-left: 3px solid transparent;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.file-bar div:hover {
+  background-color: #333333;
+}
+
+.file-bar div.active {
+  background-color: #094771;
+  border-left-color: #0e639c;
+  color: white;
+  font-weight: 600;
+}
+
+.file-bar div .file-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  fill: #858585;
+  flex-shrink: 0;
+}
+
+.file-bar div.active .file-icon {
+  fill: white;
+}
+
+
+/* ===== JSON Diff Highlight ===== */
+.json-line-modified {
+  background-color: #264f78 !important;
+}
+
+/* ===== Diff Summary Box ===== */
+.diff-summary {
+  padding: 10px;
+  font-family: monospace;
+  background: #252526;
+  border-top: 1px solid #444;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.diff-summary code {
+  display: block;
+  white-space: pre-wrap;
+  color: #ccc;
+}
+
+.diff-summary code.added {
+  color: #9f0;
+}
+
+.diff-summary code.removed {
+  color: #f66;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .main {
+    flex-direction: column;
+  }
+  .file-bar-wrapper {
+    flex-direction: row;
+    height: auto;
+    width: 100%;
+  }
+  .file-bar {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .scroll-btn {
+    display: inline-block;
+  }
+}
+#diff-summary{
+  display: none;
+}
+
+/* Works in Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e1e1e; /* Match the dark background */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #4d4d4d;
+  border-radius: 4px;
+  border: 2px solid #1e1e1e; /* Creates spacing between thumb and track */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #6e6e6e;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #4d4d4d #1e1e1e;
+}
+#file-list:focus {
+  outline: 2px solid #007acc;
 }

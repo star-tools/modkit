@@ -1,5 +1,5 @@
 
-import SC2JSON from '../converter/SC2XMLJSON.js';
+import SC2JSON from '../converter/scjson.js';
 
 
 function groupTextValues(input) {

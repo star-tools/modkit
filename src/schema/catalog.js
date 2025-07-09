@@ -434,13 +434,13 @@ export const SActorSoundLayer = {
 }
 export const SActorAVPair = {
     Model: L.Model,
-    Scale: C.VectorScale,
+    Scale: C.ScaleVector,
     AnimProps: C.AnimProps,
     Sound: L.Sound,
 }
 export const SActorActionTerrainSquib = {
     Model: L.Model,
-    Scale: C.VectorScale,
+    Scale: C.ScaleVector,
     AnimProps: C.AnimProps,
     Sound: L.Sound,
     TerrainPhysicsMaterial: C.PhysicsMaterialLinks,
@@ -448,12 +448,12 @@ export const SActorActionTerrainSquib = {
 }
 export const SActorAVCluster = {
     Model: L.Model,
-    Scale: C.VectorScale,
+    Scale: C.ScaleVector,
     AnimProps: C.AnimProps,
     Sound: L.Sound,
     ModelReaction: L.Model,
     AnimPropsReaction: C.AnimProps,
-    ScaleReaction: C.VectorScale,
+    ScaleReaction: C.ScaleVector,
 }
 export const SActorPhysicsData = {
     Name: C.ActorLabelKey,
@@ -850,7 +850,7 @@ export const SModification = {
     AbilCategoriesEnable: F.Unknown,
     AbilCategoriesDisable: F.Unknown,
     AbilClassEnableArray: F.ClassIdCAbil,
-    AbilClassDisableArray: F.ClassIdCxAbil,
+    AbilClassDisableArray: F.ClassIdCAbil,
     AbilTechAliasEnableArray: [T.TechAlias],
     AbilTechAliasDisableArray: [T.TechAlias],
     AbilLinkEnableArray: [L.Abil],
@@ -2015,7 +2015,7 @@ export const SModelVariation = {
     PhysicsForceFactor: C.Real32,
     PhysicsDeathMotionFactor: C.VariatorActorReal32,
     TextureAppliedGroups: C.TextureProps,
-    TextureExpressionsForEdito: [STextureExpressionSpec],
+    TextureExpressionsForEditor: [STextureExpressionSpec],
     TextureMatchesForEditor: [STextureMatchSpec],
 }
 
@@ -3309,7 +3309,7 @@ const CAbil = {
     Name: L.String,
     TechPlayer: E.AbilTechPlayer,
     Alignment: E.AbilAlignment,
-    OrderArray: S.AbilOrderDisplay,
+    OrderArray: [S.AbilOrderDisplay],
     AbilSetId: C.AbilSetId,
     EditorCategories: T.EditorCategories,
     InfoTooltipPriority: C.UInt32,
@@ -4447,7 +4447,7 @@ const CActorModel = {
     ...CActorBearings,
     Model: L.Model,
     ModelAspectSets: [S.ActorModelAspectSet],
-    Scale: C.VectorScale,
+    Scale: C.ScaleVector,
     AutoScaleFactor: C.Real32,
     AutoScaleFromSelectionFactor: C.Real32,
     AnimBlendTime: C.Real32,
@@ -4554,7 +4554,7 @@ const CActorSplat = {
     HoldTime: C.Real32,
     Layer: E.SplatLayer,
     Model: L.Model,
-    Scale: C.VectorScale,
+    Scale: C.ScaleVector,
     AutoScaleFactor: C.Real32,
     AutoScaleFromSelectionFactor: C.Real32,
     Height: E.ActorSplatHeight,
@@ -4937,7 +4937,7 @@ const CActorSelection = {
     HoldTime: C.Real32,
     Layer: E.SplatLayer,
     Model: L.Model,
-    Scale: C.VectorScale,
+    Scale: C.ScaleVector,
     AutoScaleFactor: C.Real32,
     AutoScaleFromSelectionFactor: C.Real32,
     Height: E.ActorSplatHeight,
@@ -4974,7 +4974,7 @@ const CActorShadow = {
     HoldTime: C.Real32,
     Layer: E.SplatLayer,
     Model: L.Model,
-    Scale: C.VectorScale,
+    Scale: C.ScaleVector,
     AutoScaleFactor: C.Real32,
     AutoScaleFromSelectionFactor: C.Real32,
     Height: E.ActorSplatHeight,
@@ -5676,7 +5676,7 @@ const CArtifact = {
     Upgrades: [L.Upgrade],
     PlayerResponses: [L.PlayerResponse],
     Face: L.Button,
-    ApplyTo: F.PlayerRelationship,
+    ApplyTo: F.PlayerRelationship
 }
 
 const CArtifactSlot = {
@@ -7383,6 +7383,7 @@ const CGameUI = {
     PostGameMusic: L.Soundtrack,
     CreditsMusic: L.Soundtrack,
     MatchmakingMusic: L.Soundtrack,
+    MusicArray: L.Soundtrack,
     LoopAmbience: L.Soundtrack,
     SoundQuality: [S.SoundQuality],
     MinimapData: S.MinimapData,
