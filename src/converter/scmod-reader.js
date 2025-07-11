@@ -66,6 +66,7 @@ function groupFiles(files) {
 
 
 export default class SCComponentReader{
+
     constructor (options = {}){
         this.parser = new SC2JSON(options.debugger);
         this.config = {
@@ -88,6 +89,8 @@ export default class SCComponentReader{
             Object.assign(this.config,options)
         }
     }
+
+
 
     static DATA_FILES =  [
         "abil",

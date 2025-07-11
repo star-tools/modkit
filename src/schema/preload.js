@@ -31,12 +31,11 @@ export const PreloadArray = {
     PlayerResponse: [{id:L.PlayerResponse}]
 }
 
-export default {
-    Array: PreloadArray
-}
+// export default {
+//     Array: PreloadArray
+// }
 
 
 SCSchema.Preload = PreloadArray
-
 
 

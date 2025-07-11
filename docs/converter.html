@@ -9,17 +9,23 @@
 <body>
 
 <header class="toolbar">
-  <button id="btn-xml-to-json" title="Convert XML → JSON">📤</button>
-  <button id="btn-json-to-xml" title="Convert JSON → XML">📥</button>
+  <button id="btn-xml-to-json" title="Convert XML → JSON">➡️</button>
+  <button id="btn-json-to-xml" title="Convert JSON → XML">⬅️</button>
   <button id="btn-reset" title="Reset Editors">♻️</button>
   <button id="btn-download-zip" title="Download ZIP">💾</button>
+  <button id="btn-merge" title="Merge mods into one">📦</button>
+  <button id="btn-new-mod" title="New mod">🆕</button>
+  <button id="btn-new-file" title="New File">📄</button>
+  <button id="btn-remove-file" title="Remove File">🗑️</button>
+
 
   <label class="upload-btn" title="Upload XML or ZIP">📁
     <input type="file" id="fileInput" accept=".xml,.zip" hidden >
   </label>
 
-  <span id="uploadInfo" class="upload-info"></span>
+  <!-- <span id="uploadInfo" class="upload-info"></span> -->
 </header>
+  <div id="mod-bar" class="mod-bar"></div>
 
 <!-- Default data for initial load -->
 <script type="text/xml" id="sc2-xml">

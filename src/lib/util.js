@@ -36,6 +36,55 @@ export function escapeXml(str) {
     .replace(/'/g, "&apos;");
 }
 
+export function parseLines(rawtext){
+    if (!rawtext) {
+        return null
+    }
+    return rawtext
+        .replace("﻿","")  //Zero Width No-Break Space
+        .replace(/\r/g, "")
+        .split("\n")
+}
+
+export function parseIni(iniText) {
+  const result = {};
+  let currentSection = null;
+
+  const lines = iniText.split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith(';') || trimmed.startsWith('#')) continue;
+
+    const sectionMatch = trimmed.match(/^\[(.+?)\]$/);
+    if (sectionMatch) {
+      currentSection = sectionMatch[1];
+      result[currentSection] = [];
+    } else if (currentSection) {
+      result[currentSection].push(trimmed);
+    }
+  }
+
+  return result;
+}
+
+
+export function parseEnv(rawtext){
+    if (!rawtext) {
+        return null
+    }
+    let data = {}
+    rawtext
+        .replace("﻿","")  //Zero Width No-Break Space
+        .replace(/\r/g, "")
+        .split("\n")
+        .forEach(el => {
+            let key = el.substring(0, el.indexOf("="))
+            let value = el.substring(el.indexOf("=") + 1)
+            data[key] = value
+        })
+        return data
+}
+
 /**
  * Determines whether a value is an integer.
  * @param {string|number} value
@@ -209,4 +258,52 @@ export function convertJSONtoXML(node, indent = '') {
 
   xml += `${indent}</${tag}>\n`;
   return xml;
+}
+
+
+
+
+export function deep(a,b,c = 'merge'){
+    if(!a){return b}
+    if(!b){return a}
+    for(let i in b){
+        let value = b[i]
+        let target = a[i]
+
+        if(value === undefined || value === null)continue;
+
+        if(value.constructor === Array){
+            value = deep([],value)
+        }
+        else if(value.constructor === Object){
+            value = deep({},value)
+        }
+
+
+        if(!target){
+            a[i] = value
+        }
+        else{
+            if(value.constructor === String || value.constructor !== target.constructor){
+                target = value
+            }
+            else if(target && target.constructor === Array && c === 'replace') {
+                target = value
+            }
+            else if(target && target.constructor === Array && c === 'unite') {
+                deep(target,value,c)
+            }
+            else if(target && target.constructor === Array && c === 'merge') {
+                target = [...target,...value]
+            }
+            else if(target && target.constructor === Object){
+                deep(target,value,c)
+            }
+            else {
+                target = value
+            }
+            a[i] = target
+        }
+    }
+    return a
 }

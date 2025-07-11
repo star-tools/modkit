@@ -1,19 +1,18 @@
 import fs from "fs";
 import path from "path";
-import SCComponentReader from './scmod-reader.js';
+import Reader from './reader.js';
 
 
 
-export default class NodeSCComponentReader extends SCComponentReader {
+export default class NodeReader extends Reader {
     constructor(options) {
         super(options);
     }
-    async load(modpath){
+    async init(modpath){
         this.basePath = path.resolve(modpath);
-        return await this.read()
     }
 
-    async getFiles(dirPath = "", recursive = true) {
+    async list(dirPath = "") {
         const fullPath = path.join(this.basePath, dirPath);
         const files = [];
         const folders = [];
@@ -28,11 +27,9 @@ export default class NodeSCComponentReader extends SCComponentReader {
                 if (item.isDirectory()) {
                     folders.push(relativePath);
 
-                    if (recursive) {
-                        const sub = await this.getFiles(relativePath, true);
-                        files.push(...sub.files);
-                        folders.push(...sub.folders);
-                    }
+                    const sub = await this.list(relativePath, true);
+                    files.push(...sub);
+                        
                 } else if (item.isFile()) {
                     files.push(relativePath);
                 }
@@ -42,11 +39,11 @@ export default class NodeSCComponentReader extends SCComponentReader {
                 console.error(`Failed to list directory: ${fullPath}`, err.message);
             }
         }
-
-        return { files, folders };
+        // files.unshift(...folders)
+        return files
     }
 
-    async readFile(relativeFile, format = 'utf-8') {
+    async get(relativeFile, format = 'utf-8') {
         const fullPath = path.join(this.basePath, relativeFile);
         if(format === 'base64'){
             const buffer = fs.readFileSync('example.png');
@@ -61,11 +58,21 @@ export default class NodeSCComponentReader extends SCComponentReader {
             return null;
         }
     }
+
+    set(filename,content){
+        let foutput = this.basePath + filename.replace(/\\/g, "\/")
+        fs.mkdirSync(foutput.substring(0, foutput.lastIndexOf("/")), {recursive: true});
+        fs.writeFileSync(foutput, content)
+    }
 }
 
-//Usage
-// const reader = new NodeSCComponentReader("./mods/mymod");
-// const { files, folders } = await reader.getFilesList("data");
-// const content = await reader.readFile("data/mod.json");
-// console.log("Files:", files);
-// console.log("Content:", content);
+    // write(destpath){
+    //     let files = this.mod.getFiles({scope: this.scope})
+    //     fs.mkdirSync(destpath, {recursive: true});
+    //     for(let file of files){
+    //         let filedata = this.mod.read(file)
+    //         let foutput = destpath + file.replace(/\\/g, "\/")
+    //         fs.mkdirSync(foutput.substring(0, foutput.lastIndexOf("/")), {recursive: true});
+    //         fs.writeFileSync(foutput, file.data)
+    //     }
+    // }

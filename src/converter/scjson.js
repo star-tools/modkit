@@ -157,16 +157,24 @@ export default class SC2JSON {
   _applySchemaForChild(obj, child, schema) {
     const { field, schema: subSchema } = this.getSchema(child.tag, schema);
 
-    if(!subSchema && schema)this.debugger?.missingSchema(obj, child.tag);
+    if(!subSchema && schema){
+      this.debugger?.missingSchema(obj, child.tag);
+    }
 
     const fieldName = field || child.tag || '_';
-    const isArray = !subSchema || Array.isArray(subSchema);
+    let isArray = !subSchema || Array.isArray(subSchema);
     const schemaClass = isArray ? subSchema?.[0] : subSchema;
 
     let index = child.attributes?.index;
     const namedIndex = index && !isInteger(index);
     const enumIndex = subSchema?.[1];
-    const isIndexedArray = !!(enumIndex || namedIndex || obj[fieldName]?.constructor === Object);
+    const isIndexedArray = !!(enumIndex || namedIndex)
+
+    if(!isIndexedArray && obj[fieldName]?.constructor === Object){
+      console.warn(`${fieldName} possible an array`)
+      obj[fieldName] = [obj[fieldName]]
+      isArray = true
+    }
 
     let value;
     if (!isIndexedArray && typeof schemaClass === 'object') {
@@ -197,8 +205,17 @@ export default class SC2JSON {
         obj[fieldName][enumName] = value;
         return;
       } else {
-        if(child.attributes?.value){
+        if(child.attributes?.index){
+          let result = {}
+          if(child.attributes.removed)result.removed = child.attributes.removed
+          if(child.attributes.index)result.removed = +child.attributes.index
+          if(child.attributes.value!==undefined)result.value = schemaClass?.parse(child.attributes?.value);
+        }
+        else if(child.attributes?.value !== undefined){
           value = schemaClass?.parse(child.attributes?.value);
+        }
+        else{
+          console.log("wrong schema?" + this.debugger?.trace.join(".") + "." + fieldName + " " + JSON.stringify(child))
         }
       }
     }

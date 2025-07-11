@@ -1,22 +1,20 @@
-import SCComponentReader from "./scmod-reader.js";
 
 // universal-fetch.js
 export const fetchUniversal = globalThis.fetch || await import('node-fetch').then(mod => mod.default);
 
-export class WebSCComponentReader extends SCComponentReader {
+export class URLReader {
 
     constructor(options) {
         super(options);
     }
-    async load(modpath){
+    async init(modpath){
         if (!baseUrl.endsWith("/")) baseUrl += "/";
         this.baseUrl = baseUrl;
         this.indexFile = indexFile = "index.json"
         this.index = null;  // cached index
     }
     
-
-    async loadIndex() {
+    async _loadIndex() {
         if (this.index) return this.index;
 
         try {
@@ -34,8 +32,8 @@ export class WebSCComponentReader extends SCComponentReader {
         return this.index;
     }
 
-    async getFiles(dirPath = "", recoursive = true) {
-        const index = await this.loadIndex();
+    async list(dirPath = "", recoursive = true) {
+        const index = await this._loadIndex();
 
         if (!dirPath) return index;
 
@@ -46,7 +44,7 @@ export class WebSCComponentReader extends SCComponentReader {
         return { files, folders };
     }
 
-    async readFile(relativeFile) {
+    async get(relativeFile) {
         try {
             const url = this.baseUrl + relativeFile;
             const response = await fetch(url);

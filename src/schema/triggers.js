@@ -6,18 +6,37 @@ import {Assets as A,C, Links as L} from "./types.js"
 export const SLibraryElement =   {
   $Type: C.Word,
   $Id: C.Word,
-  Internal: C.String,
-  Disabled: C.String,
-  FlagAction: C.String,
-  FlagCall: C.String,
-  FlagInline: C.String,
-  FlagNoScriptPrefix: C.String,
-  InitOff: C.String,
-  PresetInteger: C.String,
-  ParamFlagPreload: C.String,
-  FlagCondition: C.String,
-  FlagCreateThread: C.String,
-  PresetGenConstVar: C.String,
+  // Flags: {
+    Internal: {},
+    Disabled: {},
+    FlagAction: {},
+    FlagCall: {},
+    FlagInline: {},
+    FlagNoScriptPrefix: {},
+    InitOff: {},
+
+    ParamFlagVariableOnly: {},
+    PresetShowAsBasic: {},
+    Deprecated: {},
+    PresetGenIdentFunc: {},
+    FlagEvent: {},
+    FlagCustomScript: {},
+    FlagRestricted: {},
+    PresetCustom: {},
+    DefinesDefault: {},
+    PresetAsBits: {},
+    PresetInteger: {},
+    ParamFlagPreload: {},
+    FlagCondition: {},
+    FlagCreateThread: {},
+    PresetGenConstVar: {},
+    Template: {},
+    NotYetImplemented: {},
+    FlagSubFunctions: {},
+    FlagAllowBreak: {},
+    FlagOperator: {},
+    FlagNative: {},
+  // },
   ValueTypeInfo: {Value: C.Int},
   ValueContext: {Value: C.String},
   ExpressionCode: {Value: C.String},
@@ -30,7 +49,7 @@ export const SLibraryElement =   {
   Array: [{ Id: C.Word, Library: C.Word, Type: C.Word}],
   VariableType: {
     Type: {Value: C.String},
-    Constant: C.String,
+    Constant: {},
     GameType: {Value:C.Word},
     ArraySize: [{
       Dim:C.Int,
@@ -114,47 +133,32 @@ export const SLibraryElement =   {
   Limits: {
     Value: C.String
   },
-  NotYetImplemented: C.String,
-  FlagSubFunctions: C.String,
-  FlagAllowBreak: C.String,
-  FlagOperator: C.String,
   StructMember: {
     Type: C.Word,
     Library: C.Word,
     Id: C.Word
   },
   Icon: {content: C.String},
-  Template: C.String,
   DisplayText: {content: C.String},
   Section: {
     Value: C.Word
   },
-  ParamFlagVariableOnly: C.String,
-  FlagEvent: C.String,
-  PresetShowAsBasic: C.String,
-  Deprecated: C.String,
-  PresetGenIdentFunc: C.String,
-  FlagCustomScript: C.String,
-  FlagRestricted: C.String,
-  PresetCustom: C.String,
-  DefinesDefault: C.String,
-  PresetAsBits: C.String,
   PresetExtends: {
     Type: C.String,//'>Preset',
     Library: C.String,//'>Ntve',
     Id: C.String//'>37841D63'
   },
-  FlagNative: C.String,
 }
-
-export const TLibrary = {
-  Id: C.Word,
-  Root: {
+export const SLibraryRoot = {
     Item: [{ Id: C.Word, Library: C.Word, Type: C.Word}],
     Library: C.Word,
     Type: C.Word,
     Id: C.Word
-  },
+}
+  
+export const TLibrary = {
+  Id: C.Word,
+  Root: SLibraryRoot,
   LibraryShareToMods: C.Words,
   SharedLib: [
     {
@@ -168,6 +172,9 @@ export const TLibrary = {
 export const TTriggerData = {
     library: [{external: C.String }],//[TriggerLibs/VoidMultiLib
     Library: [TLibrary],
+    Standard: {},
+    Root: SLibraryRoot,
+    Element: [SLibraryElement]
 }
 
 export default {

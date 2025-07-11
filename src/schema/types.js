@@ -422,7 +422,7 @@ export const CFangle = Real
 export const CDataSoupKey = CString
 export const CGamePoint = CReals
 export const CIdentifier = CString // <File value="Assets/Sounds/GDI/##prefix##^TemplateParam1^.ogg"/>
-export const CColor = CInts
+export const CColor = CString
 export const CActorKey = CString
 export const CActorTerms = CString //'terms'
 export const CScaleVector = CReals
@@ -661,6 +661,7 @@ export class CDataEntryPath extends CDataType  {
    }
 
    export const C = {
+    DataEntryPath: CDataEntryPath,
         Parent: CParent,
         TokenValue: CTokenValue,
         Month,

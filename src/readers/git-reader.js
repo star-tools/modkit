@@ -1,12 +1,12 @@
 import { Octokit } from "octokit";
-import SCComponentReader from "./scmod-reader.js";
+import Reader from './reader.js';
 
-export class GithubSCComponentReader extends SCComponentReader {
+export class GitReader extends Reader{
     constructor(options,token) {
         super(options);
         this.octokit = new Octokit(token ? { auth: token } : {});
     }
-    async load(modpath){
+    async init(modpath){
         super();
         const [owner, repo, ...pathParts] = modpath.split(":")[1].split("/");
 
@@ -15,58 +15,58 @@ export class GithubSCComponentReader extends SCComponentReader {
         this.path = pathParts.join("/");
 
     }
-    //get full list of files getFi;es only returs 1000
-    async listAllFiles() {
-    const { data } = await octokit.rest.git.getTree({
-        owner: "star-assets",
-        repo: "models-a",
-        tree_sha: "HEAD",
-        recursive: true,
-    });
+    async list() {
+        const { data } = await octokit.rest.git.getTree({
+            owner: this.owner,
+            repo: this.repo,
+            tree_sha: "HEAD",
+            recursive: true,
+        });
 
-    const files = data.tree
-        .filter(item => item.type === "blob") // blobs = files
-        .map(item => item.path);
+        const files = data.tree
+            .filter(item => item.type === "blob") // blobs = files
+            .map(item => item.path);
 
-    console.log(files);
+            return files
     }
-    async getFiles(dirPath = "", recursive = false) {
-        const fullPath = dirPath ? `${this.path}/${dirPath}` : this.path;
-        const files = [];
-        const folders = [];
+    //deprecated, only returs 1000 items
+    // async getFiles(dirPath = "", recursive = false) {
+    //     const fullPath = dirPath ? `${this.path}/${dirPath}` : this.path;
+    //     const files = [];
+    //     const folders = [];
 
-        try {
-            const { data } = await this.octokit.rest.repos.getContent({
-                owner: this.owner,
-                repo: this.repo,
-                path: fullPath,
-            });
+    //     try {
+    //         const { data } = await this.octokit.rest.repos.getContent({
+    //             owner: this.owner,
+    //             repo: this.repo,
+    //             path: fullPath,
+    //         });
 
-            for (const item of data) {
-                if (item.type === "file") {
-                    files.push(recursive ? `${dirPath}/${item.name}`.replace(/^\/+/, '') : item.name);
-                } else if (item.type === "dir") {
-                    folders.push(item.name);
-                    if (recursive) {
-                        // Recursively fetch files in subfolder
-                        const subDirFiles = await this.files((dirPath ? dirPath + "/" : "") + item.name, true);
-                        files.push(...subDirFiles.files);
-                    }
-                }
-            }
+    //         for (const item of data) {
+    //             if (item.type === "file") {
+    //                 files.push(recursive ? `${dirPath}/${item.name}`.replace(/^\/+/, '') : item.name);
+    //             } else if (item.type === "dir") {
+    //                 folders.push(item.name);
+    //                 if (recursive) {
+    //                     // Recursively fetch files in subfolder
+    //                     const subDirFiles = await this.files((dirPath ? dirPath + "/" : "") + item.name, true);
+    //                     files.push(...subDirFiles.files);
+    //                 }
+    //             }
+    //         }
 
-            return { files, folders };
-        } catch (error) {
-            if (error.status === 404) {
-                console.warn(`Directory not found: ${dirPath}`);
-            } else {
-                console.error(`GitHub API error: ${error.message}`);
-            }
-            return { files: [], folders: [] };
-        }
-    }
+    //         return { files, folders };
+    //     } catch (error) {
+    //         if (error.status === 404) {
+    //             console.warn(`Directory not found: ${dirPath}`);
+    //         } else {
+    //             console.error(`GitHub API error: ${error.message}`);
+    //         }
+    //         return { files: [], folders: [] };
+    //     }
+    // }
 
-    async read (fineName) {
+    async get (fineName) {
         const fullPath = `${this.path}/${fineName}`;
 
         try {

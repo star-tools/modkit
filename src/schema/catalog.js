@@ -1,4 +1,4 @@
-import {V, C, T, Links as L,Assets as A} from "./types.js"
+import {V, C, T, Links as L,Assets as A,EUnknown} from "./types.js"
 import {SCSchema} from "./schema.js"
 import E from "./catalog-enums.js"
 import F from "./catalog-flags.js"
@@ -15,16 +15,24 @@ export const SToken = {
 }
 export const SConst = {
     id: C.Word,
-    type: E.ClassId,
+    type: E.TypeId,
     value: C.TokenValue,
     path: C.Path,
 }
+
+export const SStructDefinition = {
+    "@class": E.StructId
+}
+export const SStruct = {
+}
 export const SProductReleaseDate = {
+    ...SStruct,
     Month: C.Month,
     Day: C.Day,
     Year: C.Year
 }
 export const SAbilOrderDisplay = {
+    ...SStruct,
     DisplayType: E.AbilOrderDisplayType,
     Color: C.Color,
     Model: A.Model,
@@ -32,12 +40,14 @@ export const SAbilOrderDisplay = {
     LineTexture: A.Image,
 }
 export const SEffectBehavior = {
+    ...SStruct,
     Behavior: L.Behavior,
     Count: C.UInt32,
     Flags: F.Unknown,
     Duration: C.GameTime,
 }
 export const SCooldown = {
+    ...SStruct,
     Link: T.CooldownLink,
     Location: E.CooldownLocation,
     TimeStart: C.GameTime,
@@ -45,6 +55,7 @@ export const SCooldown = {
     TimeUse: C.GameTime,
 }
 export const SCharge = {
+    ...SStruct,
     CountMax: C.Real,
     CountStart: C.Real,
     CountUse: C.Real,
@@ -57,6 +68,7 @@ export const SCharge = {
     Flags: F.Unknown,
 }
 export const SCost = {
+    ...SStruct,
     Resource: [C.Int32,E.ResourceType],
     Display: F.Unknown,
     Vital:  [C.Real,E.UnitVital],
@@ -65,6 +77,7 @@ export const SCost = {
     Cooldown: SCooldown,
 }
 export const SCostFactor = {
+    ...SStruct,
     Vital: [C.Real,E.UnitVital],
     VitalFraction: [C.Real,E.UnitVital],
     Resource: [C.Real,E.ResourceType],
@@ -72,11 +85,13 @@ export const SCostFactor = {
     Cooldown: C.Real,
 }
 export const STargetSorts = {
+    ...SStruct,
     SortArray: [L.TargetSort],
     RequestCount: C.UInt32,
     RequestPercentage: C.Real,
 }
 export const SMarker = {
+    ...SStruct,
     Count: T.MarkerCount,
     Duration: C.GameTime,
     MatchFlags: F.Marker,
@@ -84,12 +99,14 @@ export const SMarker = {
     Link: T.MarkerLink,
 }
 export const SAbilTargetCursorInfo = {
+    ...SStruct,
     Invalid: L.Cursor,
     Normal: L.Cursor,
     Allied: L.Cursor,
     Enemy: L.Cursor,
 }
 export const SAbilCmdButton = {
+    ...SStruct,
     AutoQueueId: C.Identifier,
     DefaultButtonFace: L.Button,
     Flags: F.AbilCmd,
@@ -98,6 +115,7 @@ export const SAbilCmdButton = {
     PreemptLevel: T.PreemptLevel,
 }
 export const SAbilArmMagazineInfo = {
+    ...SStruct,
     Resource: [C.Int32,E.ResourceType],
     Display: F.Unknown,
     Vital: [C.Real,E.UnitVital],
@@ -115,6 +133,7 @@ export const SAbilArmMagazineInfo = {
     Unit: L.Unit,
 }
 export const SAbilBuildInfo = {
+    ...SStruct,
     Resource: [C.Int32,E.ResourceType],
     Display: F.Unknown,
     Vital: [C.Real,E.UnitVital],
@@ -131,6 +150,7 @@ export const SAbilBuildInfo = {
     PeonKillFinish: C.Bit,
 }
 export const SAbilInventoryInfo = {
+    ...SStruct,
     Alignment: E.AbilInventoryAlignment,
     Container: L.ItemContainer,
     Item: L.Unit,
@@ -140,6 +160,7 @@ export const SAbilInventoryInfo = {
 }
 
 export const SAbilLearnInfo = {
+    ...SStruct,
     Resource: [C.Int32,E.ResourceType],
     Display: F.Unknown,
     Vital: [C.Real,E.UnitVital],
@@ -154,6 +175,7 @@ export const SAbilLearnInfo = {
     VeterancyLevelSkip: C.UInt32,
 }
 export const SAbilMergeInfo = {
+    ...SStruct,
     Resource: [C.Int32,E.ResourceType],
     Display: F.Unknown,
     Vital: [C.Real,E.UnitVital],
@@ -164,11 +186,13 @@ export const SAbilMergeInfo = {
     Time: C.GameTime,
 }
 export const SAbilMorphSection = {
+    ...SStruct,
     DurationArray: [C.GameTime],
     UseBuildTimeArray: F.Unknown,
     EffectArray: [L.Effect],
 }
 export const SAbilMorphInfo = {
+    ...SStruct,
     Score: C.Bit,
     Unit: L.Unit,
     CollideRange: C.Real,
@@ -180,6 +204,7 @@ export const SAbilMorphInfo = {
 }
 
 export const SAbilPawnInfo = {
+    ...SStruct,
     Resource: [C.Int32,E.ResourceType],
     Display: F.Unknown,
     Vital: [C.Real,E.UnitVital],
@@ -194,6 +219,7 @@ export const SAbilPawnInfo = {
     ValidatorArray: [L.Validator],
 }
 export const SAbilRallyInfo = {
+    ...SStruct,
     AllowSetOnGround: C.Bit,
     AllowSetFilters: C.TargetFilters,
     AllowSetValidators: [L.Validator],
@@ -204,6 +230,7 @@ export const SAbilRallyInfo = {
     UseValidators: [L.Validator],
 }
 export const SAbilResearchInfo = {
+    ...SStruct,
     Resource: [C.Int32,E.ResourceType],
     Display: F.Unknown,
     Vital: [C.Real,E.UnitVital],
@@ -216,6 +243,7 @@ export const SAbilResearchInfo = {
     Upgrade: L.Upgrade,
 }
 export const SAbilReviveCmdButton = {
+    ...SStruct,
     AutoQueueId: C.Identifier,
     DefaultButtonFace: L.Button,
     Flags: F.AbilCmd,
@@ -226,6 +254,7 @@ export const SAbilReviveCmdButton = {
     ValidatorArray: [L.Validator],
 }
 export const SAbilReviveInfo = {
+    ...SStruct,
     Resource: [C.Int32,E.ResourceType],
     Display: F.Unknown,
     Vital: [C.Real,E.UnitVital],
@@ -236,12 +265,14 @@ export const SAbilReviveInfo = {
     Alert: L.Alert,
 }
 export const SAbilReviveInfoMax = {
+    ...SStruct,
     ResourceFactor: [C.Real],
     TimeFactor: C.Real,
     Resource: [C.Int32,E.ResourceType],
     Time: C.GameTime,
 }
 export const SAbilSpecializeInfo = {
+    ...SStruct,
     Resource: [C.Int32,E.ResourceType],
     Display: F.Unknown,
     Vital: [C.Real,E.UnitVital],
@@ -255,6 +286,7 @@ export const SAbilSpecializeInfo = {
     Flags: F.Unknown,
 }
 export const SAbilTrainInfo = {
+    ...SStruct,
     Resource: [C.Int32,E.ResourceType],
     Display: F.Unknown,
     Vital: [C.Real,E.UnitVital],
@@ -272,6 +304,7 @@ export const SAbilTrainInfo = {
 }
 
 export const SAbilWarpTrainInfo = {
+    ...SStruct,
     Resource: [C.Int32,E.ResourceType],
     Display: F.Unknown,
     Vital: [C.Real,E.UnitVital],
@@ -287,51 +320,62 @@ export const SAbilWarpTrainInfo = {
 
 
 export const SEffectWhichUnit = {
+    ...SStruct,
     Effect: L.Effect,
     Value: E.EffectUnit,
     History: E.EffectHistory,
 }
 export const SEffectWhichLocation = {
+    ...SStruct,
     Effect: L.Effect,
     Value: E.EffectLocation,
     History: E.EffectHistory,
 }
 export const SEffectWhichBehavior = {
+    ...SStruct,
     Effect: L.Effect,
     Value: E.EffectUnit,
     History: E.EffectHistory,
     Behavior: L.Behavior,
 }
 export const SAccumulatorSwitchCase = {
+    ...SStruct,
     Validator: L.Validator,
     Accumulator: L.Accumulator,
     FallThrough: C.Bit,
 }
 export const SAccumulatedFixed = {
+    ...SStruct,
     value: C.Real,
     AccumulatorArray: [L.Accumulator],
 }
 export const SAccumulatedUInt32 = {
+    ...SStruct,
     AccumulatorArray: [L.Accumulator],
     value: C.UInt32
 }
 export const SAccumulatedGameRate = {
+    ...SStruct,
     AccumulatorArray: [L.Accumulator],
     value: C.Real
 }
 export const SAccumulatedGameTime = {
+    ...SStruct,
     AccumulatorArray: [L.Accumulator],
     value: C.Real
 }
 export const SEffectWhichPlayer = {
+    ...SStruct,
     Effect: L.Effect,
     Value: E.EffectPlayer,
 }
 export const SAchievementTag = {
+    ...SStruct,
     Value: C.FourCC,
     Check: E.AchievementTagCheck,
 }
 export const SActorRequest = {
+    ...SStruct,
     Subject: C.RefKey,
     Scope: E.ActorRequestScope,
     Actor: E.ActorRequestActor,
@@ -340,19 +384,23 @@ export const SActorRequest = {
     ReachAcrossEffectTrees: C.Bit,
 }
 export const SActorVisibilityShape = {
+    ...SStruct,
     Shape: L.Shape,
 }
 export const SActorEvent = {
+    ...SStruct,
     Terms: C.ActorTerms,
     Target: C.RefKey,
     Send: C.ActorMsgPayloadPtr,
 }
 export const SActorSiteOpsData = {
+    ...SStruct,
     Ops: C.ActorSiteOps,
     HoldPosition: C.Bit,
     HoldRotation: C.Bit,
 }
 export const SActorModelAspect = {
+    ...SStruct,
     Person: E.ActorModelAspectPerson,
     ObservingPoV: E.ActorModelAspectObservingPoV,
     RegardsAs: E.ActorModelAspectRegardsAs,
@@ -371,31 +419,37 @@ export const SActorModelAspect = {
 }
 
 export const SActorModelAspectSet = {
+    ...SStruct,
     TriggerModel: L.Model,
     Aspects: [SActorModelAspect],
 }
 
 
 export const SAttachQuery = {
+    ...SStruct,
     Methods: C.AttachMethods,
     Fallback: E.AttachKeyword,
 }
 export const SActorHostedAttach = {
+    ...SStruct,
     Name: C.ActorLabelKey,
     AttachQuery: SAttachQuery,
     HostSiteOps: SActorSiteOpsData,
 }
 export const SEventDataFootprint = {
+    ...SStruct,
     Name: C.ActorLabelKey,
     Actor: C.ActorCreateKey,
     Model: L.Model,
 }
 export const SEventDataSound = {
+    ...SStruct,
     Name: C.ActorLabelKey,
     Actor: C.ActorCreateKey,
     Sound: L.Sound,
 }
 export const SActorPhysicsImpactData = {
+    ...SStruct,
     Name: C.ActorLabelKey,
     Group: C.ActorLabelKey,
     ActorModel: C.ActorCreateKey,
@@ -411,10 +465,12 @@ export const SActorPhysicsImpactData = {
     OccuranceThrottlingPeriod: C.VariatorActorReal32,
 }
 export const SActorRangeAbil = {
+    ...SStruct,
     Link: L.Abil,
     Index: T.AbilCmdIndex,
 }
 export const SActorQuadDecoration = {
+    ...SStruct,
     Actor: C.ActorCreateKey,
     SpawnInterval: C.Real32,
     TravelSpeed: C.Real32,
@@ -423,6 +479,7 @@ export const SActorQuadDecoration = {
     Flags: F.Unknown,
 }
 export const SActorSoundLayer = {
+    ...SStruct,
     Sound: L.Sound,
     Chance: [C.UInt8],
     Pitch: [C.PitchRange],
@@ -433,12 +490,14 @@ export const SActorSoundLayer = {
     VolumeSource: E.ActorSoundValueSource,
 }
 export const SActorAVPair = {
+    ...SStruct,
     Model: L.Model,
     Scale: C.ScaleVector,
     AnimProps: C.AnimProps,
     Sound: L.Sound,
 }
 export const SActorActionTerrainSquib = {
+    ...SStruct,
     Model: L.Model,
     Scale: C.ScaleVector,
     AnimProps: C.AnimProps,
@@ -447,6 +506,7 @@ export const SActorActionTerrainSquib = {
     DistanceMaxFromTerrainToCreate: C.Real32,
 }
 export const SActorAVCluster = {
+    ...SStruct,
     Model: L.Model,
     Scale: C.ScaleVector,
     AnimProps: C.AnimProps,
@@ -456,6 +516,7 @@ export const SActorAVCluster = {
     ScaleReaction: C.ScaleVector,
 }
 export const SActorPhysicsData = {
+    ...SStruct,
     Name: C.ActorLabelKey,
     MatchKeys: C.ActorTableKeys1x3,
     AttackModelVariation: C.Int32,
@@ -464,25 +525,30 @@ export const SActorPhysicsData = {
     Flags: F.Unknown,
 }
 export const SActorQuerySubject = {
+    ...SStruct,
     Filters: C.ActorClassFilters,
     Terms: C.ActorTerms,
 }
 export const SActorQueryResponse = {
+    ...SStruct,
     Target: C.RefKey,
     Send: C.ActorMsgPayloadPtr,
     Scope: E.ActorResponseScope,
 }
 export const SActorSendBasics = {
+    ...SStruct,
     Target: C.RefKey,
     Send: C.ActorMsgPayloadPtr,
 }
 export const SActorQuerySubjectResponse = {
+    ...SStruct,
     Filters: C.ActorClassFilters,
     IntersectType: E.ActorIntersectType,
     Terms: C.ActorTerms,
     OnResponse: [SActorSendBasics],
 }
 export const SActorDeathBodySquib = {
+    ...SStruct,
     Name: C.ActorLabelKey,
     ActorModel: C.ActorCreateKey,
     Model: L.Model,
@@ -496,24 +562,29 @@ export const SActorDeathBodySquib = {
     IsFallback: C.Bit,
 }
 export const SActorCloakState = {
+    ...SStruct,
     Enter: C.AnimProps,
     Loop: C.AnimProps,
 }
 export const SActorCloakTransition = {
+    ...SStruct,
     StateArray: [SActorCloakState],
 }
 export const SActorCreepHeightClass = {
+    ...SStruct,
     Name: C.ActorLabelKey,
     StartOffset: C.Real32,
     SolidHeight: C.Real32,
     FadeHeight: C.Real32,
 }
 export const SActorCreepRate = {
+    ...SStruct,
     Name: C.ActorLabelKey,
     Rate: C.Real32,
 }
 
 export const SActorDeathData = {
+    ...SStruct,
     ActorModel: C.ActorCreateKey,
     ActorModelLow: C.ActorCreateKey,
     AnimProps: C.AnimProps,
@@ -523,6 +594,7 @@ export const SActorDeathData = {
     BodySquibs: [SActorDeathBodySquib],
 }
 export const SActorDeathDataCustom = {
+    ...SStruct,
     ActorModel: C.ActorCreateKey,
     ActorModelLow: C.ActorCreateKey,
     AnimProps: C.AnimProps,
@@ -536,22 +608,26 @@ export const SActorDeathDataCustom = {
     IsAbstract: C.Bit,
 }
 export const SLookAtTypeInfo = {
+    ...SStruct,
     Group: C.ActorKey,
     Weight: C.Real,
     Time: C.UInt32,
     Rate: C.ActorAngle,
 }
 export const SLookAtType = {
+    ...SStruct,
     Id: C.String80,
     Name: L.String,
     Start: [SLookAtTypeInfo],
     Stop: [SLookAtTypeInfo],
 }
 export const SSplatEmitterMaterialInfo = {
+    ...SStruct,
     MaterialId: C.UInt8,
     ReplacementLayers: F.Unknown,
 }
 export const SSplatEmitterInitInfo = {
+    ...SStruct,
     TextureResolution: C.Vector2i,
     ProjectorModel: L.Model,
     MaskBlobPath: A.Image,
@@ -564,11 +640,13 @@ export const SSplatEmitterInitInfo = {
     MinHeightValue: C.Real32,
 }
 export const SActorOverrideBlendTime = {
+    ...SStruct,
     AnimProps: C.AnimProps,
     BlendIn: C.Real32,
     BlendOut: C.Real32,
 }
 export const SActorOverrideTransitionBlendTime = {
+    ...SStruct,
     Type: E.ActorAnimTransitionType,
     From: C.AnimProps,
     FromMatch: E.ActorAnimPropMatchType,
@@ -577,22 +655,26 @@ export const SActorOverrideTransitionBlendTime = {
     Blend: C.Real32,
 }
 export const SActorOverrideModel = {
+    ...SStruct,
     Model: [L.Model],
     Blend: [SActorOverrideBlendTime],
     Transition: [SActorOverrideTransitionBlendTime],
 }
 export const SActorProgressStage = {
+    ...SStruct,
     AnimProps: C.AnimProps,
     BlendTime: C.Real32,
     Sound: L.Sound,
 }
 export const SActorHostedDelta = {
+    ...SStruct,
     Subject: C.RefKey,
     LocalOffset: C.Vector3,
     AttachQuerySource: SAttachQuery,
     AttachQueryTarget: SAttachQuery,
 }
 export const SSerpentAggregate = {
+    ...SStruct,
     Type: E.SerpentType,
     BaseElementLengthMax: C.Real32,
     SegmentRotationRate: C.ActorAngle,
@@ -609,38 +691,46 @@ export const SSerpentAggregate = {
     Flags: F.Unknown,
 }
 export const SSerpentSegment = {
+    ...SStruct,
     Radius: C.Real32,
 }
 export const SActorStateInfo = {
+    ...SStruct,
     Name: C.ActorLabelKey,
     Terms: C.ActorTerms,
 }
 export const SActorBaseline = {
+    ...SStruct,
     AnimProps: C.AnimProps,
     BlendIn: C.Real32,
     BlendOut: C.Real32,
 }
 export const SActorDeathDataCustomGroup = {
+    ...SStruct,
     Name: C.ActorLabelKey,
     Members: C.ActorDeathMembers,
     Supersedes: C.ActorTableKeys1x3,
     SyncPassChance: C.Real,
 }
 export const SActorUnitImpactSoundExtras = {
+    ...SStruct,
     TriggerModel: L.Model,
     SoundActor: C.ActorCreateKey,
     Sound: L.Sound,
 }
 export const SDamagePastRemainingHealth = {
+    ...SStruct,
     Value: C.Real,
     TestType: E.ActorOverkillTestType,
 }
 export const SDamageOverInterval = {
+    ...SStruct,
     Value: C.Real,
     Interval: C.Real,
     TestType: E.ActorOverkillTestType,
 }
 export const STerrainSquibVisual = {
+    ...SStruct,
     TerrainPhysicsMaterial: L.PhysicsMaterial,
     ActorModel: C.ActorCreateKey,
     ActorModelLow: C.ActorCreateKey,
@@ -648,6 +738,7 @@ export const STerrainSquibVisual = {
     Flags: F.Unknown,
 }
 export const STerrainSquib = {
+    ...SStruct,
     GroupName: C.ActorLabelKey,
     AttachQuery: SAttachQuery,
     MovementDistance: C.VariatorActorReal32,
@@ -659,52 +750,64 @@ export const STerrainSquib = {
     Visuals: [STerrainSquibVisual],
 }
 export const SUnitAbilSound = {
+    ...SStruct,
     AbilCmd: L.AbilCommand,
     Sound: L.Sound,
     GroupSound: L.Sound,
 }
 export const SErrorOverride = {
+    ...SStruct,
     Error: E.CmdResult,
     Text: L.String,
     Sound: L.Sound,
     GroupSound: L.Sound,
 }
 export const SLayerIcon = {
+    ...SStruct,
     Image: [A.Image],
 }
 export const SLayerIconVariation = {
+    ...SStruct,
     Image: [A.Image],
     Number: C.Int32,
 }
 export const SLayerIconShield = {
+    ...SStruct,
     Image: [A.Image],
 }
 export const SLayerIconShieldVariation = {
+    ...SStruct,
     Image: [A.Image],
     Number: C.UInt32,
 }
 export const SVitalColor = {
+    ...SStruct,
     ColorArray: [C.Color],
 }
 export const SIconVariation = {
+    ...SStruct,
     Number: C.UInt32,
     Image: A.Image,
 }
 export const SStatusColor = {
+    ...SStruct,
     BackgroundColor: C.Color,
     EmptyColor: C.Color,
     ColorArray: [C.Color],
 }
 export const SStatusChargeData = {
+    ...SStruct,
     Text: L.String,
     AbilCmd: L.AbilCommand,
 }
 export const SStatusHarvesterData = {
+    ...SStruct,
     Text: L.String,
     SearchFilters: C.TargetFilters,
     SearchRadius: C.Real,
 }
 export const STextTagParameters = {
+    ...SStruct,
     Text: L.String,
     TextShadow: C.Bit,
     Offset: C.Vector2i,
@@ -717,20 +820,24 @@ export const STextTagParameters = {
     BackgroundImageTiled: C.Bit,
 }
 export const SUnitKillRank = {
+    ...SStruct,
     MinKills: C.UInt32,
     Text: L.String,
 }
 
 export const SBankPath = {
+    ...SStruct,
     File: L.Bank,
     Section: C.String,
     Key: C.String,
 }
 export const SArtifactRank = {
+    ...SStruct,
     RequiredRewardArray: [L.Reward],
     ProductId: T.BattleProductId,
 }
 export const SAttachKey = {
+    ...SStruct,
     Keyword: E.AttachKeyword,
     Index: T.AttachPropIndex,
 }
@@ -740,6 +847,7 @@ export const SAttachKey = {
 
 
 export const SDeathResponse = {
+    ...SStruct,
     Chance: C.Real,
     Cost: SCost,
     Effect: L.Effect,
@@ -747,6 +855,7 @@ export const SDeathResponse = {
     Type: F.DeathType,
 }
 export const SAttributeChange = {
+    ...SStruct,
     Attribute: L.Behavior,
     Points: C.Int32,
 }
@@ -754,22 +863,27 @@ export const SAttributeChange = {
 
 
 export const SDamageKind = {
+    ...SStruct,
     KindArray: [C.Real],
 }
 export const SScoreValueUpdate = {
+    ...SStruct,
     Validator: L.Validator,
     Value: L.ScoreValue,
 }
 export const SUnitResourceRatio = {
+    ...SStruct,
     Amount: [C.Real,E.ResourceType],
 }
 export const SUnitWeaponData = {
+    ...SStruct,
     Link: L.Weapon,
     Turret: L.Turret,
 }
 
 
 export const SModification = {
+    ...SStruct,
     ModifyFlags: F.BehaviorModify,
     StateFlags: F.BehaviorState,
     AttackTargetPriority: T.AttackTargetPriority,
@@ -895,6 +1009,7 @@ export const SModification = {
     CriticalAttackChanceUnscaledBonus: C.Real,
 }
 export const SVeterancyLevel = {
+    ...SStruct,
     InfoIcon: A.Image,
     MinVeterancyXP: C.UInt32,
     Modification: SModification,
@@ -903,14 +1018,17 @@ export const SVeterancyLevel = {
     RankNameSchema: L.String,
 }
 export const SBehaviorFraction = {
+    ...SStruct,
     Fraction: SAccumulatedFixed,
     TargetFilters: C.TargetFilters,
 }
 export const SEffectWhichTimeScale = {
+    ...SStruct,
     Effect: L.Effect,
     Value: E.EffectTimeScale,
 }
 export const SBehaviorDuration = {
+    ...SStruct,
     Duration: SAccumulatedGameTime,
     ValidatorArray: [L.Validator],
 }
@@ -918,6 +1036,7 @@ export const SBehaviorDuration = {
 
 
 export const SDamageResponse = {
+    ...SStruct,
     ClampMaximum: C.Real,
     ClampMinimum: C.Real,
     Exhausted: L.Effect,
@@ -955,19 +1074,23 @@ export const SDamageResponse = {
     HandledValue: E.DamageResponseHandledValue,
 }
 export const SVitalRegenVitalRemain = {
+    ...SStruct,
     AmountMissing: C.Real,
     RegenModification: C.GameRate,
 }
 export const SAbilReplace = {
+    ...SStruct,
     Origin: L.Abil,
     New: L.Abil,
 }
 export const SAbilAdd = {
+    ...SStruct,
     Abil: L.Abil,
     OverrideCardId: C.Bit,
     CardId: C.FourCC,
 }
 export const SPowerStage = {
+    ...SStruct,
     MaxStackCount: C.UInt32,
     MinPowerLevel: T.PowerLevel,
     Modification: SModification,
@@ -977,6 +1100,7 @@ export const SPowerStage = {
     AbilAdd: [SAbilAdd],
 }
 export const SSpawnInfo = {
+    ...SStruct,
     Unit: L.Unit,
     Count: C.UInt32,
     MaxCount: C.UInt32,
@@ -986,14 +1110,17 @@ export const SSpawnInfo = {
     Effect: L.Effect,
 }
 export const STooltipBlock = {
+    ...SStruct,
     Validator: L.Validator,
     Text: L.String,
     Face: L.Button,
 }
 export const STooltipTimeAbilCmd = {
+    ...SStruct,
     AbilCmd: L.AbilCommand,
 }
 export const SButtonCardLayout = {
+    ...SStruct,
     Row: C.UInt8,
     Column: C.UInt8,
     CardId: C.FourCC,
@@ -1002,13 +1129,16 @@ export const SButtonCardLayout = {
 
 
 export const SCameraParam = {
+    ...SStruct,
     Modify: C.Bit,
     Value: C.Real32,
 }
 export const SCameraZoom = {
+    ...SStruct,
     Param: [SCameraParam],
 }
 export const SCameraSmooth = {
+    ...SStruct,
     SmoothTimeMin: C.Real32,
     SmoothTimeMax: C.Real32,
     DisplacementMin: C.Real32,
@@ -1016,11 +1146,13 @@ export const SCameraSmooth = {
 }
 
 export const SMovieConfig = {
+    ...SStruct,
     Name: L.String,
     Path: A.Movie,
     Source: C.Identifier,
 }
 export const SCampaignData = {
+    ...SStruct,
     Id: C.String,
     Name: L.String,
     Subtitle: L.String,
@@ -1058,22 +1190,26 @@ export const SCampaignData = {
     FeaturedDescription: L.String,
 }
 export const SCharacterVariation = {
+    ...SStruct,
     Name: L.String,
     Model: L.Model,
     Actor: L.Actor,
     DefaultCategories: [C.String],
 }
 export const SUIColorEntry = {
+    ...SStruct,
     Value: [C.Vector4],
 }
 
 
 
 export const SCommanderUnit = {
+    ...SStruct,
     Unit: L.Unit,
     Upgrade: L.Unit,
 }
 export const SCommanderTalentTree = {
+    ...SStruct,
     Talent: L.Talent,
     Unit: L.Unit,
     Level: T.CommanderLevel,
@@ -1081,6 +1217,7 @@ export const SCommanderTalentTree = {
     IsHidden: C.Bit,
 }
 export const SCommanderMasteryTalent = {
+    ...SStruct,
     Talent: L.Talent,
     ValuePerRank: C.Real32,
     MaxRank: C.UInt32,
@@ -1090,6 +1227,7 @@ export const SCommanderMasteryTalent = {
     MaxValuePrecision: C.UInt32,
 }
 export const SCommanderAbil = {
+    ...SStruct,
     Abil: L.Abil,
     Button: L.Button,
 }
@@ -1097,6 +1235,7 @@ export const SCommanderAbil = {
 
 
 export const SCommanderDifficultyLevel = {
+    ...SStruct,
     DifficultyLevel: T.DifficultyLevel,
     CommanderLevel: T.CommanderLevel,
     Name: L.String,
@@ -1110,6 +1249,7 @@ export const SCommanderDifficultyLevel = {
     IsRetry: C.Bit,
 }
 export const SConsoleSkinModel = {
+    ...SStruct,
     Model: C.String,
     Position: C.Vector3,
     Scale: C.Vector3,
@@ -1118,12 +1258,14 @@ export const SConsoleSkinModel = {
 
 
 export const SConversationUserValue = {
+    ...SStruct,
     Type: L.User,
     Field: T.UserFieldId,
     Index: C.Int32,
     Instance: T.UserInstanceId,
 }
 export const SConversationCondition = {
+    ...SStruct,
     FixedId: T.ConversationStateOpId,
     State: L.ConversationState,
     Index: T.ConversationStateIndexId,
@@ -1132,15 +1274,18 @@ export const SConversationCondition = {
     Value: C.Int32,
 }
 export const SConversationProductionLevel = {
+    ...SStruct,
     SubtitlePrefix: C.String,
     Flags: F.ConversationProductionLevel,
 }
 export const SConversationConditionSet = {
+    ...SStruct,
     Conditions: [SConversationCondition],
     Text: L.String,
 }
 
 export const SConversationAction = {
+    ...SStruct,
     FixedId: T.ConversationStateOpId,
     State: L.ConversationState,
     Index: T.ConversationStateIndexId,
@@ -1149,11 +1294,13 @@ export const SConversationAction = {
     Value: C.Int32,
 }
 export const SConversationActionSet = {
+    ...SStruct,
     Actions: [SConversationAction],
     Text: L.String,
 }
 
 export const SConversationFacialAnim = {
+    ...SStruct,
     Id: T.ConversationItemId,
     Text: L.String,
     SpeechTag: C.String,
@@ -1165,6 +1312,7 @@ export const SConversationFacialAnim = {
 
 
 export const SConversationLine = {
+    ...SStruct,
     Id: T.ConversationItemId,
     Text: L.String,
     Comment: C.String,
@@ -1197,24 +1345,28 @@ export const SConversationLine = {
     Tags: [T.ConversationTag],
 }
 export const SConversationRunActions = {
+    ...SStruct,
     Id: T.ConversationItemId,
     ConditionCheck: E.ConversationConditionCheck,
     Conditions: [SConversationCondition],
     Actions: [SConversationAction],
 }
 export const SConversationWait = {
+    ...SStruct,
     Id: T.ConversationItemId,
     Duration: C.UInt32,
     ConditionCheck: E.ConversationConditionCheck,
     Conditions: [SConversationCondition],
 }
 export const SConversationJump = {
+    ...SStruct,
     Id: T.ConversationItemId,
     Location: T.ConversationItemId,
     ConditionCheck: E.ConversationConditionCheck,
     Conditions: [SConversationCondition],
 }
 export const SConversationChoice = {
+    ...SStruct,
     Id: T.ConversationItemId,
     Text: L.String,
     Comment: C.String,
@@ -1226,6 +1378,7 @@ export const SConversationChoice = {
     Children: [T.ConversationItemId],
 }
 export const SConversationGroup = {
+    ...SStruct,
     Id: T.ConversationItemId,
     Name: L.String,
     Comment: C.String,
@@ -1245,6 +1398,7 @@ export const SConversationGroup = {
     Tags: [T.ConversationTag],
 }
 export const SConversationComment = {
+    ...SStruct,
     Id: T.ConversationItemId,
     Text: L.String,
 }
@@ -1252,36 +1406,44 @@ export const SConversationComment = {
 
 
 export const SConversationStateInfoText = {
+    ...SStruct,
     Id: T.ConversationStateInfoId,
     Text: L.String,
 }
 export const SConversationStateInfoValue = {
+    ...SStruct,
     Id: T.ConversationStateInfoId,
     Value: C.Real,
 }
 export const SConversationStateInfoModel = {
+    ...SStruct,
     Id: T.ConversationStateInfoId,
     Model: L.Model,
 }
 export const SConversationStateInfoUpgrade = {
+    ...SStruct,
     Id: T.ConversationStateInfoId,
     Upgrade: L.Upgrade,
 }
 export const SConversationStateInfoAbilCmd = {
+    ...SStruct,
     Id: T.ConversationStateInfoId,
     Abil: L.Abil,
     Cmd: T.AbilCmdIndex,
 }
 export const SConversationStateVariation = {
+    ...SStruct,
     Value: T.ConversationStateVariation,
     DefaultCategories: [C.String80],
 }
 export const SConversationStateInfoIds = {
+    ...SStruct,
     Id: [T.ConversationStateInfoId],
 }
 
 
 export const SConversationStateIndex = {
+    ...SStruct,
     Id: T.ConversationStateIndexId,
     Name: L.String,
     EditorPrefix: L.String,
@@ -1303,19 +1465,23 @@ export const SConversationStateIndex = {
 
 
 export const SDataCollectionRecord = {
+    ...SStruct,
     Entry: C.DataEntryPath,
 }
 export const SUpgradeInfoWeapon = {
+    ...SStruct,
     UpgradeWeapon: L.Weapon,
     UpgradeEffect: L.Effect,
     DamagePerDice: C.Real,
 }
 export const SDataFieldsPattern = {
+    ...SStruct,
     Reference: C.String,
     NameOverride: L.String,
     UserData: C.Identifier,
 }
 export const SDataTokensPattern = {
+    ...SStruct,
     Reference: C.String,
     NameOverride: L.String,
     UserData: C.Identifier,
@@ -1326,6 +1492,7 @@ export const SDataTokensPattern = {
 
 
 export const STextureSheetEntry = {
+    ...SStruct,
     TextureSheet: L.TextureSheet,
     Index: C.UInt32,
     Count: C.UInt32,
@@ -1340,6 +1507,7 @@ export const STextureSheetEntry = {
 
 
 export const SEffectDamageArea = {
+    ...SStruct,
     Arc: C.FangleArc,
     MaxCount: C.UInt32,
     Radius: C.Real,
@@ -1352,6 +1520,7 @@ export const SEffectDamageArea = {
     Validator: L.Validator,
 }
 export const SEffectSearchRevealerParams = {
+    ...SStruct,
     RevealFlags: F.EffectReveal,
     DetectFilters: C.TargetFilters,
     RadarFilters: C.TargetFilters,
@@ -1360,6 +1529,7 @@ export const SEffectSearchRevealerParams = {
     ShapeExpansion: C.Real,
 }
 export const SEffectEnumArea = {
+    ...SStruct,
     Arc: C.FangleArc,
     MaxCount: C.UInt32,
     Radius: C.Real,
@@ -1370,24 +1540,29 @@ export const SEffectEnumArea = {
     Effect: L.Effect,
 }
 export const SEffectMover = {
+    ...SStruct,
     Link: L.Mover,
     IfRangeLTE: C.Real,
 }
 export const SEffectMissileBounce = {
+    ...SStruct,
     DistanceMultiplier: C.Real,
     ImpactEffect: L.Effect,
     Offset: C.EffectOffset,
 }
 export const SUpgradeEffect = {
+    ...SStruct,
     Operation: E.UpgradeOperation,
     Reference: C.CatalogReference,
     Value: T.UpgradeEffectValue,
 }
 export const SEffectUpgrade = {
+    ...SStruct,
     Upgrade: L.Upgrade,
     Count: C.Int8,
 }
 export const SEffectModifyPlayerCost = {
+    ...SStruct,
     Resource: [C.Int32,E.ResourceType],
     Display: F.Unknown,
     Vital: [C.Real,E.UnitVital],
@@ -1401,6 +1576,7 @@ export const SEffectModifyPlayerCost = {
 
 
 export const SEffectModifyUnitCost = {
+    ...SStruct,
     Abil: L.AbilCommand,
     Behavior: L.Behavior,
     Player: SEffectWhichPlayer,
@@ -1411,17 +1587,20 @@ export const SEffectModifyUnitCost = {
     Fraction: SCostFactor,
 }
 export const SEffectModifyWeapon = {
+    ...SStruct,
     Weapon: L.Weapon,
     CooldownOperation: E.CooldownOperation,
     CooldownAmount: C.GameTime,
     CooldownFraction: C.Real,
 }
 export const SEffectModifyVital = {
+    ...SStruct,
     Change: SAccumulatedFixed,
     ChangeFraction: SAccumulatedFixed,
     ScoreArray: [SScoreValueUpdate],
 }
 export const SEffectModifyTurret = {
+    ...SStruct,
     Action: E.EffectModifyTurret,
     Turret: L.Turret,
     Target: SEffectWhichLocation,
@@ -1429,26 +1608,31 @@ export const SEffectModifyTurret = {
     AimCompleteEffect: L.Effect,
 }
 export const SEffectSwitchCase = {
+    ...SStruct,
     Validator: L.Validator,
     Effect: L.Effect,
     FallThrough: C.Bit,
 }
 export const SEmoticonPackCampaign = {
+    ...SStruct,
     Campaign: L.Campaign,
 }
 
 
 export const SFootprintBitSet = {
+    ...SStruct,
     Character: C.String4,
     Positive: F.Unknown,
     Negative: F.Unknown,
 }
 export const SFootprintLayer = {
+    ...SStruct,
     Area: C.iQuad,
     Sets: [SFootprintBitSet],
     Rows: [C.String50],
 }
 export const SFootprintShape = {
+    ...SStruct,
     Mode: E.FootprintShapeMode,
     Radius: C.Real,
     Offsets: T.FootprintOffsets,
@@ -1458,6 +1642,7 @@ export const SFootprintShape = {
 
 
 export const SDifficultyLevel = {
+    ...SStruct,
     AttributeId: C.FourCC,
     Name: L.String,
     NameCampaign: L.String,
@@ -1470,6 +1655,7 @@ export const SDifficultyLevel = {
     DefaultRebuildStructure: C.UInt8,
 }
 export const SAIBuild = {
+    ...SStruct,
     AttributeId: C.FourCC,
     Name: L.String,
     MenuTooltip: L.String,
@@ -1480,19 +1666,23 @@ export const SAIBuild = {
     BuildScriptNum: C.Int32,
 }
 export const SHandicap = {
+    ...SStruct,
     MenuTooltip: L.String,
     Percent: T.Handicap
 }
 export const SMapSize = {
+    ...SStruct,
     Name: L.String,
     MaxCells: C.UInt32,
 }
 export const SAspectMargin = {
+    ...SStruct,
     AspectWidth: C.UInt32,
     AspectHeight: C.UInt32,
     Margin: C.iQuad,
 }
 export const STeamColor = {
+    ...SStruct,
     HDRMultiplier: C.Real32,
     Name: L.String,
     Value: [C.Vector4],
@@ -1501,42 +1691,51 @@ export const STeamColor = {
     AttributeId: C.FourCC,
 }
 export const SAIDescription = {
+    ...SStruct,
     Id: C.FourCC,
     Name: L.String,
     File: C.Identifier,
     Suffix: C.String32,
 }
 export const STriggerLib = {
+    ...SStruct,
     Id: T.TriggerLibId,
     IncludePath: C.String,
 }
 export const STargetFilterResult = {
+    ...SStruct,
     Filter: C.TargetFilters,
     Result: T.CmdResult,
 }
 export const SBeaconInfo = {
+    ...SStruct,
     Alert: L.Alert,
     Unit: L.Unit,
     Tooltip: L.String,
     Clear: F.Unknown,
 }
 export const SDamageTypeInfo = {
+    ...SStruct,
     Category: E.DamageCategory,
     SupportedFilters: C.TargetFilters,
 }
 export const SAttackTypeInfo = {
+    ...SStruct,
     ArmorFactor: [C.Real],
     SupportedFilters: C.TargetFilters,
     FailThroughToDamageType: C.Bit,
 }
 export const SResourceConvert = {
+    ...SStruct,
     RatioArray: [C.Real],
 }
 export const SMeleePointThreshold = {
+    ...SStruct,
     Value: C.UInt32,
     Factor: C.Real,
 }
 export const SChallenge = {
+    ...SStruct,
     Id: C.String,
     Name: L.String,
     Description: L.String,
@@ -1547,10 +1746,12 @@ export const SChallenge = {
     IsAllowedInTrial: C.Bit,
 }
 export const SChallengeCategory = {
+    ...SStruct,
     Name: L.String,
     Challenge: [SChallenge],
 }
 export const SSoundQuality = {
+    ...SStruct,
     AutoDetectCPUCoreMaximum: C.UInt32,
     Channels: C.UInt32,
     Flags: F.Unknown,
@@ -1562,6 +1763,7 @@ export const SSoundQuality = {
     VariationMaximum: [C.UInt32],
 }
 export const SMinimapData = {
+    ...SStruct,
     InnerBorderColor: C.Color,
     OuterBorderColor: C.Color,
     FrustumColor: C.Color,
@@ -1577,6 +1779,7 @@ export const SMinimapData = {
     RadarAlpha: C.UInt8,
 }
 export const SSelectionData = {
+    ...SStruct,
     SelectionWidth: C.Real32,
     SelectionFallOff: C.Real32,
     SelectionAlpha: C.Vector3,
@@ -1598,24 +1801,29 @@ export const SSelectionData = {
 
 
 export const SVolumeFade = {
+    ...SStruct,
     Time: C.UInt32,
     Volume: C.Volume,
 }
 
 export const SReverbRolloff = {
+    ...SStruct,
     Distance: C.Real32,
     Direct: C.Real32,
     Room: C.Real32,
 }
 export const SVolumeThreshold = {
+    ...SStruct,
     Count: C.UInt32,
     Volume: C.Volume,
 }
 export const SVolumeRolloff = {
+    ...SStruct,
     Distance: C.Real32,
     Volume: C.Volume,
 }
 export const SSoundData = {
+    ...SStruct,
     DupeFadeBlend: E.SoundBlend,
     DupeFadeIn: [SVolumeFade],
     DupeFadeOut: [SVolumeFade],
@@ -1664,10 +1872,12 @@ export const SSoundData = {
 }
 
 export const SMixRoute = {
+    ...SStruct,
     ParentCategory: E.SoundCategory,
 }
 
 export const SGlobalSoundData = {
+    ...SStruct,
     SoundDistanceFactor: C.Real32,
     SoundDopplerFactor: C.Real32,
     SoundRolloffFactor: C.Real32,
@@ -1676,6 +1886,7 @@ export const SGlobalSoundData = {
     HeadphoneModeFrequency: C.Real32,
 }
 export const SPointModel = {
+    ...SStruct,
     Model: A.Model,
     Scale: C.Real32,
     NameSize: C.UInt32,
@@ -1684,23 +1895,27 @@ export const SPointModel = {
     SelectionRadius: C.Real32,
 }
 export const SCameraShakeRotation = {
+    ...SStruct,
     Yaw: C.Real32,
     Pitch: C.Real32,
     Roll: C.Real32,
 }
 export const SCameraShakeFrequency = {
+    ...SStruct,
     Id: C.String80,
     Name: L.String,
     Position: C.Vector3,
     Rotation: SCameraShakeRotation
 }
 export const SCameraShakeAmplitude = {
+    ...SStruct,
     Id: C.String80,
     Name: L.String,
     Position: C.Vector3,
     Rotation: SCameraShakeRotation
 }
 export const SListenerRolloff = {
+    ...SStruct,
     CameraValue: C.Real32,
     ListenerFactor: C.Real32,
 }
@@ -1709,27 +1924,33 @@ export const SListenerRolloff = {
 
 
 export const SUnitSpeedText = {
+    ...SStruct,
     MinSpeed: C.GameSpeed,
     Text: L.String,
 }
 export const SWeaponSpeedText = {
+    ...SStruct,
     MinSpeed: C.GameTime,
     Text: L.String,
 }
 export const SObjectGroupData = {
+    ...SStruct,
     MinLevel: C.UInt32,
     MinimapIcon: A.Image,
 }
 export const SLoadingScreenHelp = {
+    ...SStruct,
     Text: L.String,
     Race: L.Race,
 }
 export const SLoadingBar = {
+    ...SStruct,
     Name: L.String,
     FrameSuffix: C.String,
 }
 
 export const SGameModeInfo = {
+    ...SStruct,
     Id: C.UInt32,
     CanOverrideText: C.Bit,
     IsTutorial: C.Bit,
@@ -1737,11 +1958,13 @@ export const SGameModeInfo = {
     Description: L.String,
 }
 export const SGameCategory = {
+    ...SStruct,
     Usage: E.GameCategoryUsage,
     Info: SGameModeInfo,
     Modes: [SGameModeInfo],
 }
 export const SDefaultGameVariant = {
+    ...SStruct,
     CategoryId: C.UInt32,
     ModeId: C.UInt32,
     MinPlayers: C.Int32,
@@ -1754,49 +1977,59 @@ export const SDefaultGameVariant = {
     AchievementTags: [C.FourCC],
 }
 export const STutorialConfig = {
+    ...SStruct,
     Title: L.String,
     Description: L.String,
     Icon: A.Image,
     Movie: A.Movie,
 }
 export const SHotkeyInfo = {
+    ...SStruct,
     Category: L.String,
     Name: L.String,
     Tooltip: L.String,
 }
 export const SResourceUI = {
+    ...SStruct,
     Icon: A.Image,
     IconBackground: A.Image,
     Tooltip: L.String,
 }
 export const SHelpControlCategoryInfo = {
+    ...SStruct,
     Name: L.String,
     Description: L.String,
 }
 export const SHelpControlInfo = {
+    ...SStruct,
     Category: L.String,
     Name: L.String,
     Description: L.String,
     Basic: C.Bit,
 }
 export const SHelpGameMechanicInfo = {
+    ...SStruct,
     Icon: A.Image,
     IconBackground: A.Image,
     Name: L.String,
     Description: L.String,
 }
 export const SAltSoundtrack = {
+    ...SStruct,
     AltSoundtrackName: L.String,
     Suffix: C.String,
 }
 export const SCutsceneAssetPath = {
+    ...SStruct,
     Path: A.Cutscene,
     Theme: E.GlueTheme,
 }
 export const SHerdLevel = {
+    ...SStruct,
     Weight: C.Real32,
 }
 export const SHerdNode = {
+    ...SStruct,
     Weight: C.Real32,
     Link: L.HerdNode,
 }
@@ -1804,6 +2037,7 @@ export const SHerdNode = {
 
 
 export const SHeroAbilCategory = {
+    ...SStruct,
     Name: L.String,
     Tooltip: L.String,
     Image: A.Image,
@@ -1814,35 +2048,42 @@ export const SHeroAbilCategory = {
 }
 
 export const SHeroAbil = {
+    ...SStruct,
     Abil: L.Abil,
     Button: L.Button,
     Unit: L.Unit,
     Flags: F.HeroAbil,
 }
 export const SHeroHeroicAbility = {
+    ...SStruct,
     Abil: L.Abil,
 }
 export const SHeroSpecificVO = {
+    ...SStruct,
     Target: L.Unit,
     Sound: L.Sound,
 }
 export const SHeroTalentTree = {
+    ...SStruct,
     Talent: L.Talent,
     Tier: C.UInt32,
     Column: C.UInt32,
     PrerequisiteTalentArray: [L.Talent],
 }
 export const SHeroTalentTier = {
+    ...SStruct,
     Tier: C.UInt32,
     Level: C.UInt32,
 }
 export const SHeroSpecificIntroVO = {
+    ...SStruct,
     Target: L.Unit,
     Question: L.Sound,
     Response: L.Sound,
 }
 
 export const SHeroLevelModification = {
+    ...SStruct,
     Catalog: E.GameCatalog,
     Entry: C.Identifier,
     Field: C.Identifier,
@@ -1852,16 +2093,19 @@ export const SHeroLevelModification = {
     AffectedByOverdrive: C.Bit,
 }
 export const SHeroLevelScaling = {
+    ...SStruct,
     Ability: L.Abil,
     Modifications: [SHeroLevelModification],
 }
 export const SHeroRatings = {
+    ...SStruct,
     Damage: C.UInt8,
     Utility: C.UInt8,
     Survivability: C.UInt8,
     Complexity: C.UInt8,
 }
 export const SHeroAITalentBuild = {
+    ...SStruct,
     BuildType: E.HeroAITalentBuildType,
     AIOnly: C.Bit,
     ChanceToPick: C.UInt8,
@@ -1870,15 +2114,18 @@ export const SHeroAITalentBuild = {
     TalentsArray: [L.Talent],
 }
 export const SHeroSpecificUI = {
+    ...SStruct,
     Location: C.Identifier,
     DescName: C.String,
 }
 export const SHeroStatModifier = {
+    ...SStruct,
     Stat: L.HeroStat,
     Value: C.Int32,
     State: E.HeroStatState,
 }
 export const SItemContainerSlot = {
+    ...SStruct,
     EmptyFace: L.Button,
     Classes: [L.ItemClass],
     Requirements: L.Requirement,
@@ -1887,14 +2134,17 @@ export const SItemContainerSlot = {
     Column: C.UInt8,
 }
 export const SFlareInfo = {
+    ...SStruct,
     Model: L.Model,
     Template: C.Identifier,
 }
 export const STimeEvent = {
+    ...SStruct,
     Time: C.TimeOfDay,
     Name: L.String,
 }
 export const SDirectionalLight = {
+    ...SStruct,
     UseAmbientOcclusion: C.Bit,
     Color: C.Vector3,
     ColorMultiplier: C.Real32,
@@ -1903,11 +2153,13 @@ export const SDirectionalLight = {
     Direction: C.Vector3,
 }
 export const SVariationConfig = {
+    ...SStruct,
     Command: E.VariationCommands,
     Sensitivity: C.UInt32,
     Region: E.TonemapRegionTypes,
 }
 export const SLightRegionInfo = {
+    ...SStruct,
     UseDefault: C.Bit,
     AmbientColor: C.Vector3,
     AmbientEnvironmentMultiplier: C.Real32,
@@ -1918,6 +2170,7 @@ export const SLightRegionInfo = {
     FogColor: C.Vector3,
 }
 export const SLightInfo = {
+    ...SStruct,
     Id: C.Identifier,
     TimeOfDay: C.TimeOfDay,
     AmbientColor: C.Vector3,
@@ -1935,6 +2188,7 @@ export const SLightInfo = {
     LightRegions: [SLightRegionInfo],
 }
 export const SMissionCategory = {
+    ...SStruct,
     Name: L.String,
     Map: L.Map,
     Tooltip: L.String,
@@ -1944,18 +2198,22 @@ export const SMissionCategory = {
     State: E.MissionState,
 }
 export const SLootChoice = {
+    ...SStruct,
     Chance: C.UInt8,
     Child: L.Loot,
 }
 export const SAnimFile = {
+    ...SStruct,
     FilePath: A.Anims,
     Flags: F.Unknown,
 }
 export const SAnimAlias = {
+    ...SStruct,
     Anim: C.AnimProps,
     Alias: C.AnimProps,
 }
 export const SAttachProps = {
+    ...SStruct,
     Id: E.AttachmentID,
     Keys: [T.AttachPropIndex],
     SquibType: E.SquibType,
@@ -1965,6 +2223,7 @@ export const SAttachProps = {
     RadiusShield: C.Real32,
 }
 export const SModelDataEvent = {
+    ...SStruct,
     Variation: C.Int32,
     Anim: C.AnimProps,
     Name: C.Identifier,
@@ -1975,12 +2234,14 @@ export const SModelDataEvent = {
     ModelQuality: E.ModelQuality,
 }
 export const SPhysicsMaterialMapping = {
+    ...SStruct,
     PhysicsMaterialInnate: E.PhysicsMaterial,
     PhysicsMaterialOverride: L.PhysicsMaterial,
 }
 
 
 export const STextureNameAdaption = {
+    ...SStruct,
     TriggerOnSubstring: C.Identifier,
     Slot: C.TextureSlot,
     PropsAdd: C.TextureProps,
@@ -1990,24 +2251,29 @@ export const STextureNameAdaption = {
     AppliesToFile: C.Bit,
 }
 export const STextureDeclare = {
+    ...SStruct,
     Prefix: C.Identifier,
     Slot: C.TextureSlot,
     Adaptions: [STextureNameAdaption],
 }
 export const STextureInfo = {
+    ...SStruct,
     Slot: C.TextureSlot,
     Expression: C.TextureExpression,
     Probability: C.UInt32,
 }
 export const STextureExpressionSpec = {
+    ...SStruct,
     Slot: C.TextureSlot,
     Expression: C.TextureExpression,
 }
 export const STextureMatchSpec = {
+    ...SStruct,
     Slot: C.TextureSlot,
     Source: C.TextureSlot,
 }
 export const SModelVariation = {
+    ...SStruct,
     Number: C.Int32,
     Probability: C.UInt32,
     Radius: C.Real32,
@@ -2021,14 +2287,17 @@ export const SModelVariation = {
 
 
 export const SPathingData = {
+    ...SStruct,
     Bits: F.Unknown,
 }
 
 
 export const SMotionOverlayPhase = {
+    ...SStruct,
     Scale: C.VariatorGameFixed,
 }
 export const SMotionPhase = {
+    ...SStruct,
     Driver: E.MotionDriverType,
     Acceleration: C.MissileAcceleration,
     AccelerationRange: C.MissileAcceleration,
@@ -2070,6 +2339,7 @@ export const SMotionPhase = {
     Overlays: [SMotionOverlayPhase],
 }
 export const SMotionOverlay = {
+    ...SStruct,
     Type: E.MotionOverlayType,
     Polarity: E.MotionOverlayPolarity,
     PolarityDriver: C.DataSoupKey,
@@ -2087,6 +2357,7 @@ export const SMotionOverlay = {
 
 
 export const SStartingUnit = {
+    ...SStruct,
     Count: C.UInt32,
     Flags: F.Unknown,
     Offset: [C.GamePoint],
@@ -2094,41 +2365,50 @@ export const SStartingUnit = {
     Unit: L.Unit,
 }
 export const SUpkeepTax = {
+    ...SStruct,
     FoodLevel: C.UInt32,
     Tax: [C.Real],
 }
 
 
 export const SRequirementNode = {
+    ...SStruct,
     Link: L.RequirementNode,
 }
 export const SRequirementCount = {
+    ...SStruct,
     Link: T.TechAlias,
     State: E.RequirementState,
     Unlock: T.TechAlias,
 }
 export const SRewardCategory = {
+    ...SStruct,
     File: C.String,
     Tag: C.FourCC,
 }
 export const SRewardSpecificUI = {
+    ...SStruct,
     Location: C.Identifier,
     DescName: C.String,
 }
 export const SGameReplacement = {
+    ...SStruct,
     Catalog: E.GameCatalog,
     From: C.Identifier,
     To: C.Identifier,
 }
 export const SSkinModelGroup = {
+    ...SStruct,
     Name: C.Identifier,
     Models: [L.Model],
 }
 export const SSkinModelMacroRun = {
+    ...SStruct,
     Models: C.Identifier,
     Macro: L.Actor,
 }
 export const SSkinPackEntry = {
+    ...SStruct,
     Unit: L.Unit,
     Reward: L.Reward,
     UnitAlternate: L.Unit,
@@ -2139,12 +2419,14 @@ export const SSkinPackEntry = {
 
 
 export const SSyncPointRange = {
+    ...SStruct,
     BarAndBeat: C.Vector2i,
     TimeSignature: C.Vector2i,
     BeatsPerMinute: C.UInt16,
     SyncPointsPerBar: C.UInt16,
 }
 export const SSoundAsset = {
+    ...SStruct,
     TemplateParam: C.String,
     File: A.Sound,
     LoopCount: C.Int32,
@@ -2165,6 +2447,7 @@ export const SSoundAsset = {
     Subtitle: L.String,
 }
 export const SSoundAssetTemplate = {
+    ...SStruct,
     File: C.Identifier,
     FacialAnim: C.Identifier,
     FacialGroup: C.Identifier,
@@ -2172,34 +2455,42 @@ export const SSoundAssetTemplate = {
     PortraitAnim: C.Identifier,
 }
 export const SSoundLocaleFlags = {
+    ...SStruct,
     Locale: T.LocaleId,
     Flags: F.Unknown,
 }
 export const SPitchShift = {
+    ...SStruct,
     Time: C.UInt32,
     Pitch: C.Pitch,
 }
 export const SReverbBalance = {
+    ...SStruct,
     Direct: T.SoundBalance,
     Room: T.SoundBalance,
 }
 export const SSoundtrackMasterLayer = {
+    ...SStruct,
     Sound: L.Sound,
 }
 export const SSoundtrackSection = {
+    ...SStruct,
     Chance: C.Real32,
     Sound: L.Sound,
     Start: C.UInt32,
 }
 export const SSoundtrackSlaveLayer = {
+    ...SStruct,
     Sections: [SSoundtrackSection],
 }
 export const SSoundtrackCue = {
+    ...SStruct,
     MasterLayer: SSoundtrackMasterLayer,
     SlaveLayers: [SSoundtrackSlaveLayer],
     Weight: T.SoundWeight,
 }
 export const STacAbilData = {
+    ...SStruct,
     AbilLink: L.Abil,
     Cooldown: [C.Real],
 }
@@ -2207,6 +2498,7 @@ export const STacAbilData = {
 
 
 export const STalentRank = {
+    ...SStruct,
     Face: L.Button,
     Item: L.Unit,
     Upgrade: L.Upgrade,
@@ -2231,6 +2523,7 @@ export const STalentRank = {
     MountSpeed: C.Real,
 }
 export const STalentModification = {
+    ...SStruct,
     Type: E.TalentModification,
     Catalog: E.GameCatalog,
     Entry: C.Identifier,
@@ -2240,6 +2533,7 @@ export const STalentModification = {
     StringReplacement: C.String,
 }
 export const STalentAbilityModification = {
+    ...SStruct,
     ModifyAbil: L.Abil,
     OriginalAbilButton: L.Button,
     ModifiedAbilButton: L.Button,
@@ -2247,6 +2541,7 @@ export const STalentAbilityModification = {
     TooltipAddendum: L.String,
 }
 export const STargetFindEnumArea = {
+    ...SStruct,
     Arc: C.FangleArc,
     MaxCount: C.UInt32,
     Radius: C.Real,
@@ -2254,9 +2549,11 @@ export const STargetFindEnumArea = {
     Validator: L.Validator,
 }
 export const SDSPArray = {
+    ...SStruct,
     LinkArray: [L.DSP],
 }
 export const SCreepSettings = {
+    ...SStruct,
     CreepOpaqueAlphaThreshold: C.Real32,
     CreepTranslucentMinThreshold: C.Real32,
     CreepTranslucentMaxThreshold: C.Real32,
@@ -2275,16 +2572,19 @@ export const SCreepSettings = {
     CreepGroundNormalBlend: C.Real32,
 }
 export const SFoliageSimulationConfig = {
+    ...SStruct,
     SamplingDistance: [C.Real32],
     AcceptWorldForces: F.Unknown,
 }
 export const STerrainDoodad = {
+    ...SStruct,
     Model: L.Model,
     RandomRotation: C.Bit,
     Probability: C.Real32,
     PlacementRadius: C.Real32,
 }
 export const SFidget = {
+    ...SStruct,
     ChanceArray: [C.UInt8,E.Chance],
     DelayMax: C.GameTime,
     DelayMin: C.GameTime,
@@ -2294,6 +2594,7 @@ export const SFidget = {
     TurningRate: C.FangleRate,
 }
 export const SUnitArmorFormula = {
+    ...SStruct,
     NegativeArmorMultiplier: C.Real,
     NegativeDamageBase: C.Real,
     NegativeDamageUnscaled: C.Real,
@@ -2301,17 +2602,21 @@ export const SUnitArmorFormula = {
     PositiveDamageRatio: C.Real,
 }
 export const SStockCharge = {
+    ...SStruct,
     CountMax: C.Real,
     TimeDelay: C.GameTime,
     TimeUse: C.GameTime,
 }
 export const SUnitAbilData = {
+    ...SStruct,
     Link: L.Abil,
 }
 export const SUnitBehaviorData = {
+    ...SStruct,
     Link: L.Behavior,
 }
 export const SCardLayoutButton = {
+    ...SStruct,
     Face: L.Button,
     Type: E.CardButtonType,
     AbilCmd: L.AbilCommand,
@@ -2326,16 +2631,19 @@ export const SCardLayoutButton = {
     Column: C.UInt8,
 }
 export const SCardLayout = {
+    ...SStruct,
     CardId: C.CardId,
     LayoutButtons: [SCardLayoutButton],
     RowText: [L.String],
 }
 export const SAddedOnData = {
+    ...SStruct,
     UnitLink: L.Unit,
     BehaviorLink: L.Behavior,
     ParentBehaviorLink: L.Behavior,
 }
 export const SUnitEquipment = {
+    ...SStruct,
     Effect: L.Effect,
     Icon: A.Image,
     Name: L.String,
@@ -2343,6 +2651,7 @@ export const SUnitEquipment = {
     Weapon: L.Weapon,
 }
 export const SUnitReviveInfo = {
+    ...SStruct,
     Resource: [C.Int32,E.ResourceType],
     Display: F.Unknown,
     Vital: [C.Real,E.UnitVital],
@@ -2352,11 +2661,13 @@ export const SUnitReviveInfo = {
     Time: C.GameTime,
 }
 export const SAttributePointsInfo = {
+    ...SStruct,
     Attribute: L.Behavior,
     Points: C.Int32,
     PointsPerLevel: C.Real,
 }
 export const SUpgradeEffectTemplate = {
+    ...SStruct,
     Operation: E.UpgradeOperation,
     Reference: C.String,
     Value: C.String,
@@ -2365,10 +2676,12 @@ export const SUpgradeEffectTemplate = {
 
 
 export const SValidatorCondition = {
+    ...SStruct,
     Test: L.Validator,
     Return: L.Validator,
 }
 export const SValidatorFunction = {
+    ...SStruct,
     Test: L.Validator,
     Return: L.Validator,
     Success: L.Validator,
@@ -2377,6 +2690,7 @@ export const SValidatorFunction = {
     Break: C.Bit,
 }
 export const SValidatorEnumArea = {
+    ...SStruct,
     Arc: C.FangleArc,
     Compare: E.ValueCompare,
     Count: C.UInt32,
@@ -2386,14 +2700,17 @@ export const SValidatorEnumArea = {
 }
 
 export const SVoiceOverSkin = {
+    ...SStruct,
     Id: T.VoiceOverSkinId,
     State: E.VoiceOverSkinState,
 }
 export const SVoiceOverGroup = {
+    ...SStruct,
     Id: T.VoiceOverGroupId,
     SoundParent: L.Sound,
 }
 export const SVoiceOverLine = {
+    ...SStruct,
     Group: T.VoiceOverGroupId,
     SoundIndex: C.Int32,
     SoundType: E.VoiceOverSoundType,
@@ -2405,84 +2722,103 @@ export const SVoiceOverLine = {
     Skins: [SVoiceOverSkin],
 }
 export const SVoicePackExampleLine = {
+    ...SStruct,
     Description: L.String,
     Sound: L.Sound,
 }
 
 
 export const SUserInstanceField = {
+    ...SStruct,
     Id: T.UserFieldId,
     Index: C.UInt32,
 }
 export const SUserInstanceAbilCmd = {
+    ...SStruct,
     Field: SUserInstanceField,
     Abil: L.Abil,
     Cmd: T.AbilCmdIndex,
 }
 export const SUserInstanceActor = {
+    ...SStruct,
     Field: SUserInstanceField,
     Actor: L.Actor,
 }
 export const SUserInstanceColor = {
+    ...SStruct,
     Field: SUserInstanceField,
     Color: C.Color,
 }
 export const SUserInstanceCompare = {
+    ...SStruct,
     Field: SUserInstanceField,
     Compare: E.ValueCompare,
 }
 export const SUserInstanceFixed = {
+    ...SStruct,
     Field: SUserInstanceField,
     Fixed: C.Real,
 }
 export const SUserInstanceGameLink = {
+    ...SStruct,
     Field: SUserInstanceField,
     GameLink: C.String,
 }
 export const SUserInstanceImage = {
+    ...SStruct,
     Field: SUserInstanceField,
     Image: A.Image,
     Edge: E.TextTagEdge,
     Attach: E.AttachmentID,
 }
 export const SUserInstanceInt = {
+    ...SStruct,
     Field: SUserInstanceField,
     Int: C.Int32,
 }
 export const SUserInstanceModel = {
+    ...SStruct,
     Field: SUserInstanceField,
     Model: L.Model,
 }
 export const SUserInstanceMovie = {
+    ...SStruct,
     Field: SUserInstanceField,
     Movie: A.Movie,
 }
 export const SUserInstanceSound = {
+    ...SStruct,
     Field: SUserInstanceField,
     Sound: L.Sound,
 }
 export const SUserInstanceString = {
+    ...SStruct,
     Field: SUserInstanceField,
     String: C.String,
 }
 export const SUserInstanceText = {
+    ...SStruct,
     Field: SUserInstanceField,
     Text: L.String,
 }
 export const SUserInstanceUnit = {
+    ...SStruct,
     Field: SUserInstanceField,
     Unit: L.Unit,
 }
 export const SUserInstanceUpgrade = {
+    ...SStruct,
     Field: SUserInstanceField,
     Upgrade: L.Upgrade,
 }
 export const SUserInstanceUser = {
+    ...SStruct,
     Field: SUserInstanceField,
     Type: L.User,
     Instance: T.UserInstanceId,
 }
 export const SUserField = {
+    ...SStruct,
     Id: T.UserFieldId,
     Type: E.UserType,
     GameLinkType: E.GameCatalog,
@@ -2493,6 +2829,7 @@ export const SUserField = {
     EditorText: E.EditorTextType,
 }
 export const SUserInstance = {
+    ...SStruct,
     Id: T.UserInstanceId,
     AbilCmd: [SUserInstanceAbilCmd],
     Actor: [SUserInstanceActor],
@@ -2515,6 +2852,7 @@ export const SUserInstance = {
 
 
 const SWaterStateDesc = {
+    ...SStruct,
     Name: C.String32,
     Height: C.Real32,
     Color: C.Vector4,
@@ -2533,6 +2871,7 @@ const SWaterStateDesc = {
     ReflectivityPower: C.Real32,
 }
 const SWaterDoodad = {
+    ...SStruct,
     Model: L.Model,
     Density: C.Real32,
     MinSize: C.Real32,
@@ -2541,6 +2880,340 @@ const SWaterDoodad = {
 }
 
 
+
+export const SAbilOrderDisplayDefinition = {...SAbilOrderDisplay,...SStructDefinition}
+export const SEffectBehaviorDefinition = {...SEffectBehavior,...SStructDefinition}
+export const SCostDefinition = {...SCost,...SStructDefinition}
+export const SCooldownDefinition = {...SCooldown,...SStructDefinition}
+export const SChargeDefinition = {...SCharge,...SStructDefinition}
+export const SCostFactorDefinition = {...SCostFactor,...SStructDefinition}
+export const STargetSortsDefinition = {...STargetSorts,...SStructDefinition}
+export const SMarkerDefinition = {...SMarker,...SStructDefinition}
+export const SAbilTargetCursorInfoDefinition = {...SAbilTargetCursorInfo,...SStructDefinition}
+export const SAbilArmMagazineInfoDefinition = {...SAbilArmMagazineInfo,...SStructDefinition}
+export const SAbilCmdButtonDefinition = {...SAbilCmdButton,...SStructDefinition}
+export const SAbilBuildInfoDefinition = {...SAbilBuildInfo,...SStructDefinition}
+export const SAbilInventoryInfoDefinition = {...SAbilInventoryInfo,...SStructDefinition}
+export const SAbilLearnInfoDefinition = {...SAbilLearnInfo,...SStructDefinition}
+export const SAbilMergeInfoDefinition = {...SAbilMergeInfo,...SStructDefinition}
+export const SAbilMorphInfoDefinition = {...SAbilMorphInfo,...SStructDefinition}
+export const SAbilMorphSectionDefinition = {...SAbilMorphSection,...SStructDefinition}
+export const SAbilPawnInfoDefinition = {...SAbilPawnInfo,...SStructDefinition}
+export const SAbilRallyInfoDefinition = {...SAbilRallyInfo,...SStructDefinition}
+export const SAbilResearchInfoDefinition = {...SAbilResearchInfo,...SStructDefinition}
+export const SAbilReviveCmdButtonDefinition = {...SAbilReviveCmdButton,...SStructDefinition}
+export const SAbilReviveInfoDefinition = {...SAbilReviveInfo,...SStructDefinition}
+export const SAbilReviveInfoMaxDefinition = {...SAbilReviveInfoMax,...SStructDefinition}
+export const SAbilSpecializeInfoDefinition = {...SAbilSpecializeInfo,...SStructDefinition}
+export const SAbilTrainInfoDefinition = {...SAbilTrainInfo,...SStructDefinition}
+export const SAbilWarpTrainInfoDefinition = {...SAbilWarpTrainInfo,...SStructDefinition}
+export const SEffectWhichUnitDefinition = {...SEffectWhichUnit,...SStructDefinition}
+export const SEffectWhichLocationDefinition = {...SEffectWhichLocation,...SStructDefinition}
+export const SEffectWhichBehaviorDefinition = {...SEffectWhichBehavior,...SStructDefinition}
+export const SAccumulatorSwitchCaseDefinition = {...SAccumulatorSwitchCase,...SStructDefinition}
+export const SAccumulatedFixedDefinition = {...SAccumulatedFixed,...SStructDefinition}
+export const SAccumulatedUInt32Definition = {...SAccumulatedUInt32,...SStructDefinition}
+export const SAccumulatedGameRateDefinition = {...SAccumulatedGameRate,...SStructDefinition}
+export const SAccumulatedGameTimeDefinition = {...SAccumulatedGameTime,...SStructDefinition}
+export const SEffectWhichPlayerDefinition = {...SEffectWhichPlayer,...SStructDefinition}
+export const SAchievementTagDefinition = {...SAchievementTag,...SStructDefinition}
+export const SActorRequestDefinition = {...SActorRequest,...SStructDefinition}
+export const SActorVisibilityShapeDefinition = {...SActorVisibilityShape,...SStructDefinition}
+export const SActorEventDefinition = {...SActorEvent,...SStructDefinition}
+export const SActorSiteOpsDataDefinition = {...SActorSiteOpsData,...SStructDefinition}
+export const SActorModelAspectSetDefinition = {...SActorModelAspectSet,...SStructDefinition}
+export const SActorModelAspectDefinition = {...SActorModelAspect,...SStructDefinition}
+export const SActorHostedAttachDefinition = {...SActorHostedAttach,...SStructDefinition}
+export const SAttachQueryDefinition = {...SAttachQuery,...SStructDefinition}
+export const SEventDataFootprintDefinition = {...SEventDataFootprint,...SStructDefinition}
+export const SEventDataSoundDefinition = {...SEventDataSound,...SStructDefinition}
+export const SActorPhysicsImpactDataDefinition = {...SActorPhysicsImpactData,...SStructDefinition}
+export const SActorRangeAbilDefinition = {...SActorRangeAbil,...SStructDefinition}
+export const SActorQuadDecorationDefinition = {...SActorQuadDecoration,...SStructDefinition}
+export const SActorSoundLayerDefinition = {...SActorSoundLayer,...SStructDefinition}
+export const SActorAVPairDefinition = {...SActorAVPair,...SStructDefinition}
+export const SActorActionTerrainSquibDefinition = {...SActorActionTerrainSquib,...SStructDefinition}
+export const SActorAVClusterDefinition = {...SActorAVCluster,...SStructDefinition}
+export const SActorPhysicsDataDefinition = {...SActorPhysicsData,...SStructDefinition}
+export const SActorQuerySubjectDefinition = {...SActorQuerySubject,...SStructDefinition}
+export const SActorQueryResponseDefinition = {...SActorQueryResponse,...SStructDefinition}
+export const SActorQuerySubjectResponseDefinition = {...SActorQuerySubjectResponse,...SStructDefinition}
+export const SActorSendBasicsDefinition = {...SActorSendBasics,...SStructDefinition}
+export const SActorDeathBodySquibDefinition = {...SActorDeathBodySquib,...SStructDefinition}
+export const SActorCloakTransitionDefinition = {...SActorCloakTransition,...SStructDefinition}
+export const SActorCloakStateDefinition = {...SActorCloakState,...SStructDefinition}
+export const SActorCreepHeightClassDefinition = {...SActorCreepHeightClass,...SStructDefinition}
+export const SActorCreepRateDefinition = {...SActorCreepRate,...SStructDefinition}
+export const SActorDeathDataDefinition = {...SActorDeathData,...SStructDefinition}
+export const SActorDeathDataCustomDefinition = {...SActorDeathDataCustom,...SStructDefinition}
+export const SLookAtTypeInfoDefinition = {...SLookAtTypeInfo,...SStructDefinition}
+export const SLookAtTypeDefinition = {...SLookAtType,...SStructDefinition}
+export const SSplatEmitterMaterialInfoDefinition = {...SSplatEmitterMaterialInfo,...SStructDefinition}
+export const SSplatEmitterInitInfoDefinition = {...SSplatEmitterInitInfo,...SStructDefinition}
+export const SActorOverrideBlendTimeDefinition = {...SActorOverrideBlendTime,...SStructDefinition}
+export const SActorOverrideTransitionBlendTimeDefinition = {...SActorOverrideTransitionBlendTime,...SStructDefinition}
+export const SActorOverrideModelDefinition = {...SActorOverrideModel,...SStructDefinition}
+export const SActorProgressStageDefinition = {...SActorProgressStage,...SStructDefinition}
+export const SActorHostedDeltaDefinition = {...SActorHostedDelta,...SStructDefinition}
+export const SSerpentAggregateDefinition = {...SSerpentAggregate,...SStructDefinition}
+export const SSerpentSegmentDefinition = {...SSerpentSegment,...SStructDefinition}
+export const SActorStateInfoDefinition = {...SActorStateInfo,...SStructDefinition}
+export const SActorBaselineDefinition = {...SActorBaseline,...SStructDefinition}
+export const SActorDeathDataCustomGroupDefinition = {...SActorDeathDataCustomGroup,...SStructDefinition}
+export const SActorUnitImpactSoundExtrasDefinition = {...SActorUnitImpactSoundExtras,...SStructDefinition}
+export const SDamagePastRemainingHealthDefinition = {...SDamagePastRemainingHealth,...SStructDefinition}
+export const SDamageOverIntervalDefinition = {...SDamageOverInterval,...SStructDefinition}
+export const STerrainSquibDefinition = {...STerrainSquib,...SStructDefinition}
+export const STerrainSquibVisualDefinition = {...STerrainSquibVisual,...SStructDefinition}
+export const SUnitAbilSoundDefinition = {...SUnitAbilSound,...SStructDefinition}
+export const SErrorOverrideDefinition = {...SErrorOverride,...SStructDefinition}
+export const SLayerIconDefinition = {...SLayerIcon,...SStructDefinition}
+export const SLayerIconVariationDefinition = {...SLayerIconVariation,...SStructDefinition}
+export const SLayerIconShieldDefinition = {...SLayerIconShield,...SStructDefinition}
+export const SLayerIconShieldVariationDefinition = {...SLayerIconShieldVariation,...SStructDefinition}
+export const SVitalColorDefinition = {...SVitalColor,...SStructDefinition}
+export const SIconVariationDefinition = {...SIconVariation,...SStructDefinition}
+export const SStatusColorDefinition = {...SStatusColor,...SStructDefinition}
+export const SStatusChargeDataDefinition = {...SStatusChargeData,...SStructDefinition}
+export const SStatusHarvesterDataDefinition = {...SStatusHarvesterData,...SStructDefinition}
+export const STextTagParametersDefinition = {...STextTagParameters,...SStructDefinition}
+export const SUnitKillRankDefinition = {...SUnitKillRank,...SStructDefinition}
+export const SBankPathDefinition = {...SBankPath,...SStructDefinition}
+export const SArtifactRankDefinition = {...SArtifactRank,...SStructDefinition}
+export const SProductReleaseDateDefinition = {...SProductReleaseDate,...SStructDefinition}
+export const SAttachKeyDefinition = {...SAttachKey,...SStructDefinition}
+export const SModificationDefinition = {...SModification,...SStructDefinition}
+export const SDeathResponseDefinition = {...SDeathResponse,...SStructDefinition}
+export const SAttributeChangeDefinition = {...SAttributeChange,...SStructDefinition}
+export const SDamageKindDefinition = {...SDamageKind,...SStructDefinition}
+export const SScoreValueUpdateDefinition = {...SScoreValueUpdate,...SStructDefinition}
+export const SUnitResourceRatioDefinition = {...SUnitResourceRatio,...SStructDefinition}
+export const SUnitWeaponDataDefinition = {...SUnitWeaponData,...SStructDefinition}
+export const SVeterancyLevelDefinition = {...SVeterancyLevel,...SStructDefinition}
+export const SBehaviorFractionDefinition = {...SBehaviorFraction,...SStructDefinition}
+export const SEffectWhichTimeScaleDefinition = {...SEffectWhichTimeScale,...SStructDefinition}
+export const SBehaviorDurationDefinition = {...SBehaviorDuration,...SStructDefinition}
+export const SDamageResponseDefinition = {...SDamageResponse,...SStructDefinition}
+export const SVitalRegenVitalRemainDefinition = {...SVitalRegenVitalRemain,...SStructDefinition}
+export const SPowerStageDefinition = {...SPowerStage,...SStructDefinition}
+export const SAbilReplaceDefinition = {...SAbilReplace,...SStructDefinition}
+export const SAbilAddDefinition = {...SAbilAdd,...SStructDefinition}
+export const SSpawnInfoDefinition = {...SSpawnInfo,...SStructDefinition}
+export const STooltipBlockDefinition = {...STooltipBlock,...SStructDefinition}
+export const STooltipTimeAbilCmdDefinition = {...STooltipTimeAbilCmd,...SStructDefinition}
+export const SButtonCardLayoutDefinition = {...SButtonCardLayout,...SStructDefinition}
+export const SCameraZoomDefinition = {...SCameraZoom,...SStructDefinition}
+export const SCameraParamDefinition = {...SCameraParam,...SStructDefinition}
+export const SCameraSmoothDefinition = {...SCameraSmooth,...SStructDefinition}
+export const SCampaignDataDefinition = {...SCampaignData,...SStructDefinition}
+export const SMovieConfigDefinition = {...SMovieConfig,...SStructDefinition}
+export const SCharacterVariationDefinition = {...SCharacterVariation,...SStructDefinition}
+export const SUIColorEntryDefinition = {...SUIColorEntry,...SStructDefinition}
+export const SCommanderUnitDefinition = {...SCommanderUnit,...SStructDefinition}
+export const SCommanderTalentTreeDefinition = {...SCommanderTalentTree,...SStructDefinition}
+export const SCommanderMasteryTalentDefinition = {...SCommanderMasteryTalent,...SStructDefinition}
+export const SCommanderAbilDefinition = {...SCommanderAbil,...SStructDefinition}
+export const SCommanderDifficultyLevelDefinition = {...SCommanderDifficultyLevel,...SStructDefinition}
+export const SConsoleSkinModelDefinition = {...SConsoleSkinModel,...SStructDefinition}
+export const SConversationProductionLevelDefinition = {...SConversationProductionLevel,...SStructDefinition}
+export const SConversationConditionSetDefinition = {...SConversationConditionSet,...SStructDefinition}
+export const SConversationConditionDefinition = {...SConversationCondition,...SStructDefinition}
+export const SConversationUserValueDefinition = {...SConversationUserValue,...SStructDefinition}
+export const SConversationActionSetDefinition = {...SConversationActionSet,...SStructDefinition}
+export const SConversationActionDefinition = {...SConversationAction,...SStructDefinition}
+export const SConversationFacialAnimDefinition = {...SConversationFacialAnim,...SStructDefinition}
+export const SConversationLineDefinition = {...SConversationLine,...SStructDefinition}
+export const SConversationRunActionsDefinition = {...SConversationRunActions,...SStructDefinition}
+export const SConversationWaitDefinition = {...SConversationWait,...SStructDefinition}
+export const SConversationJumpDefinition = {...SConversationJump,...SStructDefinition}
+export const SConversationChoiceDefinition = {...SConversationChoice,...SStructDefinition}
+export const SConversationGroupDefinition = {...SConversationGroup,...SStructDefinition}
+export const SConversationCommentDefinition = {...SConversationComment,...SStructDefinition}
+export const SConversationStateIndexDefinition = {...SConversationStateIndex,...SStructDefinition}
+export const SConversationStateInfoTextDefinition = {...SConversationStateInfoText,...SStructDefinition}
+export const SConversationStateInfoValueDefinition = {...SConversationStateInfoValue,...SStructDefinition}
+export const SConversationStateInfoModelDefinition = {...SConversationStateInfoModel,...SStructDefinition}
+export const SConversationStateInfoUpgradeDefinition = {...SConversationStateInfoUpgrade,...SStructDefinition}
+export const SConversationStateInfoAbilCmdDefinition = {...SConversationStateInfoAbilCmd,...SStructDefinition}
+export const SConversationStateVariationDefinition = {...SConversationStateVariation,...SStructDefinition}
+export const SConversationStateInfoIdsDefinition = {...SConversationStateInfoIds,...SStructDefinition}
+export const SDataCollectionRecordDefinition = {...SDataCollectionRecord,...SStructDefinition}
+export const SUpgradeInfoWeaponDefinition = {...SUpgradeInfoWeapon,...SStructDefinition}
+export const SDataFieldsPatternDefinition = {...SDataFieldsPattern,...SStructDefinition}
+export const SDataTokensPatternDefinition = {...SDataTokensPattern,...SStructDefinition}
+export const STextureSheetEntryDefinition = {...STextureSheetEntry,...SStructDefinition}
+export const SEffectDamageAreaDefinition = {...SEffectDamageArea,...SStructDefinition}
+export const SEffectSearchRevealerParamsDefinition = {...SEffectSearchRevealerParams,...SStructDefinition}
+export const SEffectEnumAreaDefinition = {...SEffectEnumArea,...SStructDefinition}
+export const SEffectMoverDefinition = {...SEffectMover,...SStructDefinition}
+export const SEffectMissileBounceDefinition = {...SEffectMissileBounce,...SStructDefinition}
+export const SUpgradeEffectDefinition = {...SUpgradeEffect,...SStructDefinition}
+export const SEffectUpgradeDefinition = {...SEffectUpgrade,...SStructDefinition}
+export const SEffectModifyPlayerCostDefinition = {...SEffectModifyPlayerCost,...SStructDefinition}
+export const SEffectModifyUnitCostDefinition = {...SEffectModifyUnitCost,...SStructDefinition}
+export const SEffectModifyWeaponDefinition = {...SEffectModifyWeapon,...SStructDefinition}
+export const SEffectModifyVitalDefinition = {...SEffectModifyVital,...SStructDefinition}
+export const SEffectModifyTurretDefinition = {...SEffectModifyTurret,...SStructDefinition}
+export const SEffectSwitchCaseDefinition = {...SEffectSwitchCase,...SStructDefinition}
+export const SEmoticonPackCampaignDefinition = {...SEmoticonPackCampaign,...SStructDefinition}
+export const SFootprintLayerDefinition = {...SFootprintLayer,...SStructDefinition}
+export const SFootprintShapeDefinition = {...SFootprintShape,...SStructDefinition}
+export const SFootprintBitSetDefinition = {...SFootprintBitSet,...SStructDefinition}
+export const SDifficultyLevelDefinition = {...SDifficultyLevel,...SStructDefinition}
+export const SAIBuildDefinition = {...SAIBuild,...SStructDefinition}
+export const SHandicapDefinition = {...SHandicap,...SStructDefinition}
+export const SMapSizeDefinition = {...SMapSize,...SStructDefinition}
+export const SAspectMarginDefinition = {...SAspectMargin,...SStructDefinition}
+export const STeamColorDefinition = {...STeamColor,...SStructDefinition}
+export const SAIDescriptionDefinition = {...SAIDescription,...SStructDefinition}
+export const STriggerLibDefinition = {...STriggerLib,...SStructDefinition}
+export const STargetFilterResultDefinition = {...STargetFilterResult,...SStructDefinition}
+export const SBeaconInfoDefinition = {...SBeaconInfo,...SStructDefinition}
+export const SDamageTypeInfoDefinition = {...SDamageTypeInfo,...SStructDefinition}
+export const SAttackTypeInfoDefinition = {...SAttackTypeInfo,...SStructDefinition}
+export const SResourceConvertDefinition = {...SResourceConvert,...SStructDefinition}
+export const SMeleePointThresholdDefinition = {...SMeleePointThreshold,...SStructDefinition}
+export const SChallengeCategoryDefinition = {...SChallengeCategory,...SStructDefinition}
+export const SChallengeDefinition = {...SChallenge,...SStructDefinition}
+export const SSoundQualityDefinition = {...SSoundQuality,...SStructDefinition}
+export const SMinimapDataDefinition = {...SMinimapData,...SStructDefinition}
+export const SSelectionDataDefinition = {...SSelectionData,...SStructDefinition}
+export const SVolumeFadeDefinition = {...SVolumeFade,...SStructDefinition}
+export const SReverbRolloffDefinition = {...SReverbRolloff,...SStructDefinition}
+export const SVolumeThresholdDefinition = {...SVolumeThreshold,...SStructDefinition}
+export const SVolumeRolloffDefinition = {...SVolumeRolloff,...SStructDefinition}
+export const SSoundDataDefinition = {...SSoundData,...SStructDefinition}
+export const SMixRouteDefinition = {...SMixRoute,...SStructDefinition}
+export const SGlobalSoundDataDefinition = {...SGlobalSoundData,...SStructDefinition}
+export const SPointModelDefinition = {...SPointModel,...SStructDefinition}
+export const SCameraShakeAmplitudeDefinition = {...SCameraShakeAmplitude,...SStructDefinition}
+export const SCameraShakeFrequencyDefinition = {...SCameraShakeFrequency,...SStructDefinition}
+export const SCameraShakeRotationDefinition = {...SCameraShakeRotation,...SStructDefinition}
+export const SListenerRolloffDefinition = {...SListenerRolloff,...SStructDefinition}
+export const SUnitSpeedTextDefinition = {...SUnitSpeedText,...SStructDefinition}
+export const SWeaponSpeedTextDefinition = {...SWeaponSpeedText,...SStructDefinition}
+export const SObjectGroupDataDefinition = {...SObjectGroupData,...SStructDefinition}
+export const SLoadingScreenHelpDefinition = {...SLoadingScreenHelp,...SStructDefinition}
+export const SLoadingBarDefinition = {...SLoadingBar,...SStructDefinition}
+export const SGameCategoryDefinition = {...SGameCategory,...SStructDefinition}
+export const SGameModeInfoDefinition = {...SGameModeInfo,...SStructDefinition}
+export const SDefaultGameVariantDefinition = {...SDefaultGameVariant,...SStructDefinition}
+export const STutorialConfigDefinition = {...STutorialConfig,...SStructDefinition}
+export const SHotkeyInfoDefinition = {...SHotkeyInfo,...SStructDefinition}
+export const SResourceUIDefinition = {...SResourceUI,...SStructDefinition}
+export const SHelpControlCategoryInfoDefinition = {...SHelpControlCategoryInfo,...SStructDefinition}
+export const SHelpControlInfoDefinition = {...SHelpControlInfo,...SStructDefinition}
+export const SHelpGameMechanicInfoDefinition = {...SHelpGameMechanicInfo,...SStructDefinition}
+export const SAltSoundtrackDefinition = {...SAltSoundtrack,...SStructDefinition}
+export const SCutsceneAssetPathDefinition = {...SCutsceneAssetPath,...SStructDefinition}
+export const SHerdLevelDefinition = {...SHerdLevel,...SStructDefinition}
+export const SHerdNodeDefinition = {...SHerdNode,...SStructDefinition}
+export const SHeroAbilCategoryDefinition = {...SHeroAbilCategory,...SStructDefinition}
+export const SHeroAbilDefinition = {...SHeroAbil,...SStructDefinition}
+export const SHeroHeroicAbilityDefinition = {...SHeroHeroicAbility,...SStructDefinition}
+export const SHeroSpecificVODefinition = {...SHeroSpecificVO,...SStructDefinition}
+export const SHeroTalentTreeDefinition = {...SHeroTalentTree,...SStructDefinition}
+export const SHeroTalentTierDefinition = {...SHeroTalentTier,...SStructDefinition}
+export const SHeroSpecificIntroVODefinition = {...SHeroSpecificIntroVO,...SStructDefinition}
+export const SHeroLevelScalingDefinition = {...SHeroLevelScaling,...SStructDefinition}
+export const SHeroLevelModificationDefinition = {...SHeroLevelModification,...SStructDefinition}
+export const SHeroRatingsDefinition = {...SHeroRatings,...SStructDefinition}
+export const SHeroAITalentBuildDefinition = {...SHeroAITalentBuild,...SStructDefinition}
+export const SHeroSpecificUIDefinition = {...SHeroSpecificUI,...SStructDefinition}
+export const SHeroStatModifierDefinition = {...SHeroStatModifier,...SStructDefinition}
+export const SItemContainerSlotDefinition = {...SItemContainerSlot,...SStructDefinition}
+export const SFlareInfoDefinition = {...SFlareInfo,...SStructDefinition}
+export const STimeEventDefinition = {...STimeEvent,...SStructDefinition}
+export const SLightInfoDefinition = {...SLightInfo,...SStructDefinition}
+export const SDirectionalLightDefinition = {...SDirectionalLight,...SStructDefinition}
+export const SVariationConfigDefinition = {...SVariationConfig,...SStructDefinition}
+export const SLightRegionInfoDefinition = {...SLightRegionInfo,...SStructDefinition}
+export const SMissionCategoryDefinition = {...SMissionCategory,...SStructDefinition}
+export const SLootChoiceDefinition = {...SLootChoice,...SStructDefinition}
+export const SAnimFileDefinition = {...SAnimFile,...SStructDefinition}
+export const SAnimAliasDefinition = {...SAnimAlias,...SStructDefinition}
+export const SAttachPropsDefinition = {...SAttachProps,...SStructDefinition}
+export const SModelDataEventDefinition = {...SModelDataEvent,...SStructDefinition}
+export const SPhysicsMaterialMappingDefinition = {...SPhysicsMaterialMapping,...SStructDefinition}
+export const STextureDeclareDefinition = {...STextureDeclare,...SStructDefinition}
+export const STextureNameAdaptionDefinition = {...STextureNameAdaption,...SStructDefinition}
+export const STextureInfoDefinition = {...STextureInfo,...SStructDefinition}
+export const STextureExpressionSpecDefinition = {...STextureExpressionSpec,...SStructDefinition}
+export const STextureMatchSpecDefinition = {...STextureMatchSpec,...SStructDefinition}
+export const SModelVariationDefinition = {...SModelVariation,...SStructDefinition}
+export const SPathingDataDefinition = {...SPathingData,...SStructDefinition}
+export const SMotionPhaseDefinition = {...SMotionPhase,...SStructDefinition}
+export const SMotionOverlayPhaseDefinition = {...SMotionOverlayPhase,...SStructDefinition}
+export const SMotionOverlayDefinition = {...SMotionOverlay,...SStructDefinition}
+export const SStartingUnitDefinition = {...SStartingUnit,...SStructDefinition}
+export const SUpkeepTaxDefinition = {...SUpkeepTax,...SStructDefinition}
+export const SRequirementNodeDefinition = {...SRequirementNode,...SStructDefinition}
+export const SRequirementCountDefinition = {...SRequirementCount,...SStructDefinition}
+export const SRewardCategoryDefinition = {...SRewardCategory,...SStructDefinition}
+export const SRewardSpecificUIDefinition = {...SRewardSpecificUI,...SStructDefinition}
+export const SGameReplacementDefinition = {...SGameReplacement,...SStructDefinition}
+export const SSkinModelGroupDefinition = {...SSkinModelGroup,...SStructDefinition}
+export const SSkinModelMacroRunDefinition = {...SSkinModelMacroRun,...SStructDefinition}
+export const SSkinPackEntryDefinition = {...SSkinPackEntry,...SStructDefinition}
+export const SSoundAssetDefinition = {...SSoundAsset,...SStructDefinition}
+export const SSyncPointRangeDefinition = {...SSyncPointRange,...SStructDefinition}
+export const SSoundAssetTemplateDefinition = {...SSoundAssetTemplate,...SStructDefinition}
+export const SSoundLocaleFlagsDefinition = {...SSoundLocaleFlags,...SStructDefinition}
+export const SPitchShiftDefinition = {...SPitchShift,...SStructDefinition}
+export const SReverbBalanceDefinition = {...SReverbBalance,...SStructDefinition}
+export const SSoundtrackCueDefinition = {...SSoundtrackCue,...SStructDefinition}
+export const SSoundtrackMasterLayerDefinition = {...SSoundtrackMasterLayer,...SStructDefinition}
+export const SSoundtrackSlaveLayerDefinition = {...SSoundtrackSlaveLayer,...SStructDefinition}
+export const SSoundtrackSectionDefinition = {...SSoundtrackSection,...SStructDefinition}
+export const STacAbilDataDefinition = {...STacAbilData,...SStructDefinition}
+export const STalentRankDefinition = {...STalentRank,...SStructDefinition}
+export const STalentAbilityModificationDefinition = {...STalentAbilityModification,...SStructDefinition}
+export const STalentModificationDefinition = {...STalentModification,...SStructDefinition}
+export const STargetFindEnumAreaDefinition = {...STargetFindEnumArea,...SStructDefinition}
+export const SDSPArrayDefinition = {...SDSPArray,...SStructDefinition}
+export const SCreepSettingsDefinition = {...SCreepSettings,...SStructDefinition}
+export const SFoliageSimulationConfigDefinition = {...SFoliageSimulationConfig,...SStructDefinition}
+export const STerrainDoodadDefinition = {...STerrainDoodad,...SStructDefinition}
+export const SFidgetDefinition = {...SFidget,...SStructDefinition}
+export const SUnitArmorFormulaDefinition = {...SUnitArmorFormula,...SStructDefinition}
+export const SStockChargeDefinition = {...SStockCharge,...SStructDefinition}
+export const SUnitAbilDataDefinition = {...SUnitAbilData,...SStructDefinition}
+export const SUnitBehaviorDataDefinition = {...SUnitBehaviorData,...SStructDefinition}
+export const SCardLayoutDefinition = {...SCardLayout,...SStructDefinition}
+export const SCardLayoutButtonDefinition = {...SCardLayoutButton,...SStructDefinition}
+export const SAddedOnDataDefinition = {...SAddedOnData,...SStructDefinition}
+export const SUnitEquipmentDefinition = {...SUnitEquipment,...SStructDefinition}
+export const SUnitReviveInfoDefinition = {...SUnitReviveInfo,...SStructDefinition}
+export const SAttributePointsInfoDefinition = {...SAttributePointsInfo,...SStructDefinition}
+export const SUpgradeEffectTemplateDefinition = {...SUpgradeEffectTemplate,...SStructDefinition}
+export const SValidatorConditionDefinition = {...SValidatorCondition,...SStructDefinition}
+export const SValidatorFunctionDefinition = {...SValidatorFunction,...SStructDefinition}
+export const SValidatorEnumAreaDefinition = {...SValidatorEnumArea,...SStructDefinition}
+export const SVoiceOverSkinDefinition = {...SVoiceOverSkin,...SStructDefinition}
+export const SVoiceOverGroupDefinition = {...SVoiceOverGroup,...SStructDefinition}
+export const SVoiceOverLineDefinition = {...SVoiceOverLine,...SStructDefinition}
+export const SVoicePackExampleLineDefinition = {...SVoicePackExampleLine,...SStructDefinition}
+export const SUserFieldDefinition = {...SUserField,...SStructDefinition}
+export const SUserInstanceDefinition = {...SUserInstance,...SStructDefinition}
+export const SUserInstanceFieldDefinition = {...SUserInstanceField,...SStructDefinition}
+export const SUserInstanceAbilCmdDefinition = {...SUserInstanceAbilCmd,...SStructDefinition}
+export const SUserInstanceActorDefinition = {...SUserInstanceActor,...SStructDefinition}
+export const SUserInstanceColorDefinition = {...SUserInstanceColor,...SStructDefinition}
+export const SUserInstanceCompareDefinition = {...SUserInstanceCompare,...SStructDefinition}
+export const SUserInstanceFixedDefinition = {...SUserInstanceFixed,...SStructDefinition}
+export const SUserInstanceGameLinkDefinition = {...SUserInstanceGameLink,...SStructDefinition}
+export const SUserInstanceImageDefinition = {...SUserInstanceImage,...SStructDefinition}
+export const SUserInstanceIntDefinition = {...SUserInstanceInt,...SStructDefinition}
+export const SUserInstanceModelDefinition = {...SUserInstanceModel,...SStructDefinition}
+export const SUserInstanceMovieDefinition = {...SUserInstanceMovie,...SStructDefinition}
+export const SUserInstanceSoundDefinition = {...SUserInstanceSound,...SStructDefinition}
+export const SUserInstanceStringDefinition = {...SUserInstanceString,...SStructDefinition}
+export const SUserInstanceTextDefinition = {...SUserInstanceText,...SStructDefinition}
+export const SUserInstanceUnitDefinition = {...SUserInstanceUnit,...SStructDefinition}
+export const SUserInstanceUpgradeDefinition = {...SUserInstanceUpgrade,...SStructDefinition}
+export const SUserInstanceUserDefinition = {...SUserInstanceUser,...SStructDefinition}
+export const SWaterStateDescDefinition = {...SWaterStateDesc,...SStructDefinition}
+export const SWaterDoodadDefinition = {...SWaterDoodad,...SStructDefinition}
 
 export const Structs = {
     AbilOrderDisplay: SAbilOrderDisplay,
@@ -3265,6 +3938,362 @@ SCSchema.struct = {
     SWaterDoodad,
 }
 
+SCSchema.structDefinitions = {
+    SAbilOrderDisplay: SAbilOrderDisplayDefinition,
+    SEffectBehavior: SEffectBehaviorDefinition,
+    SCost: SCostDefinition,
+    SCooldown: SCooldownDefinition,
+    SCharge: SChargeDefinition,
+    SCostFactor: SCostFactorDefinition,
+    STargetSorts: STargetSortsDefinition,
+    SMarker: SMarkerDefinition,
+    SAbilTargetCursorInfo: SAbilTargetCursorInfoDefinition,
+    SAbilArmMagazineInfo: SAbilArmMagazineInfoDefinition,
+    SAbilCmdButton: SAbilCmdButtonDefinition,
+    SAbilBuildInfo: SAbilBuildInfoDefinition,
+    SAbilInventoryInfo: SAbilInventoryInfoDefinition,
+    SAbilLearnInfo: SAbilLearnInfoDefinition,
+    SAbilMergeInfo: SAbilMergeInfoDefinition,
+    SAbilMorphInfo: SAbilMorphInfoDefinition,
+    SAbilMorphSection: SAbilMorphSectionDefinition,
+    SAbilPawnInfo: SAbilPawnInfoDefinition,
+    SAbilRallyInfo: SAbilRallyInfoDefinition,
+    SAbilResearchInfo: SAbilResearchInfoDefinition,
+    SAbilReviveCmdButton: SAbilReviveCmdButtonDefinition,
+    SAbilReviveInfo: SAbilReviveInfoDefinition,
+    SAbilReviveInfoMax: SAbilReviveInfoMaxDefinition,
+    SAbilSpecializeInfo: SAbilSpecializeInfoDefinition,
+    SAbilTrainInfo: SAbilTrainInfoDefinition,
+    SAbilWarpTrainInfo: SAbilWarpTrainInfoDefinition,
+    SEffectWhichUnit: SEffectWhichUnitDefinition,
+    SEffectWhichLocation: SEffectWhichLocationDefinition,
+    SEffectWhichBehavior: SEffectWhichBehaviorDefinition,
+    SAccumulatorSwitchCase: SAccumulatorSwitchCaseDefinition,
+    SAccumulatedFixed: SAccumulatedFixedDefinition,
+    SAccumulatedUInt32: SAccumulatedUInt32Definition,
+    SAccumulatedGameRate: SAccumulatedGameRateDefinition,
+    SAccumulatedGameTime: SAccumulatedGameTimeDefinition,
+    SEffectWhichPlayer: SEffectWhichPlayerDefinition,
+    SAchievementTag: SAchievementTagDefinition,
+    SActorRequest: SActorRequestDefinition,
+    SActorVisibilityShape: SActorVisibilityShapeDefinition,
+    SActorEvent: SActorEventDefinition,
+    SActorSiteOpsData: SActorSiteOpsDataDefinition,
+    SActorModelAspectSet: SActorModelAspectSetDefinition,
+    SActorModelAspect: SActorModelAspectDefinition,
+    SActorHostedAttach: SActorHostedAttachDefinition,
+    SAttachQuery: SAttachQueryDefinition,
+    SEventDataFootprint: SEventDataFootprintDefinition,
+    SEventDataSound: SEventDataSoundDefinition,
+    SActorPhysicsImpactData: SActorPhysicsImpactDataDefinition,
+    SActorRangeAbil: SActorRangeAbilDefinition,
+    SActorQuadDecoration: SActorQuadDecorationDefinition,
+    SActorSoundLayer: SActorSoundLayerDefinition,
+    SActorAVPair: SActorAVPairDefinition,
+    SActorActionTerrainSquib: SActorActionTerrainSquibDefinition,
+    SActorAVCluster: SActorAVClusterDefinition,
+    SActorPhysicsData: SActorPhysicsDataDefinition,
+    SActorQuerySubject: SActorQuerySubjectDefinition,
+    SActorQueryResponse: SActorQueryResponseDefinition,
+    SActorQuerySubjectResponse: SActorQuerySubjectResponseDefinition,
+    SActorSendBasics: SActorSendBasicsDefinition,
+    SActorDeathBodySquib: SActorDeathBodySquibDefinition,
+    SActorCloakTransition: SActorCloakTransitionDefinition,
+    SActorCloakState: SActorCloakStateDefinition,
+    SActorCreepHeightClass: SActorCreepHeightClassDefinition,
+    SActorCreepRate: SActorCreepRateDefinition,
+    SActorDeathData: SActorDeathDataDefinition,
+    SActorDeathDataCustom: SActorDeathDataCustomDefinition,
+    SLookAtTypeInfo: SLookAtTypeInfoDefinition,
+    SLookAtType: SLookAtTypeDefinition,
+    SSplatEmitterMaterialInfo: SSplatEmitterMaterialInfoDefinition,
+    SSplatEmitterInitInfo: SSplatEmitterInitInfoDefinition,
+    SActorOverrideBlendTime: SActorOverrideBlendTimeDefinition,
+    SActorOverrideTransitionBlendTime: SActorOverrideTransitionBlendTimeDefinition,
+    SActorOverrideModel: SActorOverrideModelDefinition,
+    SActorProgressStage: SActorProgressStageDefinition,
+    SActorHostedDelta: SActorHostedDeltaDefinition,
+    SSerpentAggregate: SSerpentAggregateDefinition,
+    SSerpentSegment: SSerpentSegmentDefinition,
+    SActorStateInfo: SActorStateInfoDefinition,
+    SActorBaseline: SActorBaselineDefinition,
+    SActorDeathDataCustomGroup: SActorDeathDataCustomGroupDefinition,
+    SActorUnitImpactSoundExtras: SActorUnitImpactSoundExtrasDefinition,
+    SDamagePastRemainingHealth: SDamagePastRemainingHealthDefinition,
+    SDamageOverInterval: SDamageOverIntervalDefinition,
+    STerrainSquib: STerrainSquibDefinition,
+    STerrainSquibVisual: STerrainSquibVisualDefinition,
+    SUnitAbilSound: SUnitAbilSoundDefinition,
+    SErrorOverride: SErrorOverrideDefinition,
+    SLayerIcon: SLayerIconDefinition,
+    SLayerIconVariation: SLayerIconVariationDefinition,
+    SLayerIconShield: SLayerIconShieldDefinition,
+    SLayerIconShieldVariation: SLayerIconShieldVariationDefinition,
+    SVitalColor: SVitalColorDefinition,
+    SIconVariation: SIconVariationDefinition,
+    SStatusColor: SStatusColorDefinition,
+    SStatusChargeData: SStatusChargeDataDefinition,
+    SStatusHarvesterData: SStatusHarvesterDataDefinition,
+    STextTagParameters: STextTagParametersDefinition,
+    SUnitKillRank: SUnitKillRankDefinition,
+    SBankPath: SBankPathDefinition,
+    SArtifactRank: SArtifactRankDefinition,
+    SProductReleaseDate: SProductReleaseDateDefinition,
+    SAttachKey: SAttachKeyDefinition,
+    SModification: SModificationDefinition,
+    SDeathResponse: SDeathResponseDefinition,
+    SAttributeChange: SAttributeChangeDefinition,
+    SDamageKind: SDamageKindDefinition,
+    SScoreValueUpdate: SScoreValueUpdateDefinition,
+    SUnitResourceRatio: SUnitResourceRatioDefinition,
+    SUnitWeaponData: SUnitWeaponDataDefinition,
+    SVeterancyLevel: SVeterancyLevelDefinition,
+    SBehaviorFraction: SBehaviorFractionDefinition,
+    SEffectWhichTimeScale: SEffectWhichTimeScaleDefinition,
+    SBehaviorDuration: SBehaviorDurationDefinition,
+    SDamageResponse: SDamageResponseDefinition,
+    SVitalRegenVitalRemain: SVitalRegenVitalRemainDefinition,
+    SPowerStage: SPowerStageDefinition,
+    SAbilReplace: SAbilReplaceDefinition,
+    SAbilAdd: SAbilAddDefinition,
+    SSpawnInfo: SSpawnInfoDefinition,
+    STooltipBlock: STooltipBlockDefinition,
+    STooltipTimeAbilCmd: STooltipTimeAbilCmdDefinition,
+    SButtonCardLayout: SButtonCardLayoutDefinition,
+    SCameraZoom: SCameraZoomDefinition,
+    SCameraParam: SCameraParamDefinition,
+    SCameraSmooth: SCameraSmoothDefinition,
+    SCampaignData: SCampaignDataDefinition,
+    SMovieConfig: SMovieConfigDefinition,
+    SCharacterVariation: SCharacterVariationDefinition,
+    SUIColorEntry: SUIColorEntryDefinition,
+    SCommanderUnit: SCommanderUnitDefinition,
+    SCommanderTalentTree: SCommanderTalentTreeDefinition,
+    SCommanderMasteryTalent: SCommanderMasteryTalentDefinition,
+    SCommanderAbil: SCommanderAbilDefinition,
+    SCommanderDifficultyLevel: SCommanderDifficultyLevelDefinition,
+    SConsoleSkinModel: SConsoleSkinModelDefinition,
+    SConversationProductionLevel: SConversationProductionLevelDefinition,
+    SConversationConditionSet: SConversationConditionSetDefinition,
+    SConversationCondition: SConversationConditionDefinition,
+    SConversationUserValue: SConversationUserValueDefinition,
+    SConversationActionSet: SConversationActionSetDefinition,
+    SConversationAction: SConversationActionDefinition,
+    SConversationFacialAnim: SConversationFacialAnimDefinition,
+    SConversationLine: SConversationLineDefinition,
+    SConversationRunActions: SConversationRunActionsDefinition,
+    SConversationWait: SConversationWaitDefinition,
+    SConversationJump: SConversationJumpDefinition,
+    SConversationChoice: SConversationChoiceDefinition,
+    SConversationGroup: SConversationGroupDefinition,
+    SConversationComment: SConversationCommentDefinition,
+    SConversationStateIndex: SConversationStateIndexDefinition,
+    SConversationStateInfoText: SConversationStateInfoTextDefinition,
+    SConversationStateInfoValue: SConversationStateInfoValueDefinition,
+    SConversationStateInfoModel: SConversationStateInfoModelDefinition,
+    SConversationStateInfoUpgrade: SConversationStateInfoUpgradeDefinition,
+    SConversationStateInfoAbilCmd: SConversationStateInfoAbilCmdDefinition,
+    SConversationStateVariation: SConversationStateVariationDefinition,
+    SConversationStateInfoIds: SConversationStateInfoIdsDefinition,
+    SDataCollectionRecord: SDataCollectionRecordDefinition,
+    SUpgradeInfoWeapon: SUpgradeInfoWeaponDefinition,
+    SDataFieldsPattern: SDataFieldsPatternDefinition,
+    SDataTokensPattern: SDataTokensPatternDefinition,
+    STextureSheetEntry: STextureSheetEntryDefinition,
+    SEffectDamageArea: SEffectDamageAreaDefinition,
+    SEffectSearchRevealerParams: SEffectSearchRevealerParamsDefinition,
+    SEffectEnumArea: SEffectEnumAreaDefinition,
+    SEffectMover: SEffectMoverDefinition,
+    SEffectMissileBounce: SEffectMissileBounceDefinition,
+    SUpgradeEffect: SUpgradeEffectDefinition,
+    SEffectUpgrade: SEffectUpgradeDefinition,
+    SEffectModifyPlayerCost: SEffectModifyPlayerCostDefinition,
+    SEffectModifyUnitCost: SEffectModifyUnitCostDefinition,
+    SEffectModifyWeapon: SEffectModifyWeaponDefinition,
+    SEffectModifyVital: SEffectModifyVitalDefinition,
+    SEffectModifyTurret: SEffectModifyTurretDefinition,
+    SEffectSwitchCase: SEffectSwitchCaseDefinition,
+    SEmoticonPackCampaign: SEmoticonPackCampaignDefinition,
+    SFootprintLayer: SFootprintLayerDefinition,
+    SFootprintShape: SFootprintShapeDefinition,
+    SFootprintBitSet: SFootprintBitSetDefinition,
+    SDifficultyLevel: SDifficultyLevelDefinition,
+    SAIBuild: SAIBuildDefinition,
+    SHandicap: SHandicapDefinition,
+    SMapSize: SMapSizeDefinition,
+    SAspectMargin: SAspectMarginDefinition,
+    STeamColor: STeamColorDefinition,
+    SAIDescription: SAIDescriptionDefinition,
+    STriggerLib: STriggerLibDefinition,
+    STargetFilterResult: STargetFilterResultDefinition,
+    SBeaconInfo: SBeaconInfoDefinition,
+    SDamageTypeInfo: SDamageTypeInfoDefinition,
+    SAttackTypeInfo: SAttackTypeInfoDefinition,
+    SResourceConvert: SResourceConvertDefinition,
+    SMeleePointThreshold: SMeleePointThresholdDefinition,
+    SChallengeCategory: SChallengeCategoryDefinition,
+    SChallenge: SChallengeDefinition,
+    SSoundQuality: SSoundQualityDefinition,
+    SMinimapData: SMinimapDataDefinition,
+    SSelectionData: SSelectionDataDefinition,
+    SVolumeFade: SVolumeFadeDefinition,
+    SReverbRolloff: SReverbRolloffDefinition,
+    SVolumeThreshold: SVolumeThresholdDefinition,
+    SVolumeRolloff: SVolumeRolloffDefinition,
+    SSoundData: SSoundDataDefinition,
+    SMixRoute: SMixRouteDefinition,
+    SGlobalSoundData: SGlobalSoundDataDefinition,
+    SPointModel: SPointModelDefinition,
+    SCameraShakeAmplitude: SCameraShakeAmplitudeDefinition,
+    SCameraShakeFrequency: SCameraShakeFrequencyDefinition,
+    SCameraShakeRotation: SCameraShakeRotationDefinition,
+    SListenerRolloff: SListenerRolloffDefinition,
+    SUnitSpeedText: SUnitSpeedTextDefinition,
+    SWeaponSpeedText: SWeaponSpeedTextDefinition,
+    SObjectGroupData: SObjectGroupDataDefinition,
+    SLoadingScreenHelp: SLoadingScreenHelpDefinition,
+    SLoadingBar: SLoadingBarDefinition,
+    SGameCategory: SGameCategoryDefinition,
+    SGameModeInfo: SGameModeInfoDefinition,
+    SDefaultGameVariant: SDefaultGameVariantDefinition,
+    STutorialConfig: STutorialConfigDefinition,
+    SHotkeyInfo: SHotkeyInfoDefinition,
+    SResourceUI: SResourceUIDefinition,
+    SHelpControlCategoryInfo: SHelpControlCategoryInfoDefinition,
+    SHelpControlInfo: SHelpControlInfoDefinition,
+    SHelpGameMechanicInfo: SHelpGameMechanicInfoDefinition,
+    SAltSoundtrack: SAltSoundtrackDefinition,
+    SCutsceneAssetPath: SCutsceneAssetPathDefinition,
+    SHerdLevel: SHerdLevelDefinition,
+    SHerdNode: SHerdNodeDefinition,
+    SHeroAbilCategory: SHeroAbilCategoryDefinition,
+    SHeroAbil: SHeroAbilDefinition,
+    SHeroHeroicAbility: SHeroHeroicAbilityDefinition,
+    SHeroSpecificVO: SHeroSpecificVODefinition,
+    SHeroTalentTree: SHeroTalentTreeDefinition,
+    SHeroTalentTier: SHeroTalentTierDefinition,
+    SHeroSpecificIntroVO: SHeroSpecificIntroVODefinition,
+    SHeroLevelScaling: SHeroLevelScalingDefinition,
+    SHeroLevelModification: SHeroLevelModificationDefinition,
+    SHeroRatings: SHeroRatingsDefinition,
+    SHeroAITalentBuild: SHeroAITalentBuildDefinition,
+    SHeroSpecificUI: SHeroSpecificUIDefinition,
+    SHeroStatModifier: SHeroStatModifierDefinition,
+    SItemContainerSlot: SItemContainerSlotDefinition,
+    SFlareInfo: SFlareInfoDefinition,
+    STimeEvent: STimeEventDefinition,
+    SLightInfo: SLightInfoDefinition,
+    SDirectionalLight: SDirectionalLightDefinition,
+    SVariationConfig: SVariationConfigDefinition,
+    SLightRegionInfo: SLightRegionInfoDefinition,
+    SMissionCategory: SMissionCategoryDefinition,
+    SLootChoice: SLootChoiceDefinition,
+    SAnimFile: SAnimFileDefinition,
+    SAnimAlias: SAnimAliasDefinition,
+    SAttachProps: SAttachPropsDefinition,
+    SModelDataEvent: SModelDataEventDefinition,
+    SPhysicsMaterialMapping: SPhysicsMaterialMappingDefinition,
+    STextureDeclare: STextureDeclareDefinition,
+    STextureNameAdaption: STextureNameAdaptionDefinition,
+    STextureInfo: STextureInfoDefinition,
+    STextureExpressionSpec: STextureExpressionSpecDefinition,
+    STextureMatchSpec: STextureMatchSpecDefinition,
+    SModelVariation: SModelVariationDefinition,
+    SPathingData: SPathingDataDefinition,
+    SMotionPhase: SMotionPhaseDefinition,
+    SMotionOverlayPhase: SMotionOverlayPhaseDefinition,
+    SMotionOverlay: SMotionOverlayDefinition,
+    SStartingUnit: SStartingUnitDefinition,
+    SUpkeepTax: SUpkeepTaxDefinition,
+    SRequirementNode: SRequirementNodeDefinition,
+    SRequirementCount: SRequirementCountDefinition,
+    SRewardCategory: SRewardCategoryDefinition,
+    SRewardSpecificUI: SRewardSpecificUIDefinition,
+    SGameReplacement: SGameReplacementDefinition,
+    SSkinModelGroup: SSkinModelGroupDefinition,
+    SSkinModelMacroRun: SSkinModelMacroRunDefinition,
+    SSkinPackEntry: SSkinPackEntryDefinition,
+    SSoundAsset: SSoundAssetDefinition,
+    SSyncPointRange: SSyncPointRangeDefinition,
+    SSoundAssetTemplate: SSoundAssetTemplateDefinition,
+    SSoundLocaleFlags: SSoundLocaleFlagsDefinition,
+    SPitchShift: SPitchShiftDefinition,
+    SReverbBalance: SReverbBalanceDefinition,
+    SSoundtrackCue: SSoundtrackCueDefinition,
+    SSoundtrackMasterLayer: SSoundtrackMasterLayerDefinition,
+    SSoundtrackSlaveLayer: SSoundtrackSlaveLayerDefinition,
+    SSoundtrackSection: SSoundtrackSectionDefinition,
+    STacAbilData: STacAbilDataDefinition,
+    STalentRank: STalentRankDefinition,
+    STalentAbilityModification: STalentAbilityModificationDefinition,
+    STalentModification: STalentModificationDefinition,
+    STargetFindEnumArea: STargetFindEnumAreaDefinition,
+    SDSPArray: SDSPArrayDefinition,
+    SCreepSettings: SCreepSettingsDefinition,
+    SFoliageSimulationConfig: SFoliageSimulationConfigDefinition,
+    STerrainDoodad: STerrainDoodadDefinition,
+    SFidget: SFidgetDefinition,
+    SUnitArmorFormula: SUnitArmorFormulaDefinition,
+    SStockCharge: SStockChargeDefinition,
+    SUnitAbilData: SUnitAbilDataDefinition,
+    SUnitBehaviorData: SUnitBehaviorDataDefinition,
+    SCardLayout: SCardLayoutDefinition,
+    SCardLayoutButton: SCardLayoutButtonDefinition,
+    SAddedOnData: SAddedOnDataDefinition,
+    SUnitEquipment: SUnitEquipmentDefinition,
+    SUnitReviveInfo: SUnitReviveInfoDefinition,
+    SAttributePointsInfo: SAttributePointsInfoDefinition,
+    SUpgradeEffectTemplate: SUpgradeEffectTemplateDefinition,
+    SValidatorCondition: SValidatorConditionDefinition,
+    SValidatorFunction: SValidatorFunctionDefinition,
+    SValidatorEnumArea: SValidatorEnumAreaDefinition,
+    SVoiceOverSkin: SVoiceOverSkinDefinition,
+    SVoiceOverGroup: SVoiceOverGroupDefinition,
+    SVoiceOverLine: SVoiceOverLineDefinition,
+    SVoicePackExampleLine: SVoicePackExampleLineDefinition,
+    SUserField: SUserFieldDefinition,
+    SUserInstance: SUserInstanceDefinition,
+    SUserInstanceField: SUserInstanceFieldDefinition,
+    SUserInstanceAbilCmd: SUserInstanceAbilCmdDefinition,
+    SUserInstanceActor: SUserInstanceActorDefinition,
+    SUserInstanceColor: SUserInstanceColorDefinition,
+    SUserInstanceCompare: SUserInstanceCompareDefinition,
+    SUserInstanceFixed: SUserInstanceFixedDefinition,
+    SUserInstanceGameLink: SUserInstanceGameLinkDefinition,
+    SUserInstanceImage: SUserInstanceImageDefinition,
+    SUserInstanceInt: SUserInstanceIntDefinition,
+    SUserInstanceModel: SUserInstanceModelDefinition,
+    SUserInstanceMovie: SUserInstanceMovieDefinition,
+    SUserInstanceSound: SUserInstanceSoundDefinition,
+    SUserInstanceString: SUserInstanceStringDefinition,
+    SUserInstanceText: SUserInstanceTextDefinition,
+    SUserInstanceUnit: SUserInstanceUnitDefinition,
+    SUserInstanceUpgrade: SUserInstanceUpgradeDefinition,
+    SUserInstanceUser: SUserInstanceUserDefinition,
+    SWaterStateDesc: SWaterStateDescDefinition,
+    SWaterDoodad: SWaterDoodadDefinition,
+    SUserInstanceField: SUserInstanceFieldDefinition,
+    SUserInstanceAbilCmd: SUserInstanceAbilCmdDefinition,
+    SUserInstanceActor: SUserInstanceActorDefinition,
+    SUserInstanceColor: SUserInstanceColorDefinition,
+    SUserInstanceCompare: SUserInstanceCompareDefinition,
+    SUserInstanceFixed: SUserInstanceFixedDefinition,
+    SUserInstanceGameLink: SUserInstanceGameLinkDefinition,
+    SUserInstanceImage: SUserInstanceImageDefinition,
+    SUserInstanceInt: SUserInstanceIntDefinition,
+    SUserInstanceModel: SUserInstanceModelDefinition,
+    SUserInstanceMovie: SUserInstanceMovieDefinition,
+    SUserInstanceSound: SUserInstanceSoundDefinition,
+    SUserInstanceString: SUserInstanceStringDefinition,
+    SUserInstanceText: SUserInstanceTextDefinition,
+    SUserInstanceUnit: SUserInstanceUnitDefinition,
+    SUserInstanceUpgrade: SUserInstanceUpgradeDefinition,
+    SUserInstanceUser: SUserInstanceUserDefinition,
+    SUserField: SUserFieldDefinition,
+    SUserInstance: SUserInstanceDefinition,
+    SWaterStateDesc: SWaterStateDescDefinition,
+    SWaterDoodad: SWaterDoodadDefinition,
+}
 
 
 
@@ -7401,7 +8430,7 @@ const CGameUI = {
     ListenerAngleRolloff: [S.ListenerRolloff],
     ListenerDistanceRolloff: [S.ListenerRolloff],
     PlanetPanelDefaultBackground: L.Model,
-    PlayerIdObserverColorMap: [E.UIColorRelation],
+    PlayerIdObserverColorMap: [E.UIColorRelation,EUnknown],
     BehaviorIconColors: [C.Color],
     BehaviorBorderColors: [C.Color],
     VitalColors: [S.VitalColor,E.UnitVital],
@@ -11059,16 +12088,16 @@ SCSchema["*Data"] = [SCSchema.classes]
 SCSchema.Catalog = {
     path: A.XML,
     //constants will be stored in a separate array 
-    Const: [S.Const],
+    const: [S.Const],
     //these are variative fields... did not find a best way to imlpement schema for the catalog.
     //if tag schema not found for example, there ar no CUnit field
     //if persist all CUNits would be saved in CUnit array
     //but instead cnverter will search for variative filds if any validate the CUnit it will be added to this array .
     //if validate method returns Schema object it will be used as schema  (VData will return CUnit from schema types it will be used instead of VData)
     //separate structures and catalogs 
-    "*Struct": [SCSchema.struct],
+    "*Struct": [SCSchema.structDefinitions],
     "*Data": [SCSchema.classes],
-    "@type": C.String
+    // "@type": C.String
     // ...SStructs, // only 1 structure element per type
     // ...Object.fromEntries(Object.entries(SClasses).map(([e,c]) => ([e,[c]]))) //multiple classes
 }
