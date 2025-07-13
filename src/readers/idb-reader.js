@@ -3,134 +3,127 @@ export default class IDBReader {
     this.dbName = dbName;
     this.storeName = storeName;
     this.db = null;
-    this.modName = ''; // should be set externally or by caller
+    this.modName = ''; // Optional namespace/prefix for keys
   }
 
-  async init(modName) {
-    this.modName = modName
-    // Step 1: Open DB to get current version
-    const oldDb = await new Promise((resolve, reject) => {
-      const req = indexedDB.open(this.dbName);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
+  async init(modName = '') {
+    this.modName = modName;
+
+    // Open DB once with upgrade if needed
+    this.db = await new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName);
+
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(this.storeName)) {
+          db.createObjectStore(this.storeName);
+        }
+      };
+
+      request.onsuccess = (event) => {
+        resolve(event.target.result);
+      };
+
+      request.onerror = (event) => reject(event.target.error);
     });
+  }
 
-    const currentVersion = oldDb.version;
-    oldDb.close();
+  _getStore(mode = 'readonly') {
+    if (!this.db) throw new Error('IDBReader: DB not initialized. Call init() first.');
+    return this.db.transaction(this.storeName, mode).objectStore(this.storeName);
+  }
 
-    // Step 2: Check if store exists
-    const hasStore = oldDb.objectStoreNames.contains(this.storeName);
-    if (hasStore) {
-      // Open normally if store exists
-      this.db = await new Promise((resolve, reject) => {
-        const req = indexedDB.open(this.dbName, currentVersion);
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-    } else {
-      // Upgrade version to add new store
-      this.db = await new Promise((resolve, reject) => {
-        const req = indexedDB.open(this.dbName, currentVersion + 1);
-        req.onupgradeneeded = (e) => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains(this.storeName)) {
-            db.createObjectStore(this.storeName);
-          }
-        };
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-    }
+  _makeKey(filename) {
+    return this.modName ? `${this.modName}:${filename}` : filename;
   }
 
   async list(prefix = '') {
+    const store = this._getStore('readonly');
+    const results = [];
+
     return new Promise((resolve, reject) => {
-      const tx = this.db.transaction(this.storeName, 'readonly');
-      const store = tx.objectStore(this.storeName);
       const request = store.openCursor();
-      const result = [];
 
       request.onsuccess = (event) => {
         const cursor = event.target.result;
         if (cursor) {
           const key = cursor.key;
-          // if (key.startsWith(`${this.modName}:${prefix}`)) {
-          if (key.startsWith(`${this.modName}`)) {
-            result.push(key);
+          if (key.startsWith(this._makeKey(prefix))) {
+            results.push(key);
           }
           cursor.continue();
         } else {
-          resolve(result);
+          resolve(results);
         }
       };
 
+      request.onerror = (event) => reject(event.target.error);
+    });
+  }
+
+  async get(filename) {
+    const store = this._getStore('readonly');
+    const key = this._makeKey(filename);
+
+    return new Promise((resolve, reject) => {
+      const request = store.get(key);
+      request.onsuccess = () => resolve(request.result ?? null);
       request.onerror = () => reject(request.error);
     });
   }
 
   async set(filename, value) {
-    const key = filename//`${this.modName}:${filename}`;
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction(this.storeName, 'readwrite');
-      const store = tx.objectStore(this.storeName);
-      store.put(value, key);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
-  }
+    const store = this._getStore('readwrite');
+    const key = this._makeKey(filename);
 
-  async get(filename) {
-    const key = filename//`${this.modName}:${filename}`;
     return new Promise((resolve, reject) => {
-      const tx = this.db.transaction(this.storeName, 'readonly');
-      const store = tx.objectStore(this.storeName);
-      const request = store.get(key);
-      request.onsuccess = () => resolve(request.result);
+      const request = store.put(value, key);
+      request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
   }
 
   async delete(filename) {
-    const key = filename//`${this.modName}:${filename}`;
+    const store = this._getStore('readwrite');
+    const key = this._makeKey(filename);
+
     return new Promise((resolve, reject) => {
-      const tx = this.db.transaction(this.storeName, 'readwrite');
-      const store = tx.objectStore(this.storeName);
-      store.delete(key);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
-  }
-
-  async clear() {
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction(this.storeName, 'readwrite');
-      const store = tx.objectStore(this.storeName);
-      const request = store.openCursor();
-
-      request.onsuccess = (event) => {
-        const cursor = event.target.result;
-        if (cursor) {
-          if (cursor.key.startsWith(this.modName)) {
-            store.delete(cursor.key);
-          }
-          cursor.continue();
-        } else {
-          resolve(); // Done
-        }
-      };
-
+      const request = store.delete(key);
+      request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
   }
 
+  async clear() {
+    // Delete only keys that start with modName prefix
+    if (!this.modName) {
+      // If no modName set, clear entire store
+      const store = this._getStore('readwrite');
+      return new Promise((resolve, reject) => {
+        const request = store.clear();
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    } else {
+      // Delete keys matching modName prefix only
+      const store = this._getStore('readwrite');
+      return new Promise((resolve, reject) => {
+        const request = store.openCursor();
 
-  // async clear() {
-  //   return new Promise((resolve, reject) => {
-  //     const tx = this.db.transaction(this.storeName, 'readwrite');
-  //     const store = tx.objectStore(this.storeName);
-  //     store.clear();
-  //     tx.oncomplete = () => resolve();
-  //     tx.onerror = () => reject(tx.error);
-  //   });
-  // }
+        request.onsuccess = (event) => {
+          const cursor = event.target.result;
+          if (cursor) {
+            if (cursor.key.startsWith(this.modName + ':')) {
+              cursor.delete();
+            }
+            cursor.continue();
+          } else {
+            resolve();
+          }
+        };
+
+        request.onerror = (event) => reject(event.target.error);
+      });
+    }
+  }
 }

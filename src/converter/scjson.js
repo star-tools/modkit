@@ -1,35 +1,187 @@
-import { SCSchema } from '../schema/schema.js';
-import {
-  convertXMLtoJSON,
-  convertJSONtoXML,
-  parseXML,
-  isInteger
-} from '../lib/util.js';
+import { SCSchema ,getSchemaField} from '../schema/schema.js';
 
+// util.js - Utility functions for XML/JSON handling (cross-platform)
 
-export function getSchema(tag, schema = SCSchema) {
-  if (schema[tag] || schema['%' + tag] || schema['@' + tag]) return schema[tag]
-  for (let key in schema) {
-    if (key[0] === '*' && schema[key][0]?.[tag]) {
-      return schema[key][0][tag]
-    }
-  }
-  return null
+let DOMParser;
+
+// Determine environment and load DOMParser
+if (typeof window !== 'undefined' && typeof window.DOMParser !== 'undefined') {
+  // In the browser
+  DOMParser = window.DOMParser;
+} else {
+  // In Node.js
+  const xmldom = await import('xmldom');
+  DOMParser = xmldom.DOMParser;
 }
-export function getSchemaField(tag, schema = SCSchema) {
-  if (schema[tag]) return { schema: schema[tag], field: tag };
-  if (schema['%' + tag]) return { schema: schema['%' + tag], field: tag };
-  if (schema['@' + tag]) return { schema: schema['@' + tag], field: tag };
-  for (let key in schema) {
-    if (key[0] === '*' && schema[key][0]?.[tag]) {
-      const subSchema = schema[key][0][tag];
-      return {
-        schema: Array.isArray(schema[key]) ? [subSchema] : subSchema,
-        field: key.substring(1)
-      };
+
+/**
+ * Parses an XML string into a DOM Document.
+ * @param {string} xmlString
+ * @returns {Document}
+ */
+export function parseXML(xmlString) {
+  const parser = new DOMParser();
+  return parser.parseFromString(xmlString, 'text/xml');
+}
+
+/**
+ * Determines whether a value is an integer.
+ * @param {string|number} value
+ * @returns {boolean}
+ */
+export function isInteger(value) {
+  return Number.isInteger(Number(value));
+}
+
+/**
+ * Escapes XML special characters in a string.
+ * @param {string} str
+ * @returns {string}
+ */
+export function escapeXml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+export function convertXMLtoJSON(node) {
+  if (!node) return null;
+
+  // If root is a document node, recurse into its documentElement
+  if (node.nodeType === 9) return convertXMLtoJSON(node.documentElement);
+
+  if (node.nodeType === 1) { // ELEMENT_NODE
+    const result = { tag: node.tagName };
+
+    // Parse attributes
+    if (node.attributes?.length) {
+      const attrs = {};
+      for (let i = 0; i < node.attributes.length; i++) {
+        const attr = node.attributes[i];
+        attrs[attr.name] = attr.value;
+      }
+      result.attributes = attrs;
+    }
+
+    const children = [];
+    const directives = [];
+
+    for (let i = 0; i < node.childNodes.length; i++) {
+      const child = node.childNodes[i];
+      let value;
+      let array = children
+
+      switch (child.nodeType) {
+        case 1: // ELEMENT_NODE
+          value = convertXMLtoJSON(child);
+          break;
+        case 3: { // TEXT_NODE
+          const text = child.nodeValue.trim();
+          if (text) value = text
+          break;
+        }
+        case 7: { // PROCESSING_INSTRUCTION_NODE
+          const directive = { directive: child.target };
+          const attrs = [...child.data.matchAll(/(\w+)="([^"]*)"/g)];
+          for (const [, key, val] of attrs) directive[key] = val;
+          value = directive;
+          array = directives
+          break;
+        }
+        case 8: // COMMENT_NODE
+          value = "<!--" + child.nodeValue + "-->"
+          break;
+      }
+
+      if (value !== undefined) array.push(value);
+    }
+
+    if (children.length === 1 && typeof children[0] === "string") {
+      result.value = children[0]; // collapse pure text into `value`
+    } else if (children.length > 0) {
+      result.children = children;
+    }
+    if (directives.length > 0) {
+      result.directives = directives;
+    }
+
+    return result;
+  }
+
+  return null; // other node types are ignored
+}
+
+//turns the JSON format produced by your convertXMLtoJSON function back into an XML string:
+//supports
+// Attributes
+// Text content (collapsed into value)
+// Children nodes
+// Comments (in string format: <!--comment-->)
+// Directives (<?token ...?> style)
+export function convertJSONtoXML(node, indent = '') {
+  if (!node || typeof node !== 'object') return '';
+
+  const INDENT = '  ';
+  const nextIndent = indent + INDENT;
+  const tag = node.tag;
+  let xml = '';
+
+  // Open tag
+  xml += `${indent}<${tag}`;
+
+  // Add attributes
+  if (node.attributes) {
+    for (const [key, val] of Object.entries(node.attributes)) {
+      xml += ` ${key}="${val}"`;
     }
   }
-  return { schema: null, field: null };
+
+  // Self-close if no children/directives/value
+  const hasContent = node.value !== undefined || node.children || node.directives;
+  if (!hasContent) {
+    return xml + ` />\n`;
+  }
+
+  xml += '>';
+
+  // Add text value
+  if (typeof node.value === 'string') {
+    xml += node.value;
+    xml += `</${tag}>\n`;
+    return xml;
+  }
+
+  xml += '\n';
+
+  // Add directives (processing instructions)
+  if (node.directives) {
+    for (const directive of node.directives) {
+      const { directive: target, ...attrs } = directive;
+      const data = Object.entries(attrs)
+        .map(([k, v]) => `${k}="${v}"`)
+        .join(' ');
+      xml += `${nextIndent}<?${target} ${data}?>\n`;
+    }
+  }
+
+  // Add children
+  if (node.children) {
+    for (const child of node.children) {
+      if (typeof child === 'string') {
+        xml += `${nextIndent}${child}\n`;
+      } else if (typeof child === 'object') {
+        xml += convertJSONtoXML(child, nextIndent);
+      } else if (typeof child === 'number') {
+        xml += `${nextIndent}${child}\n`;
+      }
+    }
+  }
+
+  xml += `${indent}</${tag}>\n`;
+  return xml;
 }
 
 /**

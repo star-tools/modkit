@@ -2,7 +2,6 @@
 import {CEnum } from "./types.js"
 import {SCSchema} from "./schema.js"
 
-
 export class EStructId extends CEnum {static enum = [
   "SAbilOrderDisplay",
   "SEffectBehavior",
@@ -599,7 +598,6 @@ export class ETypeId extends CEnum {static enum = [
   "CAssetLink",
   "CBankLink",
 ]}
-
 export class EClassId extends CEnum {static enum = [
   "CAbil",
   "CAbilProgress",
@@ -1245,7 +1243,6 @@ export class EClassId extends CEnum {static enum = [
   "CWeaponStrafe"
 ]}
 
-
 export class EAbilTechPlayer extends CEnum {}
 export class EAbilAlignment extends CEnum {}
 export class EAcquireLevel extends CEnum {}
@@ -1686,126 +1683,7 @@ export class EClassIdCWarChestSeason extends CEnum { static enum = ["CWarChestSe
 export class EClassIdCWater extends CEnum { static enum = ["CWaterUnknown","CWater"]}
 export class EClassIdCWeapon extends CEnum { static enum = ["CWeaponUnknown","CWeapon","CWeaponLegacy","CWeaponStrafe"]}
 
-const classNamespace = {
-  ActorSupport: EClassIdCActorSupport,
-  Abil: EClassIdCAbil,
-  Accumulator: EClassIdCAccumulator,
-  Achievement: EClassIdCAchievement,
-  AchievementTerm: EClassIdCAchievementTerm,
-  Actor: EClassIdCActor,
-  Alert: EClassIdCAlert,
-  ArmyCategory: EClassIdCArmyCategory,
-  ArmyUnit: EClassIdCArmyUnit,
-  ArmyUpgrade: EClassIdCArmyUpgrade,
-  Artifact: EClassIdCArtifact,
-  ArtifactSlot: EClassIdCArtifactSlot,
-  AttachMethod: EClassIdCAttachMethod,
-  BankCondition: EClassIdCBankCondition,
-  Beam: EClassIdCBeam,
-  Behavior: EClassIdCBehavior,
-  Boost: EClassIdCBoost,
-  Bundle: EClassIdCBundle,
-  Button: EClassIdCButton,
-  Camera: EClassIdCCamera,
-  Campaign: EClassIdCCampaign,
-  Character: EClassIdCCharacter,
-  Cliff: EClassIdCCliff,
-  CliffMesh: EClassIdCCliffMesh,
-  CliffDoodad: EClassIdCCliffDoodad,
-  ColorStyle: EClassIdCColorStyle,
-  Commander: EClassIdCCommander,
-  Config: EClassIdCConfig,
-  ConsoleSkin: EClassIdCConsoleSkin,
-  Conversation: EClassIdCConversation,
-  ConversationState: EClassIdCConversationState,
-  Cursor: EClassIdCCursor,
-  DataCollection: EClassIdCDataCollection,
-  DataCollectionPattern: EClassIdCDataCollectionPattern,
-  DecalPack: EClassIdCDecalPack,
-  DSP: EClassIdCDSP,
-  Effect: EClassIdCEffect,
-  Emoticon: EClassIdCEmoticon,
-  EmoticonPack: EClassIdCEmoticonPack,
-  Error: EClassIdCError,
-  Footprint: EClassIdCFootprint,
-  FoW: EClassIdCFoW,
-  Game: EClassIdCGame,
-  GameUI: EClassIdCGameUI,
-  Herd: EClassIdCHerd,
-  HerdNode: EClassIdCHerdNode,
-  Hero: EClassIdCHero,
-  HeroAbil: EClassIdCHeroAbil,
-  HeroStat: EClassIdCHeroStat,
-  Item: EClassIdCItem,
-  ItemClass: EClassIdCItemClass,
-  ItemContainer: EClassIdCItemContainer,
-  Kinetic: EClassIdCKinetic,
-  LensFlareSet: EClassIdCLensFlareSet,
-  Light: EClassIdCLight,
-  Location: EClassIdCLocation,
-  Loot: EClassIdCLoot,
-  Map: EClassIdCMap,
-  Model: EClassIdCModel,
-  Mount: EClassIdCMount,
-  Mover: EClassIdCMover,
-  Objective: EClassIdCObjective,
-  PhysicsMaterial: EClassIdCPhysicsMaterial,
-  Ping: EClassIdCPing,
-  PlayerResponse: EClassIdCPlayerResponse,
-  PortraitPack: EClassIdCPortraitPack,
-  Preload: EClassIdCPreload,
-  PremiumMap: EClassIdCPremiumMap,
-  Race: EClassIdCRace,
-  RaceBannerPack: EClassIdCRaceBannerPack,
-  Requirement: EClassIdCRequirement,
-  RequirementNode: EClassIdCRequirementNode,
-  Reverb: EClassIdCReverb,
-  Reward: EClassIdCReward,
-  ScoreResult: EClassIdCScoreResult,
-  ScoreValue: EClassIdCScoreValue,
-  Shape: EClassIdCShape,
-  Skin: EClassIdCSkin,
-  SkinPack: EClassIdCSkinPack,
-  Sound: EClassIdCSound,
-  SoundExclusivity: EClassIdCSoundExclusivity,
-  SoundMixSnapshot: EClassIdCSoundMixSnapshot,
-  Soundtrack: EClassIdCSoundtrack,
-  Spray: EClassIdCSpray,
-  SprayPack: EClassIdCSprayPack,
-  StimPack: EClassIdCStimPack,
-  TacCooldown: EClassIdCTacCooldown,
-  Tactical: EClassIdCTactical,
-  Talent: EClassIdCTalent,
-  TalentProfile: EClassIdCTalentProfile,
-  TargetFind: EClassIdCTargetFind,
-  TargetSort: EClassIdCTargetSort,
-  Terrain: EClassIdCTerrain,
-  TerrainObject: EClassIdCTerrainObject,
-  TerrainTex: EClassIdCTerrainTex,
-  Texture: EClassIdCTexture,
-  TextureSheet: EClassIdCTextureSheet,
-  Tile: EClassIdCTile,
-  Trophy: EClassIdCTrophy,
-  Turret: EClassIdCTurret,
-  Unit: EClassIdCUnit,
-  Upgrade: EClassIdCUpgrade,
-  User: EClassIdCUser,
-  Validator: EClassIdCValidator,
-  VoiceOver: EClassIdCVoiceOver,
-  VoicePack: EClassIdCVoicePack,
-  WarChest: EClassIdCWarChest,
-  WarChestSeason: EClassIdCWarChestSeason,
-  Water: EClassIdCWater,
-  Weapon: EClassIdCWeapon,
-}
 
-let cnamespaces = {}
-for(let namespace in classNamespace){
-  for(let className of classNamespace[namespace].enum){
-    cnamespaces[className] = namespace
-  }
-}
-export const C_NAMESPACES = cnamespaces
 
 export default {
   StructId: EStructId,

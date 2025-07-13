@@ -1,8 +1,12 @@
-import fs from "fs/promises";
-import path from "path";
 import Reader from './reader.js';
 
+let fs, path;
+export const isNode = typeof process !== 'undefined' && process.versions?.node;
 
+if (isNode) {
+    fs = await import('fs/promises');
+    path = await import('path');
+}
 
 export default class NodeReader extends Reader {
     constructor(prefix) {

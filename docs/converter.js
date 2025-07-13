@@ -4,6 +4,8 @@
 import SC2JSON from '../src/converter/scjson.js';
 import ZipReader from '../src/readers/zip-reader.js';
 import IDBReader from '../src/readers/idb-reader.js';
+// import WebReader from '../src/readers/web-reader.js';
+// import URLReader from '../src/readers/url-reader.js';
 import '../src/schema/all.js';
 
 
@@ -36,8 +38,6 @@ export default class ConverterApp {
     this.fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
     this.init();
   }
-
-
 
   async removeCurrentFile() {
     if (!this.currentMod || !this.currentFileName) return;
@@ -99,19 +99,12 @@ export default class ConverterApp {
       let mods = JSON.parse(modsRaw);
       for (const modName of mods) {
 
-
-
-
         const idbReader = new IDBReader();
         await idbReader.init(modName);
         this.mods.push({
           name: modName,
           data: idbReader
         })
-
-
-
-
         this.addModBadge(modName);
       }
       const lastMod = localStorage.getItem('lastMod');

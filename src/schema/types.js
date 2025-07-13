@@ -916,10 +916,6 @@ export class CFileXML extends CFile { static catalog = "XML" ; static extensions
 export class CFileFont extends CFile { static catalog = "Font" ; static extensions = ["ttf","c"]}
 
 
-
-
-
-
 export class CPhysicsMaterialLinks extends CList {
      static separator = " "
      static subType = CPhysicsMaterialLink
@@ -1222,15 +1218,6 @@ export class CDataEntryPath extends CDataType  {
       SyncModelData: CFileSyncModelData,
       XML: CFileXML,
     }
-
-  
-  
-  
-  
-  
-  
-  
-  
 
 
 

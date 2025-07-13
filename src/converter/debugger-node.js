@@ -1,7 +1,54 @@
-import fs from 'fs/promises';
-import { performance } from 'perf_hooks';
-import { JSONStringifyWithInlineArrays } from '../lib/util.js';
-import { SC2JSONDebugger } from './debugger.js';
+import SC2JSONDebugger from './debugger.js';
+
+let fs;
+let performance;
+let isNode = typeof process !== 'undefined' && process.versions?.node;
+
+if (isNode) {
+  fs = await import('fs/promises');
+  ({ performance } = await import('perf_hooks'));
+} else {
+  // Fallbacks for browser
+  fs = {
+    readFile: async () => { throw new Error('fs.readFile is not available in browser'); },
+    writeFile: async () => { throw new Error('fs.writeFile is not available in browser'); },
+    mkdir: async () => {},
+  };
+
+  performance = window.performance || {
+    now: () => Date.now()
+  };
+}
+
+
+/**
+ * JSON.stringify but with inline arrays and formatted nested objects.
+ * @param {Object} obj - The JSON object to stringify.
+ * @param {number} [indent=2] - Number of spaces for indentation.
+ * @returns {string}
+ */
+export function JSONStringifyWithInlineArrays(obj, indent = 2) {
+  const space = ' '.repeat(indent);
+
+  function format(value, level) {
+    if (Array.isArray(value)) {
+      return `[${value.map(v => format(v, 0)).join(',')}]`;
+    } else if (value && typeof value === 'object') {
+      const entries = Object.entries(value);
+      if (entries.length === 0) return '{}';
+      const inner = entries
+        .map(([k, v]) => `${space.repeat(level + 1)}"${k}": ${format(v, level + 1)}`)
+        .join(',\n');
+      return `{
+${inner}
+${space.repeat(level)}}`;
+    } else {
+      return JSON.stringify(value);
+    }
+  }
+
+  return format(obj, 0);
+}
 
 export default class SC2JSONDebuggerNode extends SC2JSONDebugger {
 

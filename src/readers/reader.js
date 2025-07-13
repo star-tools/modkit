@@ -1,10 +1,8 @@
-
 // IndexedDB-backed storage class
 export default class Reader {
     constructor(options) {
         this.options = options || {}
     }
-
     async init() {
     }
     
@@ -17,12 +15,12 @@ export default class Reader {
     async get(key) {
     }
 
-    
     async delete(key) {
     }
 
     async clear() {
     }
+    //read all files from from reader and write it using writer, to copy mods
     async transfer( writer){
         const files = await this.list();
         for (const file of files) {
@@ -31,8 +29,6 @@ export default class Reader {
             await writer.set(file,content);
         }
     }
-
-
     IGNORED_PATTERNS = [
         /^__macosx\//i,
         /\.ds_store$/i,
@@ -43,7 +39,6 @@ export default class Reader {
         // Add more as needed:
         // /\.tmp$/i,
     ];
-
     ignored(filename) {
         const lower = filename.toLowerCase();
         return this.IGNORED_PATTERNS.some(pattern => pattern.test(lower));

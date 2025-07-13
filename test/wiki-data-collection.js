@@ -3,9 +3,34 @@
 import SC2JSONDebugger from '../src/converter/debugger.js';
 import NodeReader from '../src/readers/node-reader.js';
 import {readModData} from '../src/readers/mod-reader.js';
-import {groupObjectKeys } from '../src/lib/util.js';
 import fs from 'fs/promises';
 import yaml from '../src/lib/js-yaml.js';
+
+export function groupObjectKeys(input) {
+    const result = {};
+
+    for (const [path, value] of Object.entries(input)) {
+        const parts = path.split('/');
+        let current = result;
+
+        for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+
+        // If it's the last part, set the value
+        if (i === parts.length - 1) {
+            current[part] = value;
+        } else {
+            // If the key doesn't exist or isn't an object, create/replace it
+            if (typeof current[part] !== 'object' || current[part] === null) {
+            current[part] = {};
+            }
+            current = current[part];
+        }
+        }
+    }
+
+    return result;
+}
 
 SCMod.prototype.calculateStringsEx = function (locale){
 
@@ -141,8 +166,6 @@ async function collectCustomFactionModData(modName){
 
   let locales = mod.components?.DataComponent?.filter(c => c.Type.toLowerCase() === "text").map(c => c.Locale).map(c => c.toLowerCase())
 
-
-
     // let locales = ["dede","enus","eses","esmx","frfr","itit","kokr","plpl","ptbr","ruru","zhcn","zhtw"] 
   // let locales = ["enus","kokr","ruru","zhcn"] 
   for(let locale of locales){
@@ -157,7 +180,6 @@ async function collectCustomFactionModData(modName){
     yamlData = yamlData.replace(/'([A-Za-z0-9_]+)'/g, '$1'); // remove safe quotes
     await fs.writeFile(`./wiki/data.v2/${modName}/${locale}.yaml`, yamlData); // save to file
   }
-
 
     //save data only
   let data = mod.catalogs.map(c => c.Data).flat().filter(Boolean)

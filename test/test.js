@@ -4,7 +4,6 @@ import fs from 'fs';
 // import {NodeSCComponentReader} from './../src/readers/scmod-reader-fs.js'
 import SC2XMLJSON from '../src/converter/scjson.js';
 import {SC2JSONDebugger} from '../src/converter/debugger.js';
-import { JSONStringifyWithInlineArrays } from '../src/lib/util.js';
 import {SCSchema} from '../src/schema/all.js';
 
 
