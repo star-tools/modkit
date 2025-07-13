@@ -13,6 +13,7 @@ export class EComponent extends CEnum {static enum = [
 ]}
 
 SCSchema.DocInfo = {
+    "@": "DocInfo",
     Dependencies: {Value: [{"&content": CString}]},
     ModType: {Value: [{"&content": CString}]},
     Preload: {Value: [{"&content": CString}]}, //   <Value>AssetFile;Assets\COOP\Mengsk\Units\Blimp_Mengsk_COOP\Blimp_Mengsk_COOP.m3</Value>
@@ -41,6 +42,7 @@ export const SComponents = {
 SCSchema.components = SComponents
 
 SCSchema.Components = {
+    "@": "Components",
     Optimized: {},
     // "*Components": [SCSchema.components,EComponent],
     DataComponent: [{Type: CString, Locale: CString}]

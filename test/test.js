@@ -1,10 +1,5 @@
 
 
-import fs from 'fs';
-// import {NodeSCComponentReader} from './../src/readers/scmod-reader-fs.js'
-import SC2XMLJSON from '../src/converter/scjson.js';
-import {SC2JSONDebugger} from '../src/converter/debugger.js';
-import {SCSchema} from '../src/schema/all.js';
 
 
 // import { convertXMLtoJSON, stringifyWithInlineArrays, getDebugData ,loadDebugData, saveDebugData} from '../src/convert/convertXMLtoJSON.js';
@@ -32,28 +27,24 @@ import {SCSchema} from '../src/schema/all.js';
 //-----JSON to XML and Back --------------------------------------
 
 
-const cdebugger = new SC2JSONDebugger( {file: './debug.json'});
-// const converter = new SC2JSON({debugger: cdebugger})
-import NodeSCComponentReader from '../src/readers/scmod-reader-node.js';
-const modReader = new NodeSCComponentReader({debugger:  cdebugger });
-let mod = await modReader.load("./test/data/input/mods/Liberty.sc2mod");
+import {SCSchema} from '../src/schema/all.js';
+import SC2JSON,{cleanXML} from '../src/converter/scjson.js';
+
+const xmlInput = `
+<Includes>
+    <Catalog path="GameData/CollectionSkin.xml"/>
+    <Catalog path="GameData/SC2Events.xml"/>
+    <Catalog path="GameData/WarChestSeason5.xml"/>
+    <Catalog path="GameData/WarChestSeason6.xml"/>
+</Includes>
+`
+
+const converter = new SC2JSON()
+const json = converter.toJSON(xmlInput);
+const xmlOutput = converter.toXML(json,SCSchema.Includes)
 
 
-
-let xmlText = `<Catalog>
-    <CActorUnit id="GenericUnitMinimal">
-      <StatusColors index="Shields">
-        <ColorArray value="255,0,0,255"/>
-      </StatusColors>
-    </CActorUnit>
-</Catalog>`
-
-
-const json = converter.toJSON(xmlText);
-console.log(JSON.stringify(json,null,1))
-console.log(cdebugger.performace());
-
-let xml = converter.toXML(json)
-console.log(xml)
-
+if(cleanXML(xmlInput) === cleanXML(xmlOutput)){
+  console.log("done!")
+}
 console.log("Finished")

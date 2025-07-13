@@ -14,20 +14,20 @@ let merged = await modsMerge(reader,[
     "mods/Void.sc2mod",
     "multi/VoidMulti5014.sc2mod",
 
-    // "custom/BroodWar.SC2Mod",
-    // "custom/Dragons.SC2Mod",
-    // "custom/Hybrids.SC2Mod",
-    // "custom/Scion.SC2Mod",
-    // "custom/Synoid.SC2Mod",
-    // "custom/TalDarim.SC2Mod",
-    // "custom/UED.SC2Mod",
-    // "custom/Umojan.SC2Mod",
-    // "custom/UPL.SC2Mod",
+    "custom/BroodWar.SC2Mod",
+    "custom/Dragons.SC2Mod",
+    "custom/Hybrids.SC2Mod",
+    "custom/Scion.SC2Mod",
+    "custom/Synoid.SC2Mod",
+    "custom/TalDarim.SC2Mod",
+    "custom/UED.SC2Mod",
+    "custom/Umojan.SC2Mod",
+    "custom/UPL.SC2Mod",
 
-    // "exo/TiberiumWars.SC2Mod",
-    // "exo/WarCraft.SC2Mod",
-    // "exo/WarHammer.SC2Mod",
-    // "exo/Warzone.SC2Mod"
+    "exo/TiberiumWars.SC2Mod",
+    "exo/WarCraft.SC2Mod",
+    "exo/WarHammer.SC2Mod",
+    "exo/Warzone.SC2Mod"
 
   ], {
     debugger: cdebugger,

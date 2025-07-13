@@ -2,7 +2,10 @@
 import {Assets as A,C, Links as L} from "./types.js"
 import {SCSchema} from "./schema.js"
 
-export const PreloadArray = {
+
+
+SCSchema.Preload = {
+    "@": "Preload",
     Asset: [{
         path: A.Asset,
         Type: C.Word,//'Layout|Cutscene|Image'
@@ -30,12 +33,5 @@ export const PreloadArray = {
     Map: [{id: L.Map}],
     PlayerResponse: [{id:L.PlayerResponse}]
 }
-
-// export default {
-//     Array: PreloadArray
-// }
-
-
-SCSchema.Preload = PreloadArray
 
 

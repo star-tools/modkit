@@ -830,7 +830,7 @@ export async function readModData(reader, modName, options = {}){
         result.galaxy = await mapToObject(  files.filter((f) => /\.(galaxy)$/i.test(f)),  text);
     }
     if(scope.cutscenes){
-        result.cutscenes = await mapToObject(  files.filter((f) => /\.(sc2cutscene|stormcutscene)$/i.test(f)),  xml);
+        result.cutscenes = await mapToObject(  files.filter((f) => /\.(sc2cutscene|stormcutscene)$/i.test(f)), text)//todo xml);
     }
     if(scope.binary){
         result.binary = {
@@ -911,6 +911,25 @@ export async function writeModData(reader, modName, obj, cdebugger) {
       return result
     }
 
+
+
+    function getOutputLayouts(layouts){
+      let result = {}
+      for(let layout in layouts){
+        result[layout + ".sc2layout"] = layouts[layout]
+      }
+      return result
+    }
+
+    function getOutputCatalogs(catalogs){
+      let outputCatalogs = {}
+      for(let catalog of catalogs){
+        outputCatalogs[catalog.path] = {...catalog}
+        delete outputCatalogs[catalog.path].path
+      }
+      return outputCatalogs
+    }
+
     let filesData = {
       "ComponentList.SC2Components": xml(obj.components,SCSchema.Components),
       "Base.SC2Data/GameData/Assets.txt": env(obj.assets),
@@ -918,10 +937,10 @@ export async function writeModData(reader, modName, obj, cdebugger) {
       "Base.SC2Data/UI/FontStyles.SC2Style": xml(obj.styles,SCSchema.StyleFile),
       "Triggers": xml(obj.triggers,SCSchema.TriggerData),
       "BankList.xml": xml(obj.banklist),
-      "Regions": xml(obj.regions),
-      "Objects": xml(obj.objects),
-      "Preload.xml": xml(obj.preload),
-      "t3Terrain.xml": xml(obj.terrain),
+      "Regions": xml(obj.regions,SCSchema.Regions),
+      "Objects": xml(obj.objects,SCSchema.Objects),
+      "Preload.xml": xml(obj.preload,SCSchema.Preload),
+      "t3Terrain.xml": xml(obj.terrain,SCSchema.Terrain),
       "Base.SC2Data/GameData.xml": xml(obj.includes,SCSchema.Includes),
       "Base.SC2Data/texturereduction/texturereductionvalues.txt": lines(obj.texturereduction),
       "Base.SC2Data/preloadassetdb.txt": ini(obj.preloadassetdb),
@@ -929,16 +948,17 @@ export async function writeModData(reader, modName, obj, cdebugger) {
       "Base.SC2Data/UI/Layout/DescIndex.SC2Layout": xml(obj.descindex,SCSchema.Desc),
       "Base.SC2Data/triggerlibs/librarylist.xml": xml(obj.librarylist,SCSchema.TriggerData),
       "Base.SC2Data/EditorData/EditorCategories.xml": xml(obj.editorcategories,SCSchema.TriggerData),
-      "DocumentHeader": obj.binary.header,
+      // "DocumentHeader": bin(obj.binary.header),
       ...fromDataArray(obj.sc2lib, xml,SCSchema.TriggerData),
-      ...fromDataArray(obj.layouts, xml,SCSchema.Desc),
-      ...fromDataArray(obj.catalogs, xml,SCSchema.Catalog,`Base.SC2Data/*.xml`),
+      ...fromDataArray(getOutputLayouts(obj.layouts), xml,SCSchema.Desc),
+      ...fromDataArray(getOutputCatalogs(obj.catalogs), xml,SCSchema.Catalog,`Base.SC2Data/*.xml`),
       ...fromDataArray(obj.galaxy, text),
       ...fromDataArray(reverseLocales(obj.strings), env),
-      ...fromDataArray(obj.cutscenes, xml)
+      ...fromDataArray(obj.cutscenes,text)//todo xml)
     }
 
     let binary = {
+      ...fromDataArray(obj.binary.header, bin),
       ...fromDataArray(obj.binary.version, bin),
       ...fromDataArray(obj.assets.model, bin),
       ...fromDataArray(obj.assets.modela, bin),
@@ -955,11 +975,12 @@ export async function writeModData(reader, modName, obj, cdebugger) {
     }
 
     for(let file in filesData){
+      console.log(file)
       await reader.set(file,filesData[file])
     }
 
     for(let file in binary){
-      await reader.set(file,filesData[file],{file: true})
+      // await reader.set(file,filesData[file],{file: true})
     }
 }
 
@@ -1002,14 +1023,14 @@ export async function modsMerge(reader,mods,options){
 
     merged.catalogs = []
       if(constCatalog.length){
-        merged.catalogs.push({ path: "GameData/ConstData.xml", const: constCatalog})
+        merged.catalogs.push({ path: "GameData/ConstData", const: constCatalog})
       }
       if(structCatalog.length){
-        merged.catalogs.push({ path: "GameData/StructData.xml", Struct: structCatalog})
+        merged.catalogs.push({ path: "GameData/StructData", Struct: structCatalog})
       }
 
       merged.catalogs.push(...Object.entries(outputCatalogs).map(([name,data]) => ({
-        path: "GameData/" + name + "Data.xml",
+        path: "GameData/" + name + "Data",
         Data: data
       })))
   }

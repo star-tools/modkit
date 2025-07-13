@@ -157,6 +157,7 @@ export const SLibraryRoot = {
 }
   
 export const TLibrary = {
+    "@": "Library",
   Id: C.Word,
   Root: SLibraryRoot,
   LibraryShareToMods: C.Words,
@@ -170,6 +171,7 @@ export const TLibrary = {
 
 
 export const TTriggerData = {
+    "@": "TriggerData",
     library: [{external: C.String }],//[TriggerLibs/VoidMultiLib
     Library: [TLibrary],
     Standard: {},

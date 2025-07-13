@@ -3,6 +3,7 @@ import {SCSchema} from "./schema.js"
 import { Int, Real, CWord, CString} from "./types.js"
 
 export const  EditorCategories = {
+    "@": "EditorCategories",
     fieldVal: [{
         path: CString, //AbilSetId,CAbil_Alignment,CAbil_CmdButtonArr
         advanced: Int,

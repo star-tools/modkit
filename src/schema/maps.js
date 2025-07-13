@@ -87,6 +87,7 @@ export const MGroup = {
     Id: C.Int
 }
 export const MObjects = {
+    "@": "Objects",
     ObjectDoodad: [MObjectDoodad],
     ObjectPoint: [MObjectPoint],
     ObjectCamera: [MObjectCamera],
@@ -95,6 +96,7 @@ export const MObjects = {
     $Version: C.Int
 }
 export const MTerrain = {
+    "@": "Terrain",
     heightMap: [{
         cliffSetList: {
             cliffSet: [{
@@ -179,6 +181,7 @@ export const MTerrain = {
     version: C.Int
 }
 export const MRegions = {
+    "@": "Regions",
     region: [{
         name: C.String,
         invisible: C.Unknown,

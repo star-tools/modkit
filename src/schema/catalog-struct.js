@@ -12100,6 +12100,7 @@ SCSchema["*Struct"] = [SCSchema.struct]
 SCSchema["*Data"] = [SCSchema.classes]
 
 SCSchema.Catalog = {
+    "@": "Catalog",
     path: A.XML,
     //constants will be stored in a separate array 
     const: [S.Const],
@@ -12117,5 +12118,6 @@ SCSchema.Catalog = {
 }
 
 SCSchema.Includes = {
+    "@": "Includes",
     Catalog: [{path: A.XML}]
 }

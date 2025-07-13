@@ -284,6 +284,10 @@ export default class SC2JSON {
       const mod = key[0];
       const field = key.slice(1);
 
+      if(key === "@") {
+        continue;
+      }
+
       switch (mod) {
         case '@': tag && this._writeValue(obj, field, schema[key].parse(tag, obj)); break;
         case '&': value && this._writeValue(obj, field, schema[key].parse(value, obj)); break;
@@ -420,8 +424,13 @@ export default class SC2JSON {
     if (!schema || typeof obj !== 'object') return result;
 
     for (const key in schema) {
+      if(key === "@") {
+        result.tag = schema[key]
+        continue;
+      }
       const mod = key[0];
       const field = key.slice(1);
+
 
       switch (mod) {
         case '@': if (field in obj) result.tag = obj[field]; break;
@@ -464,7 +473,7 @@ export default class SC2JSON {
               fieldSchema2 = fieldSchema[0][item.class];
               resultKey = item.class;
             }
-            if((fieldSchema2[1] || item.constructor === Object) && fieldSchema2.constructor === Array){
+            if((fieldSchema2[1]/* || item.constructor === Object*/) && fieldSchema2.constructor === Array){
               //indexed array
               for(let index in item){
                 const child = this.revertSchemaToXMLJSON(item[index],  fieldSchema2[0]);
@@ -497,4 +506,31 @@ export default class SC2JSON {
 
     return result;
   }
+}
+
+
+//Compact XML
+export function cleanXML(xmlString, options = { removeLineBreaks: true }) {
+  // Step 1: Remove spaces between tags
+  let out = xmlString.replace(/>\s+</g, '><');
+
+  if (options.removeLineBreaks) {
+    out = out.replace(/(\>)\s*\n\s*(\<)/g, '$1$2');
+  }
+
+  // Step 2: Clean tag attributes (remove extra spaces & trim values)
+  out = out.replace(/<([\w:-]+)\s+([^>]+?)\s*(\/?)>/g, (match, tagName, attrs, selfClose) => {
+    // Clean attribute list
+    const cleanedAttrs = attrs
+      .trim()
+      .replace(/\s*=\s*/g, '=') // Remove spaces around '='
+      .replace(/(\w+)=["']\s*([^"']*?)\s*["']/g, (m, name, value) => {
+        return `${name}="${value}"`; // Trim spaces in attribute values
+      })
+      .replace(/\s+/g, ' '); // Collapse multiple spaces between attributes
+
+    return `<${tagName} ${cleanedAttrs}${selfClose ? ' /' : ''}>`;
+  });
+
+  return out.trim();
 }

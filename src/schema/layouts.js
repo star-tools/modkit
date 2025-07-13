@@ -919,7 +919,8 @@ export const LFrame = {
 LFrame.Frame = [LFrame]
 
 
-export const LLayout = {
+export const LDesc = {
+    "@": "Desc",
     DescFlags: [{ val: CString }],
     Include: [{path: A.Layout, requiredtoload: CWord}],
     Frame: [LFrame],
@@ -939,11 +940,10 @@ export default {
     State: LState,
     StateGroup: LStateGroup,
     Frame: LFrame,
-    Layout: LLayout,
+    Desc: LDesc,
 }
 
-SCSchema.Desc = LLayout
-
+SCSchema.Desc = LDesc
 
 
 

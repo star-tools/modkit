@@ -2,6 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import { SC2JSON } from '../src/converter/SC2XMLJSON.js';
 import { SC2JSONDebugger } from '../src/converter/debugger.js';
+import {SCSchema} from '../src/schema/all.js';
+import SC2JSON,{cleanXML} from '../src/converter/scjson.js';
+
 
 describe('SC2JSON Converter', () => {
   let converter;
@@ -45,6 +48,28 @@ describe('SC2JSON Converter', () => {
     // Timing info
     expect(typeof debuggerInstance.executionDurationMs).toBe('number');
   });
+
+
+
+  test('converts sample XML to JSON and back to XML 2', () => {
+    
+    const xmlInput = `
+    <Catalog>
+      <CActorUnit id="GenericUnitMinimal">
+        <StatusColors index="Shields">
+          <ColorArray value="255,0,0,255"/>
+        </StatusColors>
+      </CActorUnit>
+    </Catalog>`
+    const converter = new SC2JSON({debugger: cdebugger})
+    const json = converter.toJSON(xmlInput);
+    const xmlOutput = converter.toXML(json,SCSchema.Catalog)
+    
+  
+    expect(cleanXML(xmlInput)).toBeEqual(cleanXML(xmlOutput))
+  })
+
+
 
   test('parses and converts a large XML file', () => {
     const xmlPath = path.resolve(__dirname, '../test/unitdata.test.xml');

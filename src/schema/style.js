@@ -33,6 +33,7 @@ export const SStyle = {
         
     }
 export const CSStyle = {
+    "@": "StyleFile",
     Constant: [{name:CWord,val: CString}],
     // "*Style": [{style: SStyle}], //lowercase typo in core.sc2mod
     Style: [SStyle],
