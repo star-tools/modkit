@@ -1,27 +1,28 @@
 
 // IndexedDB-backed storage class
 export default class Reader {
-  constructor(options) {
-    this.options = options || {}
-  }
+    constructor(options) {
+        this.options = options || {}
+    }
 
-  async init() {
-  }
-  
-  async list( prefix = '') {
-  }
+    async init() {
+    }
+    
+    async list( prefix = '') {
+    }
 
-  async set(key, value) {
-  }
+    async set(key, value) {
+    }
 
-  async get(key) {
-  }
+    async get(key) {
+    }
 
-  async delete(key) {
-  }
+    
+    async delete(key) {
+    }
 
-  async clear() {
-  }
+    async clear() {
+    }
     async transfer( writer){
         const files = await this.list();
         for (const file of files) {

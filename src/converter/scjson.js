@@ -6,6 +6,32 @@ import {
   isInteger
 } from '../lib/util.js';
 
+
+export function getSchema(tag, schema = SCSchema) {
+  if (schema[tag] || schema['%' + tag] || schema['@' + tag]) return schema[tag]
+  for (let key in schema) {
+    if (key[0] === '*' && schema[key][0]?.[tag]) {
+      return schema[key][0][tag]
+    }
+  }
+  return null
+}
+export function getSchemaField(tag, schema = SCSchema) {
+  if (schema[tag]) return { schema: schema[tag], field: tag };
+  if (schema['%' + tag]) return { schema: schema['%' + tag], field: tag };
+  if (schema['@' + tag]) return { schema: schema['@' + tag], field: tag };
+  for (let key in schema) {
+    if (key[0] === '*' && schema[key][0]?.[tag]) {
+      const subSchema = schema[key][0][tag];
+      return {
+        schema: Array.isArray(schema[key]) ? [subSchema] : subSchema,
+        field: key.substring(1)
+      };
+    }
+  }
+  return { schema: null, field: null };
+}
+
 /**
  * SC2JSON is a schema-driven XML-to-JSON and JSON-to-XML converter
  * for SC2 (StarCraft II) data structures.
@@ -33,7 +59,7 @@ export default class SC2JSON {
 
     this.debugger?.start('schema');
     if (!schema) {
-      const resolved = this.getSchema(jsonObject.tag);
+      const resolved = getSchemaField(jsonObject.tag);
       schema = resolved.schema;
     }
     if (schema) this._applySchema(jsonObject, schema);
@@ -45,25 +71,17 @@ export default class SC2JSON {
   /**
    * Converts structured JSON (with schema) to XML string.
    */
-  toXML(jsonObject) {
-    const { schema } = this.getSchema(jsonObject.type || jsonObject.class, SCSchema);
+  toXML(jsonObject,schema) {
+    if(!jsonObject){
+      return null
+    }
+
+    if(!schema){
+      const { schema: s} = getSchemaField(jsonObject.type || jsonObject.class, SCSchema);
+      schema = s
+    }
     const xmlLikeJSON = this.revertSchemaToXMLJSON(jsonObject, schema);
     return convertJSONtoXML(xmlLikeJSON);
-  }
-
-  getSchema(tag, schema = SCSchema) {
-    if (schema[tag]) return { schema: schema[tag], field: tag };
-    if (schema['%' + tag]) return { schema: schema['%' + tag], field: tag };
-    for (let key in schema) {
-      if (key[0] === '*' && schema[key][0]?.[tag]) {
-        const subSchema = schema[key][0][tag];
-        return {
-          schema: Array.isArray(schema[key]) ? [subSchema] : subSchema,
-          field: key.substring(1)
-        };
-      }
-    }
-    return { schema: null, field: null };
   }
 
   _writeValue(obj, field, value, isArray) {
@@ -133,10 +151,19 @@ export default class SC2JSON {
 
     if (attributes) {
       for (const key in attributes) {
-        const value = attributes[key];
-        if (key === 'index') continue;
-        if (key === 'removed') obj.removed = +value;
-        else value !== undefined && this._writeValue(obj, key, schema[key]?.parse?.(value, obj));
+        let value = attributes[key];
+        if (key === 'index') {obj.index = isInteger(value) ? +value : value }
+        else if (key === 'removed') {obj.removed = +value;}
+        else {
+          let fieldSchema =  schema[key]?.value || schema[key]
+          if(fieldSchema){
+            value = fieldSchema.parse(value, obj) 
+          }
+          else{
+            //no schema... token?
+          }
+          value !== undefined && this._writeValue(obj, key, value);
+        }
       }
     }
 
@@ -155,7 +182,7 @@ export default class SC2JSON {
   }
 
   _applySchemaForChild(obj, child, schema) {
-    const { field, schema: subSchema } = this.getSchema(child.tag, schema);
+    const { field, schema: subSchema } = getSchemaField(child.tag, schema);
 
     if(!subSchema && schema){
       this.debugger?.missingSchema(obj, child.tag);
@@ -166,12 +193,12 @@ export default class SC2JSON {
     const schemaClass = isArray ? subSchema?.[0] : subSchema;
 
     let index = child.attributes?.index;
-    const namedIndex = index && !isInteger(index);
+    const namedIndex = index !== undefined && !isInteger(index);
     const enumIndex = subSchema?.[1];
     const isIndexedArray = !!(enumIndex || namedIndex)
 
     if(!isIndexedArray && obj[fieldName]?.constructor === Object){
-      console.warn(`${fieldName} possible an array`)
+      console.warn(`${this.debugger?.trace.join(".") + "." + fieldName} possible an array`)
       obj[fieldName] = [obj[fieldName]]
       isArray = true
     }
@@ -205,11 +232,11 @@ export default class SC2JSON {
         obj[fieldName][enumName] = value;
         return;
       } else {
-        if(child.attributes?.index){
+        if(child.attributes?.index !== undefined){
           let result = {}
-          if(child.attributes.removed)result.removed = child.attributes.removed
-          if(child.attributes.index)result.removed = +child.attributes.index
-          if(child.attributes.value!==undefined)result.value = schemaClass?.parse(child.attributes?.value);
+          if(child.attributes.removed !== undefined)result.removed = child.attributes.removed
+          if(child.attributes.index !== undefined)result.index = +child.attributes.index
+          if(child.attributes.value !==undefined)result.value = schemaClass?.parse(child.attributes?.value);
         }
         else if(child.attributes?.value !== undefined){
           value = schemaClass?.parse(child.attributes?.value);

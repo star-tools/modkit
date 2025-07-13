@@ -41,6 +41,7 @@ export const SComponents = {
 SCSchema.components = SComponents
 
 SCSchema.Components = {
+    Optimized: {},
     // "*Components": [SCSchema.components,EComponent],
     DataComponent: [{Type: CString, Locale: CString}]
 }

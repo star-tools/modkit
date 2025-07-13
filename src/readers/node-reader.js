@@ -1,15 +1,17 @@
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 import Reader from './reader.js';
 
 
 
 export default class NodeReader extends Reader {
-    constructor(options) {
-        super(options);
+    constructor(prefix) {
+        super();
+        if(prefix && !prefix.endsWith("/"))prefix +="/"
+        this.prefix = prefix || ""
     }
     async init(modpath){
-        this.basePath = path.resolve(modpath);
+        this.basePath = path.resolve(this.prefix + modpath);
     }
 
     async list(dirPath = "") {
@@ -18,7 +20,7 @@ export default class NodeReader extends Reader {
         const folders = [];
 
         try {
-            const items = await fs.promises.readdir(fullPath, { withFileTypes: true });
+            const items = await fs.readdir(fullPath, { withFileTypes: true });
 
             for (const item of items) {
                 const itemPath = path.join(fullPath, item.name);
@@ -45,26 +47,46 @@ export default class NodeReader extends Reader {
 
     async get(relativeFile, format = 'utf-8') {
         const fullPath = path.join(this.basePath, relativeFile);
-        if(format === 'base64'){
-            const buffer = fs.readFileSync('example.png');
-            return buffer.toString('base64');
-        }
+
         try {
-            return await fs.promises.readFile(fullPath, { encoding: "utf-8" });
-        } catch (err) {
-            if (err.code !== "ENOENT") {
-                console.error(`Failed to read file: ${fullPath}`, err.message);
+            if (format === 'base64') {
+                const buffer = await fs.readFile(fullPath);
+                return buffer.toString('base64');
             }
+
+            if (format === 'buffer' || format === 'uint8array') {
+                return await fs.readFile(fullPath); // returns Buffer (which is a Uint8Array)
+            }
+
+            return await fs.readFile(fullPath, { encoding: 'utf-8' });
+
+        } catch (err) {
+            console.error(`Failed to read file: ${fullPath}`, err.message);
             return null;
         }
     }
 
-    set(filename,content){
-        let foutput = this.basePath + filename.replace(/\\/g, "\/")
-        fs.mkdirSync(foutput.substring(0, foutput.lastIndexOf("/")), {recursive: true});
-        fs.writeFileSync(foutput, content)
+    link(file){
+        return path.resolve(file)
     }
-}
+
+    async set(filename, content, options) {
+        const foutput = path.join(this.basePath, filename);
+        const dir = path.dirname(foutput);
+
+        // Ensure directory exists
+        await fs.mkdir(dir, { recursive: true });
+
+        if (options?.file) {
+            // Copy file from source path (content is the source path here)
+            await fs.copyFile(content, foutput);
+        } else {
+            // Write text/binary content directly
+            await fs.writeFile(foutput, content);
+        }
+    }
+    
+}       
 
     // write(destpath){
     //     let files = this.mod.getFiles({scope: this.scope})

@@ -1476,13 +1476,13 @@ export const SUpgradeInfoWeapon = {
 }
 export const SDataFieldsPattern = {
     ...SStruct,
-    Reference: C.String,
+    Reference: C.String,//C.CatalogReference?
     NameOverride: L.String,
     UserData: C.Identifier,
 }
 export const SDataTokensPattern = {
     ...SStruct,
-    Reference: C.String,
+    Reference: C.String,//C.CatalogReference?
     NameOverride: L.String,
     UserData: C.Identifier,
 }
@@ -2669,7 +2669,7 @@ export const SAttributePointsInfo = {
 export const SUpgradeEffectTemplate = {
     ...SStruct,
     Operation: E.UpgradeOperation,
-    Reference: C.String,
+    Reference: C.String,//C.CatalogReference?
     Value: C.String,
 }
 
@@ -4330,7 +4330,7 @@ const CData = {
     default: C.Bit,
     "@class": E.ClassId,
     "%token": [S.Token],
-    "#comment": C.Parent
+    "#comment": C.Parent,
 }
     
 const CAbil = {
@@ -6717,22 +6717,23 @@ const CArtifactSlot = {
 }
 
 const CAttachMethod = {
+    ...CData,
 }
 
 const CAttachMethodArcTest = {
-    ...CData,
+    ...CAttachMethod,
     Tests: F.Unknown,
     Type: E.AMArcTestType,
 }
 
 const CAttachMethodBestMatch = {
-    ...CData,
+    ...CAttachMethod,
     Keys: C.AttachKeys,
     Flags: F.Unknown,
 }
 
 const CAttachMethodFilter = {
-    ...CData,
+    ...CAttachMethod,
     Keys: [S.AttachKey],
     Logic: E.AMFilterLogic,
     AttachType: E.AMFilterAttachType,
@@ -6740,37 +6741,39 @@ const CAttachMethodFilter = {
 }
 
 const CAttachMethodAttachType = {
-    ...CData,
+    ...CAttachMethod,
     AttachType: E.AMAttachType,
 }
 
 const CAttachMethodIncoming = {
+    ...CAttachMethod,
 }
 
 const CAttachMethodLeastDeflection = {
+    ...CAttachMethod,
 }
 
 const CAttachMethodNodeOccupancy = {
-    ...CData,
+    ...CAttachMethod,
     Targets: [A.Model],
     Logic: E.AMOccupancyLogic,
 }
 
 const CAttachMethodNodeOccupancy2 = {
-    ...CData,
+    ...CAttachMethod,
     Targets: [L.Model],
     Logic: E.AMOccupancyLogic,
 }
 
 const CAttachMethodNumericField = {
-    ...CData,
+    ...CAttachMethod,
     Field: E.AMNumericField,
     Value: C.Real32,
     Operator: E.AMNumericFieldOp,
 }
 
 const CAttachMethodPattern = {
-    ...CData,
+    ...CAttachMethod,
     Type: E.AMPatternType,
     Keyword: E.AttachKeyword,
     Base: C.DataSoupKey,
@@ -6780,12 +6783,12 @@ const CAttachMethodPattern = {
 }
 
 const CAttachMethodPortAllocator = {
-    ...CData,
+    ...CAttachMethod,
     PortLimit: C.UInt32,
 }
 
 const CAttachMethodProximity = {
-    ...CData,
+    ...CAttachMethod,
     RequestCount: C.UInt32,
     DistanceMax: C.Real32,
     SortResults: C.Bit,
@@ -6793,14 +6796,14 @@ const CAttachMethodProximity = {
 }
 
 const CAttachMethodRandom = {
-    ...CData,
+    ...CAttachMethod,
     RequestCount: C.UInt32,
     Distribution: E.AMRandomDistribution,
     ExponentialMean: C.Real32,
 }
 
 const CAttachMethodReduction = {
-    ...CData,
+    ...CAttachMethod,
     ReductionType: E.AMReductionType,
     RequestCount: C.UInt32,
     RequestCountRange: C.UInt32,
@@ -6810,19 +6813,22 @@ const CAttachMethodReduction = {
 }
 
 const CAttachMethodVolumesRequery = {
+    ...CAttachMethod,
 }
 
 const CAttachMethodVolumesTargets = {
+    ...CAttachMethod,
 }
 
 const CAttachMethodVolumesWeightedPick = {
-    ...CData,
+    ...CAttachMethod,
     VolumeFactor: C.Real32,
     ProximityFactorNear: C.Real32,
     ProximityFactorFar: C.Real32,
 }
 
 const CBankCondition = {
+    ...CData,
 }
 
 const CBankConditionCompare = {
@@ -6871,23 +6877,28 @@ const CBankConditionCurrentMap = {
 }
 
 const CBeam = {
+    ...CData,
 }
 
 const CBeamSync = {
+    ...CBeam,
 }
 
 const CBeamSyncSweeper = {
+    ...CBeam,
 }
 
 const CBeamAsync = {
+    ...CBeam,
 }
 
 const CBeamAsyncLinear = {
-    ...CData,
+    ...CBeam,
     Duration: C.Real,
 }
 
 const CBeamAsyncShadow = {
+    ...CBeam,
 }
 
 
@@ -7538,6 +7549,7 @@ const CDecalPack = {
 }
 
 const CDSP = {
+    ...CData,
 }
 
 const CDSPChorus = {
@@ -8556,6 +8568,7 @@ const CHerd = {
 }
 
 const CHerdNode = {
+    ...CData,
 }
 
 const CHero = {
@@ -9883,6 +9896,7 @@ const CTacCooldown = {
 }
 
 const CTactical = {
+    ...CData,
 }
 
 const CTacticalOrder = {
@@ -12097,7 +12111,7 @@ SCSchema.Catalog = {
     //separate structures and catalogs 
     "*Struct": [SCSchema.structDefinitions],
     "*Data": [SCSchema.classes],
-    // "@type": C.String
+    // "@type": C.String, //can be used to identify result json object as catalog data
     // ...SStructs, // only 1 structure element per type
     // ...Object.fromEntries(Object.entries(SClasses).map(([e,c]) => ([e,[c]]))) //multiple classes
 }

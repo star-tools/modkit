@@ -89,4 +89,17 @@ describe('SC2JSON Converter', () => {
       `,SCSchema.struct.SAbilResearchInfo );
       expect(CAbilResearchjson.Button.Flags.ShowInGlossary).toBe(1);
   });
+
+
+  test('Apply patches test todo', () => {
+
+    let converter = new SC2JSON({ debugger: cdebugger });
+
+    let hydra = converter.toJSON(`<CUnit id="Hydralisk" actor="xxx"></CUnit>`,SCSchema.classes.CUnit)
+
+    let hydra1 = applyPatchesDeep(hydra)
+    expect(hydra1).toBeDefined();
+  });
+
+
 });

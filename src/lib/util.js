@@ -67,6 +67,20 @@ export function parseIni(iniText) {
   return result;
 }
 
+export function serializeIni(data) {
+  let output = '';
+
+  for (const section in data) {
+    output += `[${section}]\n`;
+    const lines = data[section];
+    for (const line of lines) {
+      output += `${line}\n`;
+    }
+    output += `\n`; // optional: add a blank line between sections
+  }
+
+  return output.trimEnd(); // remove trailing newlines
+}
 
 export function parseEnv(rawtext){
     if (!rawtext) {
@@ -83,15 +97,6 @@ export function parseEnv(rawtext){
             data[key] = value
         })
         return data
-}
-
-/**
- * Determines whether a value is an integer.
- * @param {string|number} value
- * @returns {boolean}
- */
-export function isInteger(value) {
-  return Number.isInteger(Number(value));
 }
 
 /**
@@ -260,9 +265,6 @@ export function convertJSONtoXML(node, indent = '') {
   return xml;
 }
 
-
-
-
 export function deep(a,b,c = 'merge'){
     if(!a){return b}
     if(!b){return a}
@@ -306,4 +308,65 @@ export function deep(a,b,c = 'merge'){
         }
     }
     return a
+}
+
+
+export function deepReplaceMatch(obj, testVal, testProp, cb, id, _path = [], _pathids = []) {
+    const keys = Object.keys(obj)
+    for (let i = 0, len = keys.length; i < len; i++) {
+        let prop = keys[i], val = obj[prop]
+        let path = [..._path, obj]
+        let crumbs = [..._pathids, prop]
+        if ((!testVal || testVal(val)) && (!testProp || testProp(prop))){
+            let result = cb({val, value: val,property: prop, object: obj, prop, obj, id, path,crumbs})
+            if(result !== undefined) {
+                obj[prop] = result;
+                val = result;
+            }
+        }
+        if (val && typeof val === 'object'){
+            deepReplaceMatch(val, testVal, testProp, cb, prop, path,crumbs)
+        }
+    }
+}
+
+export function groupObjectKeys(input) {
+    const result = {};
+
+    for (const [path, value] of Object.entries(input)) {
+        const parts = path.split('/');
+        let current = result;
+
+        for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+
+        // If it's the last part, set the value
+        if (i === parts.length - 1) {
+            current[part] = value;
+        } else {
+            // If the key doesn't exist or isn't an object, create/replace it
+            if (typeof current[part] !== 'object' || current[part] === null) {
+            current[part] = {};
+            }
+            current = current[part];
+        }
+        }
+    }
+
+    return result;
+}
+
+export function isNumeric(str) {
+    if (typeof str != "string") return false // we only process strings!
+    return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+        !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+}
+
+/**
+ * Determines whether a value is an integer.
+ * @param {string|number} value
+ * @returns {boolean}
+ */
+export function isInteger(value) {
+  return Number.isInteger(Number(value));
 }

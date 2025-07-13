@@ -20,7 +20,7 @@ export class CDataType {
   constructor(name) {
     this.name = name;
   }
-
+  static isValue = true
   /**
    * Validate a given value against the data type.
    * Default implementation always returns true.
@@ -158,6 +158,68 @@ export class CString extends CDataType {
     return true;
   }
 }
+
+
+function getTextRelations(value,trace = []){
+    let result = []
+    value
+      .replace(/<d\s+(?:stringref)="(\w+),([\w@]+),(\w+)"\s*\/>/g, (_,namespace,entity,field)=>{
+            result.push({type: namespace,value: entity ,trace})
+            return ''
+      })
+      .replace(/<d\s+(?:time|ref)\s*=\s*"(.+?)(?=")"((?:\s+\w+\s*=\s*"\s*([\d\w]+)?\s*")*)\s*\/>/gi, (_,ref,opts) => {
+          result.push(...getNestedTextReferenceRelations(ref,trace))
+          return ''
+      })
+      .replace(/<n\/>/g,"<br/>")
+      return result
+}
+function getNestedTextReferenceRelations (value,trace){
+    let result = []
+      let ref = value.replace(/\[d\s+(?:time|ref)\s*=\s*'(.+?)(?=')'((?:\s+\w+\s*=\s*'\s*([\d\w]+)?\s*')*)\s*\/?\]/gi, (_,ref,opts) => {
+          result.push(...this.getNestedTextReferenceRelations(ref,trace))
+          return ' '
+      })
+      ref = ref.replace(/\$(.+?)\$/g,(_,cc)=>{
+          let options = cc.split(':')
+          switch(options[0]){
+              case 'AbilChargeCount':
+                  let ability = options[1]
+                  result.push({type: "Abil",value: ability ,trace})
+                  return ' '
+              case 'UpgradeEffectArrayValue':
+                  let upgrade = options[1]
+                  let effectArrayValue = options[2]
+                  {
+                    let [namespace,entity] = effectArrayValue.split(",")
+                    result.push({type: namespace,value: entity ,trace})
+                  }
+                  result.push({type: "Upgrade",value: upgrade ,trace})
+                  return ' '
+          }
+          return ''
+      })
+
+      ref = ref.replace(/((\w+),([\w@]+),(\w+[\.\w\[\]]*))/g,(_,expr, namespace,entity,fields)=>{
+          result.push({type: namespace,value: entity ,trace})
+          return ' '
+      })
+      return result
+}
+
+
+export class CText extends CString {
+  static relations(value,trace){
+    return getTextRelations(value,trace)
+  }
+  static validate(str) {
+    return true;
+  }
+}
+
+
+
+
 
 /** Non-whitespace word */
 export class CWord extends CString {
@@ -370,7 +432,6 @@ export const TPowerLink = CString
 export const TProductHyperlinkId = CString
 export const THyperlinkId = CString
 export const TCatalogFieldPath = CString // Attributes[1]
-export const TEditorCategories = CString
 export const TGalaxyFunction = CString
 export const TCargoSize = Int
 export const TCargoCapacity = Int
@@ -419,12 +480,10 @@ export const CGameTime = Real
 export const CCmdResult = CString
 export const CfRange = CReals
 export const CFangle = Real
-export const CDataSoupKey = CString
 export const CGamePoint = CReals
 export const CIdentifier = CString // <File value="Assets/Sounds/GDI/##prefix##^TemplateParam1^.ogg"/>
 export const CColor = CString
 export const CActorKey = CString
-export const CActorTerms = CString //'terms'
 export const CScaleVector = CReals
 export const C3Vector = CReals
 export const CActorCreateKey = CString
@@ -433,7 +492,6 @@ export const CQuad = CReals
 export const CRange = CReals
 export const CVariatorActorReal32 = CReals
 export const C2Vector = CReals
-export const CRefKey = CString
 export const CActorAngle = Real
 export const CAnimNameKey = CString
 export const CAnimProps = CString
@@ -466,8 +524,6 @@ export const C2fVector = CReals
 export const CTextureSlot = CUnknown
 export const CGameAcceleration = Real
 export const C4Vector = CReals
-export const CActorMsgPayloadPtr = CString// 'send'
-export const CActorSiteOps = CString//'ops'
 export const CLabelExpression = CUnknown
 export const CIdSetPlayers = CUnknown
 export const CIdSetTeams = CUnknown
@@ -476,7 +532,6 @@ export const CAttachMethods = CUnknown
 export const CActorClassFilters = CUnknown
 export const CActorDeathMembers = CString//'filters'
 export const CGamePoInt3D = CReals
-export const CCatalogReference = CString//'reference'
 export const CTextureExpression = CUnknown
 export const CMissileAcceleration = Real
 export const CMissileSpeed = Real
@@ -492,11 +547,243 @@ export const CCardId = CWord
 
 
 
+let regexps  = {
+    bool: /^true|false$/,
+    bit: /^[01]$/,
+    int: /^-?(0|[1-9]\d*)$/,
+    real: /^(-?(0|[1-9]\d*)(\.\d+)?)|\.\d+$/,
+    ints: /^(-?(0|[1-9]\d*)(,-?(0|[1-9]\d*))*|NULL)$/,
+    reals: /^((-?(0|[1-9]\d*)(\.\d+)?)(\,-?(0|[1-9]\d*)(\.\d+)?)*|NULL)$/,
+    filters: /^(-|\w+(,\w+){0,});(-|\w+(,\w+){0,})$/,
+    categories: /^(\w+\:[\w -#]+)(,\w+\:[\w -#]+)*$/,
+    file: /^.*$/,
+    link: /^[A-Za-z_\-@#0-9-]+(\/+[A-Za-z_\-@#0-9-]+)*\/?$/,
+    linkstrict: /^[A-Za-z_\-@#0-9-]+(\/+[A-Za-z_\-@#0-9-]+)+\/?$/,
+    links: /^[A-Za-z_\-@#0-9-]+(\/+[A-Za-z_\-@#0-9-]+)*\/?(,[A-Za-z_@#0-9-]+(\/+[A-Za-z_@#0-9-]+)*\/?)*$/,
+    text: /^[A-Za-z_\-@#0-9-]+((\/+[A-Za-z_\-@#0-9-]+)\/?)*(\/+.+)+\/?$/,
+    word: /^[\w@_\-%#]+$/,
+    wordstrict: /^[\w@_\-%#]+$/,
+    abilcmd: /^([\w@_#]+([.,][\w]+)?|255)$/,
+    abilcmdstrict: /^([\w@_#]+[.,][\w]+|255)$/,
+    words: /^[\w@_\-%#]+(,[\w@_\-%#]+)*$/,
+    ops: /^[\w@_\-%#]+(\s[\w@_\-%#]+)*$/,
+    reference: /^.*$/,
+    referencestrict: /^\w+,\w+,[\w\[\].]+$/,
+    subject: /^.*$/,
+    driver: /^.*$/,
+    send: /^.*$/,
+    terms: /^.*$/,
+    filestrict: /^[Za-z_#'0-9\-]+[\\/a-z_#'0-9\-. ]+\.(dds|fxa|m3|tga|m3a|ogv|wav|mp3|SC2Map|SC2Layout|SC2Cutscene|SC2Campaign|SC2Mod)$/i,
+}
+
+
+const entityType = {
+    TurretEnable: "Turret",
+    TurretTarget: "Turret",
+    Behavior: "Behavior",
+    BehaviorLevel: "Behavior",
+    AbilTrain: "Abil",
+    Abil: "Abil",
+    AbilTransport: "Abil",
+    WeaponStart: "Weapon",
+    WeaponStop: "Weapon",
+    Upgrade: "Upgrade",
+    Confirmation: "Unit",
+    UnitConstruction: "Unit",
+    UnitDeath: "Unit",
+    UnitBirth: "Unit",
+    UnitRevive: "Unit",
+    Effect: "Effect",
+    Model: "Model",
+    Actor: "Actor",
+}
+
+const conditionEntityType = {
+    ValidatePlayer: "Validator",
+    // ModelSwap: "Model",
+    AbilTrainProduced: "Unit",
+    ValidateCreationEffect: "Validator",
+    ValidateUnit: "Validator",
+    ValidateEffect: "Validator",
+    // "!ValidateUnit": "Validator",
+    AbilTransport: "Unit",
+    MorphFrom: "Unit",
+    MorphTo: "Unit",
+}
+
+function eventConditionEntityType(eventname){
+    return conditionEntityType[eventname.replace(/^\!/,"")]
+}
+
+function eventEntityType(eventname){
+    return entityType[eventname]
+}
+
+
+
+export class TEditorCategories extends CString  {
+  static relations(value,trace){
+    let result = []
+    let pairs = value.split(",").map(el => el.split(":"))
+    for(let [property,propvalue] of pairs){
+      switch(property){
+        case "Race":
+          result.push({type: "Race", value: propvalue, trace})
+      }
+    }
+    return result;
+  }
+}
+
+export class CCatalogReference extends CString  {
+  static relations(value,trace){
+    let result = []
+    let [type, link, entityProperty] = value.split(",")
+    result.push({type, value: link, trace})
+    return result;
+  }
+}
+
+export class CRefKey extends CString  {
+  static relations(value,trace){
+    let result = []
+    
+    if(/[a-zA-Z]/.test(value[0])){
+      result.push({type: "Actor", value, trace})
+    }
+    else if(value.startsWith(':')){
+        let [type,link] = value.substring(2).split(".")
+        if(link){
+          result.push({type, link, trace})
+        }
+    }
+    return result;
+  }
+}
+
+export class CDataSoupKey extends CString  {
+  static relations(value,trace){
+    let result = []
+    if(/[a-zA-Z]/.test(value[0])){
+      result.push({type: "Effect", value, trace})
+    }
+    return result;
+  }
+}
+
+
+
+export class CActorTerms extends CString  {
+  static relations(value,trace){
+    let result = []
+    let [...conditions] = value.split(";").map(term => term.trim())
+    for(let index =0; index < conditions.length; index++){
+      let condition = conditions[index]
+      if(condition.includes(".")){
+        let [entityType, entityName, argumentName] = condition.split(".")
+        let type = eventEntityType(entityType)
+        if(type){
+          result.push({type, value: entityName, trace})
+        }
+      }
+      else{
+          let [entityType, entityName] = condition.split(" ").map(term => term.trim())
+          let type = eventConditionEntityType(entityType)
+          if(type && !result.find(i => i.type === type && i.value === entityName)){
+              result.push({type, value: entityName, trace})
+          }
+      }
+    }
+    return result
+  }
+}
+
+export class CActorMsgPayloadPtr extends CString  {
+  static relations(value,trace){
+    let args = value.split(" ")
+    let result = []
+    if(args.length <= 1) return result
+    switch (args[0]) {
+      case "AttachSetBearingsFrom":  {
+        //AttachSetBearingsFrom {Weapon 0} {} {LurkerMPSOpAoEVariancer SOpShadow SOpForwardCasterPoint SOp2DRotation LurkerMPSOpShadowSpine SOpRotVariancerUp15}
+        let _val = value
+        _val = _val.substring(_val.indexOf('}')+1)
+        _val = _val.substring(_val.indexOf('}')+1)
+        let parts = _val.replace(/([\{\} }])/g,'\n$1\n').split('\n')
+        for(let link of parts){
+            if(regexps.wordstrict.test(link)) {
+                result.push({type: "Actor", value: link, trace})
+            }
+        }
+        break;
+      }
+      case "HostSiteOpsSet":
+      {
+        //HostSiteOpsSet ::HostImpact SOpAttachCenter 1 1
+        //HostSiteOpsSet ::Host {SOpAttachCenter SOp2DRotation NovaGriffinBombingRunBombRandomRotation}
+        let _val = value
+        _val = _val.substring(_val.indexOf(' '))
+        _val = _val.substring(_val.indexOf(' '))
+        let parts = _val.replace(/([\{\} }])/g,'\n$1\n').split('\n')
+        for(let link of parts){
+            if(regexps.wordstrict.test(link)) {
+                result.push({type: "Actor", value: link, trace})
+            }
+        }
+        break;
+      }
+      case "PortraitCustomize":
+      case "ModelSwap": {
+        let link = args[1]
+        result.push({type: "Model", value: link, trace})
+        break;
+      }
+      case "RefSetFromMsg": {
+        // Send="RefSetFromMsg ::actor.SiegeTankSieged ::Sender"/>
+        let _val = value.split(" ")
+        if(_val[1][0] !== ":"){console.log("RefSetFromMsg! starts with character")}
+        let [namespace,link] = _val[1].substring(2).split(".")
+        result.push({type: namespace, value: link, trace})
+        break;
+      }
+      case "ModelMaterialRemove":
+      case "ModelMaterialApply":
+      case "CreateCopy":
+      case "Create": {
+        let link = args[1]
+        result.push({type: "Actor", value: link, trace})
+        break;
+      }
+      case "TimerSet":
+      case "QueryRegion":
+      case "QueryRadius": {
+        let link = args[2]
+        result.push({type: "Actor", value: link, trace})
+        break;
+      }
+    }
+    return result
+  }
+}
+
+export class CActorSiteOps extends CString  {
+  static relations(value,trace){
+    let result = []
+    let actors = value.split(" ")
+    for(let value of actors){
+        result.push({type: "Actor", value, trace})
+    }
+    return result
+  }
+}
 
 export class CLink extends CDataType  {
   static catalog = '';
   constructor() {
     super("Link");
+  }
+  static relations(value,trace){
+    return [{type: this.catalog, value,trace}]
   }
   validate(val) {
     return !!this.mod.catalogs[this.constructor.catalog]?.[val]
@@ -599,6 +886,9 @@ export class CFile extends CDataType {
   constructor() {
     super("File");
   }
+  static relations(value,trace){
+    return [{type: "File", value,trace}]
+  }
   static validate(val) {
     return true;
     // if (typeof val !== 'string') return false;
@@ -611,19 +901,19 @@ export class CFile extends CDataType {
   }
 }
 
-export class CFileImage extends CFile {static extensions = ["dds","png","tga","jpg"]}
-export class CFileMovie extends CFile {static extensions = ["ogv"]}
-export class CFileMap extends CFile {static extensions = ["sc2map"]}
-export class CFileModel extends CFile {static extensions = ["m3"]}
-export class CFileCutscene extends CFile {static extensions = ["sc2cutscene","stormcutscene"]}
-export class CFileFontStyle extends CFile {static extensions = ["sc2style"]}
-export class CFileLayout extends CFile {static extensions = ["sc2layout"]}
-export class CFileSound extends CFile {static extensions = ["ogg","mp3","wav"]}
-export class CFileAnims extends CFile {static extensions = ["m3a"]}
-export class CFileFacial extends CFile {static extensions = ["fx2"]}
-export class CFileSyncModelData extends CFile {static extensions = ["m3h"]}
-export class CFileXML extends CFile {static extensions = ["xml"]}
-export class CFileFont extends CFile {static extensions = ["ttf","c"]}
+export class CFileImage extends CFile { static catalog = "Image" ; static extensions = ["dds","png","tga","jpg"]}
+export class CFileMovie extends CFile { static catalog = "Movie" ; static extensions = ["ogv"]}
+export class CFileMap extends CFile { static catalog = "Map" ; static extensions = ["sc2map"]}
+export class CFileModel extends CFile { static catalog = "Model" ; static extensions = ["m3"]}
+export class CFileCutscene extends CFile { static catalog = "Cutscene" ; static extensions = ["sc2cutscene","stormcutscene"]}
+export class CFileFontStyle extends CFile { static catalog = "FontStyle" ; static extensions = ["sc2style"]}
+export class CFileLayout extends CFile { static catalog = "Layout" ; static extensions = ["sc2layout"]}
+export class CFileSound extends CFile { static catalog = "Sound" ; static extensions = ["ogg","mp3","wav"]}
+export class CFileAnims extends CFile { static catalog = "Anims" ; static extensions = ["m3a"]}
+export class CFileFacial extends CFile { static catalog = "Facial" ; static extensions = ["fx2"]}
+export class CFileSyncModelData extends CFile { static catalog = "SyncModelData" ; static extensions = ["m3h"]}
+export class CFileXML extends CFile { static catalog = "XML" ; static extensions = ["xml"]}
+export class CFileFont extends CFile { static catalog = "Font" ; static extensions = ["ttf","c"]}
 
 
 
@@ -638,6 +928,11 @@ export class CPhysicsMaterialLinks extends CList {
 export class CAbilCommand extends CDataType  {
   constructor() {
     super("Link");
+  } 
+  static relations(value,trace){
+    let [link, cmd] = value.split(",")
+    return [{type: "AbilCmd", value: link,trace}]
+    // return [{type: "AbilCmd", value: value,trace}]
   }
   validate(val) {
     let [ability,command] = val.split(",")
@@ -706,7 +1001,6 @@ export class CDataEntryPath extends CDataType  {
         CmdResult: CCmdResult,
         fRange: CfRange,
         Fangle: CFangle,
-        DataSoupKey: CDataSoupKey,
         GamePoint: CGamePoint,
         Identifier: CIdentifier,
         Color: CColor,
