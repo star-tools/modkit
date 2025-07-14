@@ -2,7 +2,7 @@
 
 import SC2JSONDebugger from '../src/converter/debugger.js';
 import NodeReader from '../src/readers/node-reader.js';
-import {readModData} from '../src/readers/mod-reader.js';
+import {SCMod,readModData} from '../src/converter/scmod.js';
 import fs from 'fs/promises';
 import yaml from '../src/lib/js-yaml.js';
 
@@ -145,8 +145,8 @@ const cdebugger = new SC2JSONDebugger( {file: './debug.json'});
 let modMultiJSONRaw = await fs.readFile(`./wiki/data.v2/multi/data.json`,{encoding: 'utf-8'})
 let modMulti = SCMod.fromJSON({catalogs: [{Data: JSON.parse(modMultiJSONRaw)}] })
 
-async function collectCustomFactionModData(modName){
-  let options = await readModData(reader, "custom/" + modName +".sc2mod", {
+async function collectCustomFactionModData(modName,deps){
+  let options = await readModData(reader, modName +".sc2mod", {
     debugger: cdebugger,
     scope: {
       catalogs: ["Abil","Behavior","Unit","Button","Actor","Weapon","Effect","Requirement","RequirementNode","Upgrade","Turret","Validator","DataCollection","DataCollectionPattern"],//,"Sound"],
@@ -156,10 +156,12 @@ async function collectCustomFactionModData(modName){
   })
   let mod = new SCMod({
     ...options,
-    dependencies:  [modMulti]
+    dependencies: deps 
   })
+
+  let dir = modName.split("/").pop()
   // Ensure directory exists
-  await fs.mkdir(`./wiki/data.v2/${modName}/`, { recursive: true });
+  await fs.mkdir(`./wiki/data.v2/${dir}/`, { recursive: true });
 
   mod._make_cache()
   
@@ -178,22 +180,24 @@ async function collectCustomFactionModData(modName){
       noRefs: true         // avoid anchors/aliases
     });
     yamlData = yamlData.replace(/'([A-Za-z0-9_]+)'/g, '$1'); // remove safe quotes
-    await fs.writeFile(`./wiki/data.v2/${modName}/${locale}.yaml`, yamlData); // save to file
+    await fs.writeFile(`./wiki/data.v2/${dir}/${locale}.yaml`, yamlData); // save to file
   }
 
     //save data only
   let data = mod.catalogs.map(c => c.Data).flat().filter(Boolean)
-  await fs.writeFile(`./wiki/data.v2/${modName}/data.json`, JSON.stringify(data)); // save to file
+  await fs.writeFile(`./wiki/data.v2/${dir}/data.json`, JSON.stringify(data)); // save to file
 }
 
-await collectCustomFactionModData("BroodWar")
-await collectCustomFactionModData("Dragons")
-await collectCustomFactionModData("Hybrids")
-await collectCustomFactionModData("Scion")
-await collectCustomFactionModData("Synoid")
-await collectCustomFactionModData("TalDarim")
-await collectCustomFactionModData("UED")
-await collectCustomFactionModData("Umojan")
-await collectCustomFactionModData("UPL")
+await collectCustomFactionModData("bundles/Base")
+await collectCustomFactionModData("bundles/VoidMulti5014")
+// await collectCustomFactionModData("custom/BroodWar", [modMulti])
+// await collectCustomFactionModData("custom/Dragons", [modMulti])
+// await collectCustomFactionModData("custom/Hybrids", [modMulti])
+// await collectCustomFactionModData("custom/Scion", [modMulti])
+// await collectCustomFactionModData("custom/Synoid", [modMulti])
+// await collectCustomFactionModData("custom/TalDarim", [modMulti])
+// await collectCustomFactionModData("custom/UED", [modMulti])
+// await collectCustomFactionModData("custom/Umojan", [modMulti])
+// await collectCustomFactionModData("custom/UPL", [modMulti])
 
 
