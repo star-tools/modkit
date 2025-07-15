@@ -3,23 +3,25 @@ import Reader from './reader.js';
 let fs, path;
 export const isNode = typeof process !== 'undefined' && process.versions?.node;
 
-if (isNode) {
+if (!!process?.versions?.node) {
     fs = await import('fs/promises');
     path = await import('path');
 }
 
 export default class NodeReader extends Reader {
-    constructor(prefix) {
-        super();
-        if(prefix && !prefix.endsWith("/"))prefix +="/"
-        this.prefix = prefix || ""
+    constructor(options) {
+        super(options);
+        this.extension = options.extension || ""
+        this.name = options.name || "nfs"
+        this.base = options.base || ""
     }
     async init(modpath){
-        this.basePath = path.resolve(this.prefix + modpath);
+        if(this.extension && !modpath.endsWith(this.extension))modpath += this.extension
+        this.modpath = path.resolve(this.base, modpath);
     }
 
     async list(dirPath = "") {
-        const fullPath = path.join(this.basePath, dirPath);
+        const fullPath = path.join(this.modpath, dirPath);
         const files = [];
         const folders = [];
 
@@ -42,7 +44,7 @@ export default class NodeReader extends Reader {
             }
         } catch (err) {
             if (err.code !== "ENOENT") {
-                console.error(`Failed to list directory: ${fullPath}`, err.message);
+                console.error(`Failed to list base: ${fullPath}`, err.message);
             }
         }
         // files.unshift(...folders)
@@ -50,7 +52,7 @@ export default class NodeReader extends Reader {
     }
 
     async get(relativeFile, format = 'utf-8') {
-        const fullPath = path.join(this.basePath, relativeFile);
+        const fullPath = path.join(this.modpath, relativeFile);
 
         try {
             if (format === 'base64') {
@@ -75,10 +77,10 @@ export default class NodeReader extends Reader {
     }
 
     async set(filename, content, options) {
-        const foutput = path.join(this.basePath, filename);
+        const foutput = path.join(this.modpath, filename);
         const dir = path.dirname(foutput);
 
-        // Ensure directory exists
+        // Ensure base exists
         await fs.mkdir(dir, { recursive: true });
 
         if (options?.file) {
@@ -90,15 +92,6 @@ export default class NodeReader extends Reader {
         }
     }
     
-}       
+}
 
-    // write(destpath){
-    //     let files = this.mod.getFiles({scope: this.scope})
-    //     fs.mkdirSync(destpath, {recursive: true});
-    //     for(let file of files){
-    //         let filedata = this.mod.read(file)
-    //         let foutput = destpath + file.replace(/\\/g, "\/")
-    //         fs.mkdirSync(foutput.substring(0, foutput.lastIndexOf("/")), {recursive: true});
-    //         fs.writeFileSync(foutput, file.data)
-    //     }
-    // }
+Reader.readers.Node = NodeReader;

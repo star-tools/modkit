@@ -12099,7 +12099,7 @@ SCSchema["Const"] = [S.Const],
 SCSchema["*Struct"] = [SCSchema.struct]
 SCSchema["*Data"] = [SCSchema.classes]
 
-SCSchema.Catalog = {
+export const SCatalog = {
     "@": "Catalog",
     path: A.XML,
     //constants will be stored in a separate array 
@@ -12117,7 +12117,7 @@ SCSchema.Catalog = {
     // ...Object.fromEntries(Object.entries(SClasses).map(([e,c]) => ([e,[c]]))) //multiple classes
 }
 
-SCSchema.Includes = {
+export const SIncludes =  {
     "@": "Includes",
     Catalog: [{path: A.XML}]
 }

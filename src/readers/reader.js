@@ -1,7 +1,5 @@
-// IndexedDB-backed storage class
 export default class Reader {
     constructor(options) {
-        this.options = options || {}
     }
     async init() {
     }
@@ -43,6 +41,12 @@ export default class Reader {
         const lower = filename.toLowerCase();
         return this.IGNORED_PATTERNS.some(pattern => pattern.test(lower));
     }
+
+    static readers = []   
     
+    static create(options) {
+        return new this(options); // 'this' refers to the actual constructor (supports inheritance)
+    }
+
 }
 

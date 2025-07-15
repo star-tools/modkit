@@ -28,7 +28,7 @@
 
 
 import {SCSchema} from '../src/schema/all.js';
-import SC2JSON,{cleanXML} from '../src/converter/scjson.js';
+import SC2JSON,{cleanXML} from '../src/converter/sc2xml.js';
 
 const xmlInput = `
 <Includes>

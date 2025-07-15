@@ -1,8 +1,8 @@
 
 
-import SC2JSONDebugger from '../src/converter/debugger.js';
+import SC2JSONDebugger from '../src/debuggers/debugger.js';
 import NodeReader from '../src/readers/node-reader.js';
-import {SCMod,readModData} from '../src/converter/scmod.js';
+import {SCMod,readModData} from '../src/scmod.js';
 import fs from 'fs/promises';
 import yaml from '../src/lib/js-yaml.js';
 
@@ -165,7 +165,6 @@ async function collectCustomFactionModData(modName,deps){
 
   mod._make_cache()
   
-
   let locales = mod.components?.DataComponent?.filter(c => c.Type.toLowerCase() === "text").map(c => c.Locale).map(c => c.toLowerCase())
 
     // let locales = ["dede","enus","eses","esmx","frfr","itit","kokr","plpl","ptbr","ruru","zhcn","zhtw"] 

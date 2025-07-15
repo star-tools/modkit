@@ -1,11 +1,12 @@
+import Reader from './reader.js';
 
-// universal-fetch.js
-export const fetchUniversal = globalThis.fetch || await import('node-fetch').then(mod => mod.default);
+const fetchUniversal = globalThis.fetch || await import('node-fetch').then(mod => mod.default);
 
-export class URLReader {
+export default class URLReader extends Reader {
 
     constructor(options) {
         super(options);
+        this.name = options?.name || "url"
     }
     async init(modpath){
         if (!baseUrl.endsWith("/")) baseUrl += "/";
@@ -18,7 +19,7 @@ export class URLReader {
         if (this.index) return this.index;
 
         try {
-            const response = await fetch(this.baseUrl + this.indexFile);
+            const response = await fetchUniversal(this.baseUrl + this.indexFile);
             if (!response.ok) {
                 console.warn(`Index file not found at ${this.baseUrl + this.indexFile}`);
                 this.index = { files: [], folders: [] };
@@ -47,7 +48,7 @@ export class URLReader {
     async get(relativeFile) {
         try {
             const url = this.baseUrl + relativeFile;
-            const response = await fetch(url);
+            const response = await fetchUniversal(url);
             if (!response.ok) {
                 console.warn(`File not found: ${url}`);
                 return null;
@@ -78,3 +79,5 @@ export class URLReader {
 // const reader = new WebSCComponentReader("https://example.com/mods/mymod/");
 // const { files, folders } = await reader.getFilesList();
 // const modJson = await reader.readFile("data/mod.json");
+
+Reader.readers.URL = URLReader;

@@ -2,7 +2,7 @@
 import {SCSchema} from "./schema.js"
 import { Int, Real, CWord, CString} from "./types.js"
 
-export const  EditorCategories = {
+export const SEditorCategories = {
     "@": "EditorCategories",
     fieldVal: [{
         path: CString, //AbilSetId,CAbil_Alignment,CAbil_CmdButtonArr
@@ -41,10 +41,3 @@ export const  EditorCategories = {
         }
     }],
 }
-
-export default {
-    Categories: EditorCategories
-}
-
-
-SCSchema.EditorCategories = EditorCategories

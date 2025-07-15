@@ -4,7 +4,7 @@ import {SCSchema} from "./schema.js"
 
 
 
-SCSchema.Preload = {
+export const SPreload = {
     "@": "Preload",
     Asset: [{
         path: A.Asset,

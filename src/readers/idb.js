@@ -1,7 +1,9 @@
-export default class IDBReader {
-  constructor(dbName = 'storage', storeName = 'store') {
-    this.dbName = dbName;
-    this.storeName = storeName;
+import Reader from './reader.js';
+export default class IDBReader extends Reader{
+  constructor(options = {}) {
+    this.name = options.name || "idb"
+    this.dbName = options.dbName || "storage"
+    this.storeName = options.storeName || "store";
     this.db = null;
     this.modName = ''; // Optional namespace/prefix for keys
   }
@@ -127,3 +129,5 @@ export default class IDBReader {
     }
   }
 }
+
+Reader.readers.IndexedDB = IDBReader;

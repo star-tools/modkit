@@ -29,3 +29,25 @@ export function getSchemaField(tag, schema = SCSchema) {
   }
   return { schema: null, field: null };
 }
+
+export function relations(value, schema, trace = "") {
+    if(!schema)return []
+    let result = []
+    if(schema.constructor === Object){
+        for (let attribute in value) {
+            if(["index",'class', "removed" ,'id','default'].includes(attribute))continue
+            let subschema = (attribute === "parent") ? schema : schema[attribute];
+    
+            schema[attribute] && result.push(...relations(value[attribute], subschema, trace + "." + attribute))
+        }
+    }
+    else if(schema.constructor === Array){
+        for(let index in value){
+            result.push(...relations(value[index], schema[0], trace + "." + index))
+        }
+    }
+    else{
+        schema.relations && result.push(...schema.relations(value, trace))
+    }
+    return result
+}

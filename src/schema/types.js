@@ -48,6 +48,11 @@ export class CDataType {
   }
 }
 
+
+
+/** Raw data  */
+export class CRaw extends CDataType {}
+
 // ====== Integer Types ======
 
 /**
@@ -215,6 +220,11 @@ export class CText extends CString {
   static validate(str) {
     return true;
   }
+}
+
+/** Non-whitespace word */
+export class CFileName extends CString {
+  // static regexp = /^\S+$/;
 }
 
 

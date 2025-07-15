@@ -2,9 +2,10 @@ import { Octokit } from "octokit";
 import Reader from './reader.js';
 
 export class GitReader extends Reader{
-    constructor(options,token) {
+    constructor(options) {
         super(options);
-        this.octokit = new Octokit(token ? { auth: token } : {});
+        this.name = options.name || "git"
+        this.octokit = new Octokit(options.token ? { auth: options.token } : {});
     }
     async init(modpath){
         super();
@@ -137,4 +138,5 @@ export class GitReader extends Reader{
 // Copy your token
 // Important: Copy the token immediately. You won’t see it again!
 
+Reader.readers.Git = GitReader;
 

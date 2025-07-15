@@ -1,4 +1,5 @@
 import level from 'level';
+import Reader from './reader.js';
 
 /**
  * 
@@ -17,16 +18,17 @@ import level from 'level';
 // await reader.clear();
 // await reader.close();
  */
-export default class LevelDBReader {
-  constructor(dbPath = './leveldb') {
-    this.dbPath = dbPath;
+export default class LevelDBReader extends Reader {
+  constructor(dbName = './leveldb') {
+    this.dbName = dbName;
     this.db = null;
+    this.name = options.name || "ldb"
     this.modName = ''; // Namespace prefix (optional)
   }
 
   async init(modName = '') {
     this.modName = modName;
-    this.db = level(this.dbPath, { valueEncoding: 'json' }); // Can store text, buffers, or JSON
+    this.db = level(this.dbName, { valueEncoding: 'json' }); // Can store text, buffers, or JSON
   }
 
   _makeKey(filename) {
@@ -88,3 +90,4 @@ export default class LevelDBReader {
     }
   }
 }
+Reader.readers.LevelDB = LevelDBReader;

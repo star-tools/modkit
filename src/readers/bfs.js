@@ -3,6 +3,7 @@ import Reader from './reader.js';
 export default class WebReader extends Reader {
     constructor(dirHandle) {
         super();
+        this.name = options.name || "wfs"
         this.dirHandle = dirHandle; // FileSystemDirectoryHandle
     }
 
@@ -70,3 +71,5 @@ export default class WebReader extends Reader {
         return filePath; // No real links in browser FS, return logical path
     }
 }
+
+Reader.readers.Web = WebReader;

@@ -2,8 +2,9 @@ import JSZip from '../lib/jszip.js';
 import Reader from './reader.js';
 
 export default class ZipReader extends Reader {
-    constructor(file) {
+    constructor(file,options) {
         super();
+        this.name = options.name || "zip"
         this.file = file;
     }
     async init(){
@@ -55,3 +56,5 @@ export default class ZipReader extends Reader {
         return await this.zip.generateAsync({ type: 'blob' });
     }
 }
+
+Reader.readers.Zip = ZipReader;

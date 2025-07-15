@@ -1,43 +1,42 @@
+import SC2Reader from '../src/SC2Reader.js';
 
-import SC2JSONDebuggerNode from '../src/converter/debugger-node.js';
-import NodeReader from '../src/readers/node-reader.js';
+// let base = "/Applications/StarCraft II/Mods/assets/data/"
+SC2Reader.readers.default.base = "/Applications/StarCraft II/Mods/assets/data/"
+// let Node = SC2Reader.configs.Node
+// SC2Reader.addReaders(
+//   {default: true,       reader: Node, base: base},
+//   {prefix: 'mods:'    , reader: Node, base: base + 'mods'},
+//   {prefix: 'custom:'  , reader: Node, base: base + 'custom'},
+//   {prefix: 'exo:'     , reader: Node, base: base + 'exo'},
+// )
 
+let modMerged = await SC2Reader.merge([
+    "mods/Core",
+    "mods/Liberty",
+    // "mods:Swarm",
+    // "mods:Void",
+    // "multi/VoidMulti5014",
 
-const reader = new NodeReader("/Applications/StarCraft II/Mods/assets/data/");
-const cdebugger = new SC2JSONDebuggerNode( {file: './debug.json'});
-import {modsMerge, writeModData} from '../src/converter/scmod.js';
+    // "custom:BroodWar",
+    // "custom:Dragons",
+    // "custom:Hybrids",
+    // "custom:Scion",
+    // "custom:Synoid",
+    // "custom:TalDarim",
+    // "custom:UED",
+    // "custom:Umojan",
+    // "custom:UPL",
 
-let merged = await modsMerge(reader,[
-    "mods/Core.sc2mod",
-    "mods/Liberty.sc2mod",
-    "mods/Swarm.sc2mod",
-    "mods/Void.sc2mod",
-    "multi/VoidMulti5014.sc2mod",
-
-    "custom/BroodWar.SC2Mod",
-    "custom/Dragons.SC2Mod",
-    "custom/Hybrids.SC2Mod",
-    "custom/Scion.SC2Mod",
-    "custom/Synoid.SC2Mod",
-    "custom/TalDarim.SC2Mod",
-    "custom/UED.SC2Mod",
-    "custom/Umojan.SC2Mod",
-    "custom/UPL.SC2Mod",
-
-    "exo/TiberiumWars.SC2Mod",
-    "exo/WarCraft.SC2Mod",
-    "exo/WarHammer.SC2Mod",
-    "exo/Warzone.SC2Mod"
-
+    // "exo:TiberiumWars",
+    // "exo:WarCraft",
+    // "exo:WarHammer",
+    // "exo:Warzone"
   ], {
-    debugger: cdebugger,
     scope: {
       // catalogs: ["Abil","Behavior","Unit","Button","Actor","Weapon","Effect","Requirement","RequirementNode","Upgrade","Turret","Validator","DataCollection","DataCollectionPattern"],//,"Sound"],
       // strings: ["Game","Hotkeys"],
       // locales: ["enUS","ruRU","koKR","zhCN"]
     }
   })
-
+  modMerged.write("output/Merged")
   console.log("finished")
-  // write full mod data
-  await writeModData(reader,"output/Merged.sc2mod", merged, cdebugger)
