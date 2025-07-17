@@ -1,19 +1,19 @@
-# SC2ModToolkit
+# sc2modkit
 
 CLI and JavaScript toolkit for reading, merging, and writing StarCraft 2 `.SC2Mod` archives.
 
 ## Installation
 
 ```bash
-npm install -g sc2modtoolkit
+npm install -g sc2modkit
 
-sc2modtoolkit info ./MyMod.SC2Mod
-sc2modtoolkit merge ./MergedMod.SC2Mod ./Mod1.SC2Mod ./Mod2.SC2Mod
-sc2modtoolkit extract ./MyMod.SC2Mod ./outputDir
+sc2modkit info ./MyMod.SC2Mod
+sc2modkit merge ./MergedMod.SC2Mod ./Mod1.SC2Mod ./Mod2.SC2Mod
+sc2modkit extract ./MyMod.SC2Mod ./outputDir
 
 ```
 
-# SC2ModToolkit - Core Classes
+# sc2modkit - Core Classes
 
 ### SC2Mod
 
@@ -33,7 +33,7 @@ It manages mod catalogs, dependencies, localized strings, and recursive entity r
 #### Usage Example:
 
 ```js
-import {SC2Mod} from 'sc2modtoolkit';
+import {SC2Mod} from 'sc2modkit';
 
 // Create new SC2Mod instance with initial data
 const mod = new SC2Mod({
@@ -90,7 +90,7 @@ const modFromJson = SC2Mod.fromJSON(jsonData);
 #### Usage Example:
 
 ```js
-import { SC2ModReader } from 'sc2modtoolkit';
+import { SC2ModReader } from 'sc2modkit';
 
 const reader = new SC2ModReader({
   base: './mods/',
@@ -285,7 +285,7 @@ ZipReader supports reading and modifying ZIP archives entirely in-memory.
 
 # Parsers Library
 
-SC2ModToolkit provides a set of parsers to handle various StarCraft II file formats. These parsers convert between text-based mod data formats and structured JSON for easier manipulation.
+sc2modkit provides a set of parsers to handle various StarCraft II file formats. These parsers convert between text-based mod data formats and structured JSON for easier manipulation.
 
 ## Available Parsers
 

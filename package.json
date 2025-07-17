@@ -1,5 +1,5 @@
 {
-  "name": "sc2modtoolkit",
+  "name": "sc2modkit",
   "version": "0.1.0",
   "types": "types/index.d.ts",
   "files": [
@@ -8,9 +8,9 @@
   ],
   "description": "Toolkit for reading, merging, and writing StarCraft 2 mods",
   "type": "module",
-  "main": "./src/SC2ModToolkit.js",
+  "main": "./src/sc2modkit.js",
   "bin": {
-    "sc2modtoolkit": "./bin/sc2modtoolkit"
+    "sc2modkit": "./bin/sc2modkit"
   },
   "keywords": [
     "starcraft2",
