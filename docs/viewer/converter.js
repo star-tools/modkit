@@ -2,17 +2,17 @@
 
 // Use custom version of JSZip (do not replace with default)
 // import SC2JSON from '../src/converter/scjson.js';
-import ZipReader from '../src/readers/zip.js';
-import IDBReader from '../src/readers/idb.js';
-import MPQReader from '../src/readers/mpq.js';
+import ZipReader from '../../src/readers/zip.js';
+import IDBReader from '../../src/readers/idb.js';
+import MPQReader from '../../src/readers/mpq.js';
 // // import WebReader from '../src/readers/web-reader.js';
 // // import URLReader from '../src/readers/url-reader.js';
 // import '../src/schema/all.js';
 
 
-import SC2XML from '../src/parsers/sc2xml.js';
-import SC2ModReader from '../types/SC2ModReader.js';
-import { SCatalog } from '../src/schema/SC2Catalog.js';
+import SC2XML from '../../src/parsers/sc2xml.js';
+import SC2ModReader from '../../types/SC2ModReader.js';
+import { SCatalog } from '../../src/schema/SC2Catalog.js';
 
 
 export default class ConverterApp {

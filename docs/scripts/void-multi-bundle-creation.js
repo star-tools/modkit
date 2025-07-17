@@ -1,4 +1,4 @@
-import SC2ModReader from '../src/SC2ModReader.js';
+import SC2ModReader from '../../src/SC2ModReader.js';
 
 let reader = new SC2ModReader({
   base: "/Applications/StarCraft II/Mods/assets/data/",
