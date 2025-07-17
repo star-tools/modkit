@@ -1,5 +1,5 @@
 import Reader from './reader.js';
-import MPQArchive from './../lib/js-mpq.js';
+import MPQArchive from '../lib/mpq.js';
 import Buffer from '../lib/buffer.js';
 
 /**

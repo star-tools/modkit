@@ -25,8 +25,8 @@ export default class VFS extends Reader {
      * @param {Function} [options.canHandle] - Optional fn(path) => boolean for custom routing.
      */
     addReader(readerConfig) {
-        if(!readerConfig.name) readerConfig.name = readerConfig.prefix || "default"
-        let _config = readerConfig.defult ? this._readers.find(r => r.default) : this._readers.find(r => r.prefix === readerConfig.prefix);
+        if(!readerConfig.name)readerConfig.name = readerConfig.prefix || readerConfig.extension || "default"
+        let _config = readerConfig.default ? this._readers.find(r => r.default) : this._readers.find(r => r.prefix === readerConfig.prefix && r.extension === readerConfig.extension);
         if(_config){
             this.removeReader(_config)
         }

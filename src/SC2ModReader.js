@@ -9,7 +9,7 @@ import VFS from './readers/vfs.js';
 //other imports
 import SC2Mod from './SC2Mod.js';
 import { SMod } from './schema/SC2Mod.js';
-import { isNode } from './lib/js-util.js';
+import { isNode } from './util/js-util.js';
 import { SCatalog } from './schema/SC2Catalog.js';
 import {  GAME_NAMESPACES } from './types/shared.js';
 
@@ -56,7 +56,7 @@ export default class SC2ModReader extends VFS {
         IndexedDB: { name: "IndexedDB", path: "./idb.js", options: {dbName: "starcraft2" , storeName: "mods"}},
         Git: { name: "Git", path: "./git.js", options: {} },
         Zip: { name: "Zip", path: "./zip.js", options: {} },
-        Zip: { name: "MPQ", path: "./mpq.js", options: {} },
+        MPQ: { name: "MPQ", path: "./mpq.js", options: {} },
         URL: { name: "URL", path: "./url.js", options: {} },
     }
     constructor(options){
@@ -94,7 +94,7 @@ export default class SC2ModReader extends VFS {
 
 
                 {extension: ".zip", reader:cs.Zip, name: "zip"},
-                {extension: ".(sc2mod|sc2map|sc2replay)", reader:cs.Zip, name: "mpq"}
+                {extension: ".(sc2mod|sc2map|sc2replay)", reader:cs.MPQ, name: "mpq"}
             )
         }
 

@@ -10,7 +10,7 @@
 // console.log(Int64.validate(-9223372036854775808n));   // true
 
 import { CDataType } from "./core.js";
-import { isValidNumber } from "../lib/js-util.js";
+import { isValidNumber } from "../util/js-util.js";
 
 
 /**

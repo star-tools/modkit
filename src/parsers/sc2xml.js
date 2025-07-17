@@ -1,6 +1,6 @@
-import { isInteger } from '../lib/js-util.js';
-import { parseXML } from '../lib/xml-util.js';
-import { getSchemaField} from '../schema.js';
+import { isInteger } from '../util/js-util.js';
+import { parseXML } from '../util/xml-util.js';
+import { getSchemaField} from '../util/schema.js';
 
 /**
  * SC2XML: StarCraft II XML <-> JSON Converter

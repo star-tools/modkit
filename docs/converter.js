@@ -11,7 +11,7 @@ import MPQReader from '../src/readers/mpq.js';
 
 
 import SC2XML from '../src/parsers/sc2xml.js';
-import SC2ModReader from '../src/SC2ModReader.js';
+import SC2ModReader from '../types/SC2ModReader.js';
 import { SCatalog } from '../src/schema/SC2Catalog.js';
 
 
@@ -29,7 +29,8 @@ export default class ConverterApp {
     this.fileListDiv = document.getElementById('file-list');
     this.modBar = document.getElementById('mod-bar');
     this.uploadInfo = document.getElementById('uploadInfo');
-    this.fileInput = document.getElementById('fileInput');
+    this.fileInput = document.getElementById('file-input');
+    // this.dirInput = document.getElementById('dir-input');
 
     document.getElementById('btn-xml-to-json').onclick = () => this.convertXmlToJson();
     document.getElementById('btn-json-to-xml').onclick = () => this.convertJsonToXml();
@@ -163,9 +164,6 @@ export default class ConverterApp {
             break;
         }
       }
-
-
-
       let files2 = await reader.list()
       let file2 = await reader.get(files2[0])
 

@@ -1,4 +1,3 @@
-
 // ====== Base Data Type Class ======
 
 /**
@@ -9,12 +8,13 @@ export class CDataType {
   constructor(name) {
     this.name = name;
   }
-  static isValue = true
+
+  static isValue = true;
+
   /**
    * Validate a given value against the data type.
    * Default implementation always returns true.
-   * Override in subclasses.
-   * @param {*} val - value to validate
+   * @param {*} val - Value to validate.
    * @returns {boolean}
    */
   static validate(val) {
@@ -24,13 +24,13 @@ export class CDataType {
   /**
    * Parse a string value to the internal representation.
    * Default implementation returns the string itself.
-   * Override to convert to number, etc.
    * @param {string} str
+   * @param {object} json - Optional context.
    * @returns {*}
    */
-  static parse(str , json) {
-    if (!this.validate(str , json)) {
-      console.warn('Invalid data: ' + str);
+  static parse(str, json) {
+    if (!this.validate(str, json)) {
+      console.warn(`Invalid data: ${str}`);
       return null;
     }
     return str;
@@ -40,7 +40,7 @@ export class CDataType {
 // ====== Enum Type ======
 
 /**
- * Enum class validates string against allowed enum values.
+ * Enum type that validates strings against allowed enum values.
  */
 export class CEnum extends CDataType {
   static enum = [];
@@ -51,62 +51,60 @@ export class CEnum extends CDataType {
 
   /**
    * Validate if value is in enum list.
-   * If enum list is empty, allow all values.
+   * Allows "Unknown" as fallback.
    * @param {string} val
    * @returns {boolean}
    */
   static validate(val) {
     if (!this.enum.length) return true;
-    if(val === "Unknown") return true; //is it correct?
-    if(!this.enum.includes(val)){
-      console.log(`value ${val} is missing in Enum ` + this.name)
-    return false
+    if (val === "Unknown") return true;
+    if (!this.enum.includes(val)) {
+      console.log(`Value '${val}' is missing in Enum ${this.name}`);
+      return false;
     }
-    return true
+    return true;
   }
 }
-
 
 // ====== List Types ======
 
 /**
  * Base class for list types.
- * Validates lists of subtypes separated by separator regex.
+ * Validates lists of subtypes separated by a pattern.
  */
 export class CList extends CDataType {
-  static separator = /[\s,]+/; // default separator: spaces or commas
+  static separator = /[\s,]+/; // default: spaces or commas
   static subType = null;
 
   /**
-   * Validate a list string by splitting and validating each element with subType.
+   * Validate a list string by splitting and validating each element.
    * @param {string} val
    * @returns {boolean}
    */
   static validate(val) {
-    const subType = this.subType;
-    const pattern = this.separator;
-
-    if (!subType || typeof subType.validate !== 'function') {
-      throw new Error('Missing static subType with validate()');
+    if (!this.subType || typeof this.subType.validate !== 'function') {
+      throw new Error('CList requires a static subType with validate()');
     }
 
-    const normalized = val.trim().replace(/\s+/g, ' ');
-    const values = normalized.split(pattern).filter(Boolean);
-
-    return values.every((v) => subType.validate(v));
+    const values = val.trim().split(this.separator).filter(Boolean);
+    return values.every((v) => this.subType.validate(v));
   }
 }
-
 
 // ====== Misc Types ======
+// These classes should be replaced with actual enum and data types
 
-/** CUnknown Enum placeholder */
+/**
+ * EUnknown: Placeholder Enum for unknown values.
+ */
 export class EUnknown extends CEnum {
   static validate(val) {
-    console.log("unknown Enum. value " + val)
-    return true
+    console.log(`Unknown Enum: ${val}`);
+    return true;
   }
 }
 
-/** Generic unknown data type */
-export class CUnknown extends CDataType {}
+/**
+ * CUnknown: Generic placeholder data type.
+ */
+export class CUnknown extends CDataType { }

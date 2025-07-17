@@ -1,4 +1,4 @@
-import { isNode } from '../lib/js-util.js';
+import { isNode } from '../util/js-util.js';
 import Reader from './reader.js';
 
 const fs = isNode ? await import('fs/promises') : null;

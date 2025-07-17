@@ -1,5 +1,17 @@
-import { Octokit } from "octokit";
+// environment-aware dynamic import for Octokit
+let Octokit;
+if (typeof window !== 'undefined') {
+    // Browser environment
+    const module = await import('https://cdn.skypack.dev/octokit');
+    Octokit = module.Octokit;
+} else {
+    // Node.js environment
+    const { Octokit: NodeOctokit } = await import('octokit');
+    Octokit = NodeOctokit;
+}
+
 import Reader from './reader.js';
+
 
 /**
  * GitReader provides an interface for reading files from a GitHub repository.
@@ -36,7 +48,7 @@ import Reader from './reader.js';
  * Keep your token secure and never share it publicly.
 
  */
-export class GitReader extends Reader {
+export default class GitReader extends Reader {
   /**
    * Create a GitReader instance.
    * @param {Object} options - Options object.

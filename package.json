@@ -1,8 +1,17 @@
 {
-  "name": "star-craft-2-mod-parser",
+  "name": "sc2modtoolkit",
   "version": "0.1.0",
-  "description": "A JavaScript library to read, analyze, and write StarCraft 2 mods in SC2Components format.",
+  "types": "types/index.d.ts",
+  "files": [
+      "src/",
+      "types/"
+  ],
+  "description": "Toolkit for reading, merging, and writing StarCraft 2 mods",
   "type": "module",
+  "main": "./src/SC2ModToolkit.js",
+  "bin": {
+    "sc2modtoolkit": "./bin/sc2modtoolkit"
+  },
   "keywords": [
     "starcraft2",
     "sc2",
@@ -18,7 +27,6 @@
     "express": "^5.1.0",
     "jest": "^30.0.4"
   },
-  "main": "./src/main.js",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
@@ -31,13 +39,9 @@
   },
   "homepage": "https://github.com/Star-Mods/parser#readme",
   "dependencies": {
-    "dotenv": "^17.1.0",
-    "js-yaml": "^4.1.0",
+    "commander": "^14.0.0",
     "level": "^10.0.0",
-    "mpqjs": "^0.1.1",
-    "mpyqjs": "^1.0.1",
     "octokit": "^5.0.3",
-    "seek-bzip": "^2.0.0",
     "xmldom": "^0.6.0"
   }
 }

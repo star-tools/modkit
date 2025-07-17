@@ -1,7 +1,7 @@
 import { EUnitAttribute, EUnitVital } from './types/enums.js';
 import Eval from './lib/expr-eval.js';
-import { objectsDeepMerge, applyArrayPatches, objectDeepTransform } from './lib/obj-util.js';
-import { isNumeric } from './lib/js-util.js';
+import { objectsDeepMerge, applyArrayPatches, objectDeepTransform } from './util/obj-util.js';
+import { isNumeric } from './util/js-util.js';
 import SC2DataClasses from './schema/SC2DataClasses.js';
 import { C_NAMESPACES } from './types/shared.js';
 
