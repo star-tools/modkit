@@ -2,8 +2,9 @@ import E from "./enums.js"
 import {Bit } from "./numbers.js"
 import {EUnknown } from "./core.js"
 
+//should be replaced with actial enum
 export const CUnknownFlags =  [Bit,EUnknown]
-//flags
+
 export const CMarkerFlags = [Bit,E.MarkerMatch]
 export const CAbilCmdFlags = CUnknownFlags
 export const CActorTransferFlags = CUnknownFlags
