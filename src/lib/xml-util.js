@@ -25,7 +25,6 @@ export function escapeXml(str) {
     .replace(/'/g, "&apos;");
 }
 
-
 //Compact XML
 export function cleanXML(xmlString, options = { removeLineBreaks: true }) {
   // Step 1: Remove spaces between tags

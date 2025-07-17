@@ -1,4 +1,22 @@
 
+export const isNode = typeof process !== 'undefined' && process.versions?.node;
+
+/**
+ * Checks if a value is a valid number or numeric string.
+ * @param {*} value
+ * @returns {boolean}
+ */
+export function isValidNumber(value) {
+  if (typeof value === 'number') return isFinite(value);
+
+  if (typeof value === 'string') {
+    // Matches integer and decimal numbers, with optional sign
+    return /^[+-]?(\d+(\.\d+)?|\.\d+)$/.test(value);
+  }
+
+  return false;
+}
+
 /**
  * Determines whether a value is an integer.
  * @param {string|number} value

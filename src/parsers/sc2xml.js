@@ -1,6 +1,6 @@
 import { isInteger } from '../lib/js-util.js';
 import { parseXML } from '../lib/xml-util.js';
-import { SCSchema ,getSchema ,getSchemaField} from '../schema/schema.js';
+import { getSchemaField} from '../schema.js';
 
 /**
  * SC2XML: StarCraft II XML <-> JSON Converter
@@ -98,9 +98,10 @@ export default class SC2XML {
   static parse(xmlText, schema = null, log = null) {
     const xmlDocument = parseXML(xmlText);
     const jsonObject = this._parse_base(xmlDocument);
-    // if (!schema) {
-    //   schema = getSchema(jsonObject.tag);
-    // }
+    if (!schema) {
+      console.error("no schema!")
+      // schema = getSchema(jsonObject.tag);
+    }
     if (schema) this._applySchema(jsonObject, schema , [], log);
     return jsonObject;
   }
@@ -198,8 +199,8 @@ export default class SC2XML {
     if (!jsonObject) return null;
 
     if (!schema) {
-      const { schema: s } = getSchemaField(jsonObject.type || jsonObject.class, SCSchema);
-      schema = s;
+      console.error("no schema!")
+      // schema = getSchema(jsonObject.type || jsonObject.class, SCSchema);
     }
     const xmlLikeJSON = this._revertSchema(jsonObject, schema);
     return this._stringify_base(xmlLikeJSON);
@@ -364,13 +365,25 @@ export default class SC2XML {
     if (attributes) {
       for (const key in attributes) {
         let value = attributes[key];
-        if (key === 'index') {
+        if (key === 'comment') {
+          //skip comments
+          continue;
+        }
+        else if (key === 'index') {
           obj.index = isInteger(value) ? +value : value;
         } else if (key === 'removed') {
           obj.removed = +value;
         } else {
           let fieldSchema = schema[key]?.value || schema[key];
-          if (fieldSchema) {
+
+
+          if(!fieldSchema){
+            this._log_missing_schema(obj, key, trace, log, {children, attributes, tag})
+          }
+          else if(fieldSchema === Number){
+            value = +value;
+          }
+          else if(fieldSchema !== String){
             value = fieldSchema.parse(value, obj);
           }
           if (value !== undefined) this._writeValue(obj, key, value);
@@ -417,10 +430,10 @@ export default class SC2XML {
    * @param {Object} entry Parsed object entry
    * @param {string} field Missing field name
    */
-  static _log_missing_schema(entry, field, trace, log) {
+  static _log_missing_schema(entry, field, trace, log, original) {
     if(!trace || !log) return;
     const tag = [...trace.map(i => i), field].join('.');
-    const value = entry[field];
+    const value = original.attributes?.[field]
 
     const parts = tag.split('.');
     if(!log.missingSchema){
@@ -434,12 +447,14 @@ export default class SC2XML {
       // If last part — ensure it's a Set
       if (i === parts.length - 1) {
         if (!current[part]) {
-          current[part] = new Set();
+          current[part] = []
+          
+          // if(original.attributes[field]){}
           console.log('No schema found for tag: ', tag);
         }
 
         if (value !== undefined) {
-          current[part].add(value);
+          current[part].push(value);
         }
       } else {
         // Traverse or create nested object
@@ -459,7 +474,7 @@ export default class SC2XML {
     const { field, schema: subSchema } = getSchemaField(child.tag, schema);
 
     if (!subSchema && schema) {
-      this._log_missing_schema(obj, child.tag, trace, log);
+      this._log_missing_schema(obj, child.tag, trace, log, child);
     }
 
     const fieldName = field || child.tag || '_';
@@ -513,7 +528,7 @@ export default class SC2XML {
         } else if (child.attributes?.value !== undefined) {
           value = schemaClass?.parse(child.attributes?.value);
         } else {
-          console.log("Unexpected schema structure: " + trace.join(".") + "." + fieldName + " " + JSON.stringify(child));
+          console.log("Unexpected schema structure: " + trace.join(".") + "." + fieldName )// + " " + JSON.stringify(child));
         }
       }
     }

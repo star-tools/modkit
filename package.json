@@ -18,13 +18,7 @@
     "express": "^5.1.0",
     "jest": "^30.0.4"
   },
-  "main": "./src/main/parseXML.js",
-  "exports": {
-    ".": {
-      "import": "./src/main/parseXML.node.js",
-      "browser": "./src/main/parseXML.browser.js"
-    }
-  },
+  "main": "./src/SC2Reader.js",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
@@ -40,7 +34,10 @@
     "dotenv": "^17.1.0",
     "js-yaml": "^4.1.0",
     "level": "^10.0.0",
+    "mpqjs": "^0.1.1",
+    "mpyqjs": "^1.0.1",
     "octokit": "^5.0.3",
+    "seek-bzip": "^2.0.0",
     "xmldom": "^0.6.0"
   }
 }

@@ -1,17 +1,22 @@
 /* ===== Full JS Implementation with IndexedDB-based Multi-ZIP Mod Support and ZIP Export ===== */
 
 // Use custom version of JSZip (do not replace with default)
-import SC2JSON from '../src/converter/scjson.js';
-import ZipReader from '../src/readers/zip-reader.js';
-import IDBReader from '../src/readers/idb-reader.js';
-// import WebReader from '../src/readers/web-reader.js';
-// import URLReader from '../src/readers/url-reader.js';
-import '../src/schema/all.js';
+// import SC2JSON from '../src/converter/scjson.js';
+// import ZipReader from '../src/readers/zip-reader.js';
+// import IDBReader from '../src/readers/idb-reader.js';
+// // import WebReader from '../src/readers/web-reader.js';
+// // import URLReader from '../src/readers/url-reader.js';
+// import '../src/schema/all.js';
+
+
+import SC2XML from '../src/parsers/sc2xml.js';
+import SC2ModReader from '../src/SC2ModReader.js';
+import { SCatalog } from '../src/schema/SC2Catalog.js';
 
 
 export default class ConverterApp {
   constructor() {
-    this.converter = new SC2JSON();
+    this.reader = new SC2ModReader({})
     this.storage = new IDBReader();
 
     this.editorXML = null;
@@ -63,7 +68,7 @@ export default class ConverterApp {
         if (file.toLowerCase().includes('abildata.xml')) {
           const xml = await this.storage.get(`file:${modName}:${file}`);
           try {
-            const json = this.converter.toJSON(xml);
+            const json = SC2XML.parse(xml,SCatalog);
             abils.push(...(json?.Catalog?.CAbil || []));
           } catch (e) {
             console.warn(`Invalid XML in ${modName}:${file}`, e);
@@ -74,7 +79,7 @@ export default class ConverterApp {
 
     if (abils.length > 0) {
       const merged = { Catalog: { CAbil: abils } };
-      const xml = this.converter.toXML(merged, 'Catalog');
+      const xml = SC2XML.stringify(merged, SCatalog);
       const modName = 'MergedMod';
       const fileName = 'merged/abildata.xml';
 
@@ -386,7 +391,7 @@ export default class ConverterApp {
   convertXmlToJson() {
     try {
       const xml = this.editorXML.getValue();
-      const json = this.converter.toJSON(xml);
+      const json = SC2XML.parse(xml,SCatalog);
       this.editorJSON.setValue(JSON.stringify(json, null, 2));
     } catch (e) {
       alert('Invalid XML: ' + e.message);
@@ -396,7 +401,7 @@ export default class ConverterApp {
   convertJsonToXml() {
     try {
       const json = JSON.parse(this.editorJSON.getValue());
-      const xml = this.converter.toXML(json, 'Catalog');
+      const xml = SC2XML.stringify(json, SCatalog);
       this.editorXML.setValue(xml);
     } catch (e) {
       alert('Invalid JSON: ' + e.message);

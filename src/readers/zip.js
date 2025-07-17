@@ -1,5 +1,26 @@
 import JSZip from '../lib/jszip.js';
 import Reader from './reader.js';
+/**
+ * ZipReader class for reading and manipulating ZIP archives.
+ *
+ * This reader allows loading a ZIP file, listing its contents,
+ * reading individual files as text, adding or updating files inside the ZIP,
+ * and exporting the entire ZIP as a Blob.
+ *
+ * Usage:
+ *   const zipReader = new ZipReader(file , { name: "zip" });
+ *   await zipReader.init();
+ *   const files = await zipReader.list();
+ *   const fileContent = await zipReader.get("path/to/file.txt");
+ *   await zipReader.set("newfile.txt", "Hello, world!");
+ *   const zipBlob = await zipReader.blob();
+ *
+ * Notes:
+ * - The `init()` method must be called before other operations.
+ * - The `list()` method returns an array of file paths inside the ZIP.
+ * - The `set()` method adds or replaces a file in the archive.
+ * - The `blob()` method generates a Blob representing the current ZIP state.
+ */
 
 export default class ZipReader extends Reader {
     constructor(file,options) {
@@ -52,6 +73,7 @@ export default class ZipReader extends Reader {
             zip.file(filename, content);
         }
     }
+
     async blob(){
         return await this.zip.generateAsync({ type: 'blob' });
     }

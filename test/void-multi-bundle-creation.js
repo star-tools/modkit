@@ -1,18 +1,26 @@
-import SC2Reader from '../src/SC2Reader.js';
+import SC2ModReader from '../src/SC2ModReader.js';
 
-// let base = "/Applications/StarCraft II/Mods/assets/data/"
-SC2Reader.readers.default.base = "/Applications/StarCraft II/Mods/assets/data/"
-// let Node = SC2Reader.configs.Node
-// SC2Reader.addReaders(
-//   {default: true,       reader: Node, base: base},
-//   {prefix: 'mods:'    , reader: Node, base: base + 'mods'},
-//   {prefix: 'custom:'  , reader: Node, base: base + 'custom'},
-//   {prefix: 'exo:'     , reader: Node, base: base + 'exo'},
-// )
+let reader = new SC2ModReader({
+  base: "/Applications/StarCraft II/Mods/assets/data/",
+  directories: {
+    mods:    './mods/',
+    custom:  './custom/',
+    exo:     './exo/'
+  }
+})
 
-let modMerged = await SC2Reader.merge([
-    "mods/Core",
-    "mods/Liberty",
+//can be used to not load unused data
+let wikiConfig = {
+  scope: {
+    catalogs: ["Abil","Behavior","Unit","Button","Actor","Weapon","Effect","Requirement","RequirementNode","Upgrade","Turret","Validator","DataCollection","DataCollectionPattern","Sound"],
+    strings: ["Game","Hotkeys"],
+    locales: ["enUS","ruRU","koKR","zhCN"]
+  }
+}
+
+let modMerged = await reader.merge([
+    "mods:Core",
+    "mods:Liberty",
     // "mods:Swarm",
     // "mods:Void",
     // "multi/VoidMulti5014",
@@ -31,12 +39,7 @@ let modMerged = await SC2Reader.merge([
     // "exo:WarCraft",
     // "exo:WarHammer",
     // "exo:Warzone"
-  ], {
-    scope: {
-      // catalogs: ["Abil","Behavior","Unit","Button","Actor","Weapon","Effect","Requirement","RequirementNode","Upgrade","Turret","Validator","DataCollection","DataCollectionPattern"],//,"Sound"],
-      // strings: ["Game","Hotkeys"],
-      // locales: ["enUS","ruRU","koKR","zhCN"]
-    }
-  })
-  modMerged.write("output/Merged")
+  ]/*, wikiConfig*/)
+  
+  reader.write("output/Merged",modMerged)
   console.log("finished")

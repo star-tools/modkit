@@ -1,34 +1,18 @@
 import level from 'level';
 import Reader from './reader.js';
 
-/**
- * 
- * 
- * 
-// const reader = new LevelDBReader('./mydb');
-// await reader.init('mod1');
-
-// await reader.set('file.txt', 'Hello LevelDB');
-// console.log(await reader.get('file.txt'));
-
-// const files = await reader.list();
-// console.log(files);
-
-// await reader.delete('file.txt');
-// await reader.clear();
-// await reader.close();
- */
 export default class LevelDBReader extends Reader {
-  constructor(dbName = './leveldb') {
-    this.dbName = dbName;
+  constructor( options = {}) {
+    super(options);
     this.db = null;
-    this.name = options.name || "ldb"
+    this.dbName = options.dbName || './leveldb',
+    this.name = options.name || "ldb";
     this.modName = ''; // Namespace prefix (optional)
   }
 
   async init(modName = '') {
     this.modName = modName;
-    this.db = level(this.dbName, { valueEncoding: 'json' }); // Can store text, buffers, or JSON
+    this.db = level(this.dbName, { valueEncoding: 'json' }); // Store JSON or strings/buffers
   }
 
   _makeKey(filename) {
@@ -90,4 +74,5 @@ export default class LevelDBReader extends Reader {
     }
   }
 }
+
 Reader.readers.LevelDB = LevelDBReader;

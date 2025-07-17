@@ -25,6 +25,7 @@ export default class VFS extends Reader {
      * @param {Function} [options.canHandle] - Optional fn(path) => boolean for custom routing.
      */
     addReader(readerConfig) {
+        if(!readerConfig.name) readerConfig.name = readerConfig.prefix || "default"
         let _config = readerConfig.defult ? this._readers.find(r => r.default) : this._readers.find(r => r.prefix === readerConfig.prefix);
         if(_config){
             this.removeReader(_config)
@@ -38,8 +39,8 @@ export default class VFS extends Reader {
      * Remove a reader from this VFS instance.
      * @param {Object} reader - Reader instance to remove.
      */
-    removeReader(reader) {
-        this._readers = this._readers.filter(r => r !== reader);
+    removeReader(readerConfig) {
+        this._readers = this._readers.filter(r => r !== readerConfig);
         delete this.readers[readerConfig.name] 
     }
 
@@ -137,4 +138,15 @@ export default class VFS extends Reader {
         const config = this._getReaderConfig(path);
         return config.reader.set(this._normalizePath(path, config), content, options);
     }
+
+
+    //read all files from from reader and write it using writer, to copy mods
+    // async transfer( writer){
+    //     const files = await this.list();
+    //     for (const file of files) {
+    //         if(file.endsWith("/"))continue;
+    //         const content = await this.get(file);
+    //         await writer.set(file,content);
+    //     }
+    // }
 }
