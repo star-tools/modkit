@@ -81,10 +81,12 @@ const modFromJson = SC2Mod.fromJSON(jsonData);
 
 * Automatically parses all supported SC2 mod file formats:
 
-  * XML, INI, ENV
-  * Script files
-  * Textures
-  * Media and binary formats
+  * XML - Catalogs, Layouts, Cutscenes, Components, DocInfo, MapInfo, etc
+  * INI - Preload DB
+  * ENV - Assets.txt, Localized Strings
+  * Script files - Galaxy Files
+  * Texture Reduction Files
+  
 * Customizable readers per protocol or environment.
 
 #### Usage Example:
@@ -289,41 +291,44 @@ sc2modkit provides a set of parsers to handle various StarCraft II file formats.
 
 ## Available Parsers
 
-### ENV Parser (`SC2ENV`)
+
+### XML Parser (`SC2XML`)
 
 **Purpose:**
-Parses and stringifies StarCraft II `.env`-style localization files.
+Schema-driven XML to JSON converter for SC2 mod files.
 
 **Features:**
 
-* Supports `KEY=VALUE` pairs.
-* Handles comments starting with `;` or `//`.
-* Preserves or ignores comments (configurable).
-* Handles BOM and Windows line endings.
+* Parses SC2 XML to structured JSON.
+* Converts JSON back to XML.
+* Supports attributes, nested elements, comments, and processing instructions.
+* Handles schema for typed fields, arrays, and enums.
+* Debug logging for missing schema entries.
 
-**Example Input:**
+**Example Input (XML):**
 
-```
-; UI Buttons
-UI/Button=Assets\\Textures\\Button.dds
-```
-
-**Parsed Output:**
-
-* With `keepComments: true`:
-
-```js
-[
-  { type: 'comment', value: 'UI Buttons' },
-  { type: 'pair', key: 'UI/Button', value: 'Assets\\Textures\\Button.dds' }
-]
+```xml
+<CUnit id="Marine">
+  <LifeMax value="45"/>
+  <Speed value="2.25"/>
+  <Attributes index="Light" value="1"/>
+  <Attributes index="Armored" value="1"/>
+  <GlossaryStrongArray value="Marauder"/>
+  <WeaponArray Link="GuassRifle"/>`
+</CUnit>
 ```
 
-* With `keepComments: false`:
+**Parsed Output (JSON):**
 
 ```js
 {
-  "UI/Button": "Assets\\Textures\\Button.dds"
+  class: "CUnit",
+  id: "Marine",
+  LifeMax: 45,
+  Speed: 2.25,
+  Attributes: {Light: 1 ,Armored: 1 },
+  GlossaryStrongArray: ["Marauder"],
+  WeaponArray: [{Link: "GuassRifle}]
 }
 ```
 
@@ -375,6 +380,47 @@ Actor=CommandUIHarnessAttackProtoss,CommandUIHarnessAttackTerran,CommandUIHarnes
 
 ---
 
+### ENV Parser (`SC2ENV`)
+
+**Purpose:**
+Parses and stringifies StarCraft II `.env`-style localization files.
+
+**Features:**
+
+* Supports `KEY=VALUE` pairs.
+* Handles comments starting with `;` or `//`.
+* Preserves or ignores comments (configurable).
+* Handles BOM and Windows line endings.
+
+**Example Input:**
+
+```
+; UI Buttons
+UI/Button=Assets\\Textures\\Button.dds
+```
+
+**Parsed Output:**
+
+* With `keepComments: true`:
+
+```js
+[
+  { type: 'comment', value: 'UI Buttons' },
+  { type: 'pair', key: 'UI/Button', value: 'Assets\\Textures\\Button.dds' }
+]
+```
+
+* With `keepComments: false`:
+
+```js
+{
+  "UI/Button": "Assets\\Textures\\Button.dds"
+}
+```
+
+---
+
+
 ### Script Parser
 
 **Purpose:**
@@ -413,44 +459,6 @@ _details.dds:5:5:5:5:5:
   { file: "_base_diffuse.dds", value: [7, 8, 8, 10, 6] },
   { file: "_details.dds", value: [5, 5, 5, 5, 5] }
 ]
-```
-
----
-
-### XML Parser (`SC2XML`)
-
-**Purpose:**
-Schema-driven XML to JSON converter for SC2 mod files.
-
-**Features:**
-
-* Parses SC2 XML to structured JSON.
-* Converts JSON back to XML.
-* Supports attributes, nested elements, comments, and processing instructions.
-* Handles schema for typed fields, arrays, and enums.
-* Debug logging for missing schema entries.
-
-**Example Input (XML):**
-
-```xml
-<CUnit id="Marine">
-  <LifeMax value="45"/>
-  <Speed value="2.25"/>
-</CUnit>
-```
-
-**Parsed Output (JSON):**
-
-```js
-{
-  CUnit: [
-    {
-      id: "Marine",
-      LifeMax: 45,
-      Speed: 2.25
-    }
-  ]
-}
 ```
 
 ---
