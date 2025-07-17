@@ -1,4 +1,4 @@
-import JSZip from '../lib/jszip.js';
+import JSZip from '../lib/js-zip.js';
 import Reader from './reader.js';
 /**
  * ZipReader class for reading and manipulating ZIP archives.
@@ -22,10 +22,9 @@ import Reader from './reader.js';
  * - The `blob()` method generates a Blob representing the current ZIP state.
  */
 
-export default class ZipReader extends Reader {
-    constructor(file,options) {
-        super();
-        this.name = options.name || "zip"
+export default class ZipReader {
+    constructor(file) {
+        this.name = file.name
         this.file = file;
     }
     async init(){
@@ -57,7 +56,6 @@ export default class ZipReader extends Reader {
         //files.unshift(...Array.from(folders));
         return files 
     }
-
     async get (path) {
         if (!this.zip) throw new Error("ZIP file not loaded. Call init() first.");
 
@@ -73,7 +71,6 @@ export default class ZipReader extends Reader {
             zip.file(filename, content);
         }
     }
-
     async blob(){
         return await this.zip.generateAsync({ type: 'blob' });
     }

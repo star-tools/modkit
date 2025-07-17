@@ -2,8 +2,9 @@
 
 // Use custom version of JSZip (do not replace with default)
 // import SC2JSON from '../src/converter/scjson.js';
-// import ZipReader from '../src/readers/zip-reader.js';
-// import IDBReader from '../src/readers/idb-reader.js';
+import ZipReader from '../src/readers/zip.js';
+import IDBReader from '../src/readers/idb.js';
+import MPQReader from '../src/readers/mpq.js';
 // // import WebReader from '../src/readers/web-reader.js';
 // // import URLReader from '../src/readers/url-reader.js';
 // import '../src/schema/all.js';
@@ -142,20 +143,39 @@ export default class ConverterApp {
   }
 
   async handleFileUpload(event) {
+    // this.dirHandle =  await window.showDirectoryPicker();
     const files = Array.from(event.target.files);
+    // if(files.length > 1 ){
+    //   file.webkitRelativePath
+    // }
     for (const file of files) {
       const ext = file.name.split('.').pop().toLowerCase();
-      if (ext !== 'zip') continue;
-      const modName = file.name.replace(/\.zip$/i, '');
-      const zipReader = new ZipReader(file);
-      await zipReader.init();
+      let reader;
+      switch(ext){
+        case 'zip': {
+            reader = new ZipReader(file);
+            await reader.init();
+            break;
+        }
+        case 'sc2mod': {
+            reader = new MPQReader(file);
+            await reader.init();
+            break;
+        }
+      }
+
+
+
+      let files2 = await reader.list()
+      let file2 = await reader.get(files2[0])
+
 
       const idbReader = new IDBReader();
       await idbReader.init(modName);
-
       //copy zip data to indexed db
-      zipReader.transfer(idbReader)
+      reader.transfer(idbReader)
 
+      const modName = file.name.replace(/\.zip$/i, '');
       this.mods.push({
         name: modName,
         data: idbReader

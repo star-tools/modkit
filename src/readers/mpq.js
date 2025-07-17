@@ -1,5 +1,6 @@
 import Reader from './reader.js';
 import MPQArchive from './../lib/js-mpq.js';
+import Buffer from '../lib/buffer.js';
 
 /**
  * MpqReader class for reading MPQ archives.
@@ -21,7 +22,13 @@ export default class MPQReader extends Reader {
     async init() {
         let buffer;
 
-        if (typeof this.file === 'string') {
+        const isBrowserFile = (x) => typeof File !== "undefined" && this.file instanceof File;
+
+        if (isBrowserFile) {
+            const arrayBuffer = await this.file.arrayBuffer();
+            buffer = Buffer.from(arrayBuffer); // In environments where Buffer is available
+            delete this.file
+        } else if (typeof this.file === 'string') {
             // Load from path (Node.js only)
             const fs = await import('fs/promises');
             buffer = await fs.readFile(this.file);
@@ -73,5 +80,4 @@ export default class MPQReader extends Reader {
 
     // MPQ is read-only in this version, so no `set()` or `blob()`
 }
-
 Reader.readers.MPQ = MPQReader;
