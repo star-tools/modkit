@@ -1,10 +1,22 @@
 export default class Reader {
-  constructor(options) {
+  constructor(options = {}) {
+    this.name = options.name
     // Options can be stored or used in subclasses
   }
 
-  async init() {
-    // Override in subclass
+  async init(fullPath) {
+      // if(!type){
+      //     if (this.extension && !modpath.endsWith(this.extension)) {
+      //         fullPath += this.extension;
+      //     }
+      // }
+      if(this.isExists(fullPath)){
+          this.type = await this.isFile(fullPath) ? "file" : "folder"
+      }
+      else{
+          console.error(`${fullPath} directory cant be read`)
+      }
+      this.modpath = fullPath
   }
 
   async list(prefix = '') {
@@ -23,6 +35,15 @@ export default class Reader {
     return false;
   }
 
+  async isFile(file) {
+    return null
+  }
+  async isFolder(file) {
+    return null
+  }
+  async isExists(path){
+    return this.isFile(path) || this.isFolder(isFile)
+  }
   async clear() {
     // Override in subclass
   }

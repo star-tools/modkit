@@ -33,7 +33,7 @@ import {  GAME_NAMESPACES } from './types/shared.js';
  * 
  * const reader = new SC2ModReader({
  *   base: './mods/',
- *   readers: [{ default: true, reader: "Node" }],
+ *   readers: [{ default: true, class: "Node" }],
  *   directories: { mods: './mods/', custom: './custom/' }
  * });
  * 
@@ -50,25 +50,22 @@ import {  GAME_NAMESPACES } from './types/shared.js';
  */
 export default class SC2ModReader extends VFS {
     configs = {
-        Node:  { name: "Node", path: "./nfs.js",options: {extension: ".sc2mod"}},
-        Web: {name: "Web",path: "./wfs.js" ,options: {extension: ".sc2mod"}},
-        LevelDB: {name: "LevelDB", path: "./ldb.js" ,options: {db: "./sc2mods.db"}},
-        IndexedDB: { name: "IndexedDB", path: "./idb.js", options: {dbName: "starcraft2" , storeName: "mods"}},
-        Git: { name: "Git", path: "./git.js", options: {} },
-        Zip: { name: "Zip", path: "./zip.js", options: {} },
-        MPQ: { name: "MPQ", path: "./mpq.js", options: {} },
-        URL: { name: "URL", path: "./url.js", options: {} },
+        Node:  { name: "Node", path: "./nfs.js"},
+        Web: {name: "Web",path: "./wfs.js" },
+        LevelDB: {name: "LevelDB", path: "./ldb.js"},
+        IndexedDB: { name: "IndexedDB", path: "./idb.js"},
+        Git: { name: "Git", path: "./git.js" },
+        URL: { name: "URL", path: "./url.js" },
+        
+        MPQ: { name: "MPQ", path: "./../extractors/mpq.js"  },
+        ZIP: { name: "ZIP", path: "./../extractors/zip.js"  },
+        JSON:{ name:"JSON", path: "./../extractors/json.js" },
     }
-    constructor(options){
+    constructor(options = {}){
+        if(options.constructor === String){
+            options = {base: options}
+        }
         super(options)
-        if(options.base){
-            this.basePath = options.base
-        }
-        else{
-            this.basePath = this._get_base_path()
-        }
-        this.configs.Node.options.base = this.basePath
-        this.configs.URL.options.base = this.basePath
 
         let cs = this.configs;
         if(options.readers){
@@ -78,23 +75,25 @@ export default class SC2ModReader extends VFS {
             this.addReaders(options.readers)
         }
         else{
+            let extension = "sc2mod|sc2map|sc2replay"
             isNode && this.addReaders(
-                {default: true, reader: cs.Node, name: "default"},
-                {prefix: "file:", reader: cs.Node, name: "file"},
-                {prefix: "(db|ldb):", reader: cs.LevelDB, name: "ldb"}
+                {prefix: "file", class: cs.Node, name: "file" , extension, base: this.basePath},
+                {prefix: "http|https", class:cs.URL, name: "url"},
+                {prefix: "db|ldb", class: cs.LevelDB, name: "db", dbPath: "./sc2mods.db"}
             )
             !isNode && this.addReaders(
-                {default: true, reader: cs.URL, name: "default"},
-                {prefix: "file:",reader: cs.Web, name: "file"},
-                {prefix: "(db|idb):",reader: cs.IndexedDB, name: "idb"}
+                {prefix: "file",class: cs.Web, name: "file"  , extension },
+                {prefix: "http|https",  class: cs.URL, name: "url" , base: this.basePath},
+                {prefix: "db|idb",class: cs.IndexedDB, name: "db", dbName: "starcraft2" , storeName: "mods"}
             )
             this.addReaders(
-                {prefix: "(http|https):", reader:cs.URL, name: "url"},
-                {prefix: "git:", reader:cs.Git, name: "git"},
+                {prefix: "git", class: cs.Git, name: "git"}
+            );
 
-
-                {extension: ".zip", reader:cs.Zip, name: "zip"},
-                {extension: ".(sc2mod|sc2map|sc2replay)", reader:cs.MPQ, name: "mpq"}
+            this.addExtractors(
+                // {extension: ".json", class:cs.JSON, name: "json"},
+                {extension: "zip", class:cs.ZIP, name: "zip"},
+                {extension, class:cs.MPQ, name: "mpq"}
             )
         }
 
@@ -104,7 +103,7 @@ export default class SC2ModReader extends VFS {
                 let base = options.directories[prefix]
                 if(base.startsWith("./"))base = base.replace("./",this.basePath)
                 else if(base.startsWith(".")) base = base.replace(".",this.basePath)
-                readers.push({prefix: prefix + ":", reader: this.readers.default.reader , base })
+                readers.push({prefix: prefix, class: this.readers[this.defaultProtocol].class , base })
             }
             this.addReaders(...readers)
         }
@@ -208,7 +207,9 @@ export default class SC2ModReader extends VFS {
             ini: async (file,schema)  => files.includes(file.toLowerCase()) &&this._parse_file(reader, file, SC2INI),
             scTextureMap: async (file,schema)  => files.includes(file.toLowerCase()) && this._parse_file( reader, file, SC2TextureMap),
             sc2script: async (file,schema)  => files.includes(file.toLowerCase()) && this._parse_file( reader, file, SC2Script),
-            bin: async (file,schema)  => files.includes(file.toLowerCase()) ? await reader.link(file) : null
+            bin: async (file,schema)  => {
+                return files.includes(file.toLowerCase()) ? ["//",reader.name,reader.modpath,file].join(":") : null
+            }
         };
 
         // Map of file tasks
@@ -562,7 +563,7 @@ export default class SC2ModReader extends VFS {
     }
 
 
-    async write(modName, modData, options){
+    async write(modName, modData, options){                                                              
         await this._writeModData(modName,modData,options);
     }
 

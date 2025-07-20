@@ -1,5 +1,3 @@
-import JSZip from '../lib/zip.js';
-import Reader from './reader.js';
 /**
  * ZipReader class for reading and manipulating ZIP archives.
  *
@@ -21,32 +19,42 @@ import Reader from './reader.js';
  * - The `set()` method adds or replaces a file in the archive.
  * - The `blob()` method generates a Blob representing the current ZIP state.
  */
+import JSZip from '../lib/zip.js';
+import Reader from '../readers/reader.js';
 
 export default class ZipReader extends Reader {
-    constructor(file) {
+    constructor(options) {
         super();
-        this.name = file.name
-        this.file = file;
+        this.name = options.name
+        this.file = options.file
     }
-    async init(){
-        if(this.file){
-            this.zip = await JSZip.loadAsync(this.file);
-            delete this.file
+    async init(modpath = ''){
+        if(!this.zip){
+            if(this.file){
+                this.zip = await JSZip.loadAsync(this.file);
+            }
+            else{
+                this.zip = new JSZip();
+            }
         }
-        else{
-            this.zip = new JSZip();
-        }
+        await super.init(modpath)
     }
     async list (dirPath = "") {
         if (!this.zip) throw new Error("ZIP file not loaded. Call init() first.");
+        const fullPath = this.modpath ? this.modpath + '/' + dirPath : dirPath
 
         const files = [];
         const folders = new Set();
 
         this.zip.forEach((relativePath) => {
-            if (relativePath.startsWith(dirPath)) {
+            if (relativePath.startsWith(fullPath)) {
                 if (!this.ignored(relativePath)){
-                    files.push(relativePath);
+                    if(this.modpath){
+                        files.push(relativePath.replace(this.modpath + '/',''));
+                    }
+                    else{
+                        files.push(relativePath);
+                    }
                     const parts = relativePath.split('/');
                     if (parts.length > 1) {
                         folders.add(parts[0] + "/");
@@ -55,20 +63,39 @@ export default class ZipReader extends Reader {
             }
         });
         //files.unshift(...Array.from(folders));
-        return files 
+        return files
     }
 
-    async get (path) {
+    async isFile (path) {
+        if(this.modpath) path = this.modpath + '/' + path
+        return !!this.zip.file(path)
+    }
+    async isFolder (path) {
+        if(this.modpath) path = this.modpath + '/' + path
+        return !!this.zip.folder(path)
+    }
+    async get (path,options) {
+        path = this.modpath + (this.modpath && path ? '/': '') + path
+        
         if (!this.zip) throw new Error("ZIP file not loaded. Call init() first.");
 
-        const zipEntry = this.zip.file(path);
+        let zipEntry = this.zip.file(path);
+        if (!zipEntry) {
+            const lowerTarget = path.toLowerCase();
+            this.zip.forEach((relativePath, zipEntry2) => {
+                if (!zipEntry2.dir && relativePath.toLowerCase() === lowerTarget) {
+                    zipEntry = zipEntry2;
+                }
+            });
+        }
+
         if (!zipEntry) {
             throw new Error(`File "${path}" not found in the ZIP archive.`);
         }
-
-        return await zipEntry.async('text');
+        return await zipEntry.async(options?.binary ? 'arraybuffer': 'text');
     }
     async set(filename, content){
+        if(this.modpath) filename = this.modpath + '/' + filename
         if (content) {
             zip.file(filename, content);
         }

@@ -13,10 +13,23 @@ export default class NodeReader extends Reader {
   }
 
   async init(modpath) {
-    if (this.extension && !modpath.endsWith(this.extension)) {
-      modpath += this.extension;
+    let fullpath = path.resolve(this.base, modpath)
+    await super.init(fullpath)
+  }
+  async isFile (path) {
+    if(fs.access(path,fs.constants.R_OK)){
+      const stats = await fs.stat(path);
+      return stats.isFile() 
     }
-    this.modpath = path.resolve(this.base, modpath);
+  }
+  async isFolder (path) {
+    if(fs.access(path,fs.constants.R_OK)){
+      const stats = await fs.stat(path);
+      return stats.isDirectory()
+    }
+  }
+  async isExists(path){
+    return !!fs.access(path,fs.constants.R_OK)
   }
 
   async list(dirPath = '') {
@@ -47,7 +60,7 @@ export default class NodeReader extends Reader {
     return files;
   }
 
-  async get(relativeFile, options = { encoding: 'utf-8' }) {
+  async get(relativeFile, options = {}) {
     const fullPath = path.join(this.modpath, relativeFile);
 
     try {
@@ -56,7 +69,7 @@ export default class NodeReader extends Reader {
         return buffer.toString('base64');
       }
 
-      if (options.encoding === 'buffer' || options.encoding === 'uint8array') {
+      if (options.binary || options.encoding === 'buffer' || options.encoding === 'uint8array') {
         return await fs.readFile(fullPath);
       }
 
@@ -65,10 +78,6 @@ export default class NodeReader extends Reader {
       console.error(`Failed to read file: ${fullPath}`, err.message);
       return null;
     }
-  }
-
-  link(file) {
-    return path.resolve(file);
   }
 
   async set(filename, content, options) {

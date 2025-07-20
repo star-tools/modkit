@@ -511,6 +511,7 @@ export const CTypes = {
   CString32,
   CString50,
   CString80,
+  CWord,
   CReals,
   CInts,
   CWords,
@@ -524,15 +525,6 @@ export const CTypes = {
 
 
   CDataEntryPath,
-  CWord,
-  CString,
-  CString4,
-  CString32,
-  CString50,
-  CString80,
-  CReals,
-  CInts,
-  CWords,
   CScaleVector,
   CVector3: C3Vector,
   CVector2: C2Vector,

@@ -64,6 +64,19 @@ for (const name of catalogNames) {
 }
 
 
+Links["CStringLink"] = class extends CLink {
+  static catalog = "String"
+};
+Links["CHotkeyLink"] = class extends CLink {
+  static catalog = "Hotkey"
+};
+Links["CAssetLink"] = class extends CLink {
+  static catalog = "Asset"
+};
+Links["CBankLink"] = class extends CLink {
+  static catalog = "Bank"
+};
+
 // Export classes individually if needed
 export const {
   CUnitLink,
@@ -152,6 +165,7 @@ export const {
   CShapeLink,
   CTextureSheetLink,
   CHeroAbilLink,
+
   CStringLink,
   CHotkeyLink,
   CAssetLink,
@@ -165,6 +179,10 @@ const CatalogLinks = catalogNames.reduce((acc, name) => {
   acc[name] = Links[`C${name}Link`];
   return acc;
 }, { 
+  String: CStringLink,
+  Hitkey: CHotkeyLink,
+  Asset: CAssetLink,
+  Bank : CBankLink
     // AbilCommand: CAbilCommand ,
     // PhysicsMaterials: CPhysicsMaterialLinks
 });

@@ -2,6 +2,8 @@
 
 CLI and JavaScript toolkit for reading, merging, and writing StarCraft 2 `.SC2Mod` archives.
 
+State - Work In Progress
+
 ## Installation
 
 ```bash

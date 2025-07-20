@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "types": "types/index.d.ts",
   "files": [
-      "src/",
-      "types/"
+    "src/",
+    "types/"
   ],
   "description": "Toolkit for reading, merging, and writing StarCraft 2 mods",
   "type": "module",
@@ -24,10 +24,12 @@
   "license": "MIT",
   "devDependencies": {
     "cors": "^2.8.5",
+    "esbuild": "^0.25.8",
     "express": "^5.1.0",
     "jest": "^30.0.4"
   },
   "scripts": {
+    "build": "node build.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "repository": {
@@ -41,6 +43,7 @@
   "dependencies": {
     "commander": "^14.0.0",
     "level": "^10.0.0",
+    "node-fetch": "^3.3.2",
     "octokit": "^5.0.3",
     "xmldom": "^0.6.0"
   }

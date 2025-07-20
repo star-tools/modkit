@@ -1,11 +1,11 @@
 import SC2ModReader from '../../src/SC2ModReader.js';
 
 let reader = new SC2ModReader({
-  base: "/Applications/StarCraft II/Mods/assets/data/",
+  base: "/Applications/StarCraft II/assets/data/",
   directories: {
     mods:    './mods/',
     custom:  './custom/',
-    exo:     './exo/'
+    exo:     './exo/',
   }
 })
 
@@ -19,26 +19,26 @@ let wikiConfig = {
 }
 
 let modMerged = await reader.merge([
-    "mods:Core",
-    "mods:Liberty",
-    // "mods:Swarm",
-    // "mods:Void",
-    // "multi/VoidMulti5014",
+    // "mods:Core.SC2Mod",
+    // "mods:Liberty.SC2Mod",
+    // "mods:Swarm.SC2Mod",
+    // "mods:Void.SC2Mod",
+    // "multi/VoidMulti5014.SC2Mod",
 
-    // "custom:BroodWar",
-    // "custom:Dragons",
-    // "custom:Hybrids",
-    // "custom:Scion",
-    // "custom:Synoid",
-    // "custom:TalDarim",
-    // "custom:UED",
-    // "custom:Umojan",
-    // "custom:UPL",
+    // "custom:BroodWar.SC2Mod",
+    // "custom:Dragons.SC2Mod",
+    // "custom:Hybrids.SC2Mod",
+    // "custom:Scion.SC2Mod",
+    // "custom:Synoid.SC2Mod",
+    // "custom:TalDarim.SC2Mod",
+    // "custom:UED.SC2Mod",
+    // "custom:Umojan.SC2Mod",
+    // "custom:UPL.SC2Mod",
 
-    // "exo:TiberiumWars",
-    // "exo:WarCraft",
-    // "exo:WarHammer",
-    // "exo:Warzone"
+    // "exo:TiberiumWars.SC2Mod",
+    // "exo:WarCraft.SC2Mod",
+    // "exo:WarHammer.SC2Mod",
+    // "exo:Warzone.SC2Mod"
   ]/*, wikiConfig*/)
   
   reader.write("output/Merged",modMerged)

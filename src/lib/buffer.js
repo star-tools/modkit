@@ -1,5 +1,5 @@
 
-    var ur = {}, G = {};
+var ur = {}, G = {};
 G.byteLength = Lr;
 G.toByteArray = Mr;
 G.fromByteArray = br;

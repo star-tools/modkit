@@ -1,7 +1,3 @@
-import Reader from './reader.js';
-import MPQArchive from '../lib/mpq.js';
-import Buffer from '../lib/buffer.js';
-
 /**
  * MpqReader class for reading MPQ archives.
  *
@@ -12,21 +8,24 @@ import Buffer from '../lib/buffer.js';
  *   const fileContent = await mpqReader.get("Base.SC2Data\\UI\\FontStyles.SC2Style");
  */
 
+import Reader from '../readers/reader.js';
+import MPQArchive from '../lib/mpq.js';
+import Buffer from '../lib/buffer.js';
+
 export default class MPQReader extends Reader {
-    constructor(file, options = {}) {
-        super();
-        this.name = options.name || "mpq";
-        this.file = file; // Can be Buffer, File, or path string
+    constructor(options) {
+        super(options);
+        this.file = options?.file
     }
 
     async init() {
         let buffer;
 
-        const isBrowserFile = (x) => typeof File !== "undefined" && this.file instanceof File;
+        const isBrowserFile =  typeof File !== "undefined" && this.file instanceof File;
 
         if (isBrowserFile) {
             const arrayBuffer = await this.file.arrayBuffer();
-            buffer = Buffer.from(arrayBuffer); // In environments where Buffer is available
+            buffer = Buffer.from(arrayBuffer)
             delete this.file
         } else if (typeof this.file === 'string') {
             // Load from path (Node.js only)
@@ -43,14 +42,14 @@ export default class MPQReader extends Reader {
         }
 
         this.mpq = new MPQArchive(buffer);
-        this.files = this.mpq.files;
+        await super.init('')
     }
 
     async list(dirPath = "") {
         if (!this.mpq) throw new Error("MPQ file not loaded. Call init() first.");
 
         const files = [];
-        for (let filename of this.files) {
+        for (let filename of this.mpq.files) {
             const normalized = filename.replace(/\\/g, '/');
             if (normalized.startsWith(dirPath) && !this.ignored(normalized)) {
                 files.push(normalized);
