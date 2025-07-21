@@ -2,6 +2,7 @@
 import { CEnum } from "./core.js";
 import { CGAME_CLASSES, GAME_TYPES, SGAMEDATA_STRUCTURES, CGAME_CATALOGS, GAME_NAMESPACES, GAME_LOCALES } from "./shared.js";
 
+export class EConstId extends CEnum {static enum = ["const"]}
 export class EStructId extends CEnum {static enum = SGAMEDATA_STRUCTURES}
 export class ETypeId extends CEnum {static enum =  GAME_TYPES}
 export class EClassId extends CEnum {static enum = CGAME_CLASSES}
@@ -455,6 +456,7 @@ export const EnumClasses = {
   ELocaleId,
   EPlayerId,
   ETypeId,
+  EConstId,
   EStructId,
   EClassId,
   EClassIdCActorSupport,

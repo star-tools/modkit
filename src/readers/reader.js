@@ -10,11 +10,13 @@ export default class Reader {
       //         fullPath += this.extension;
       //     }
       // }
-      if(this.isExists(fullPath)){
+      let exists = await this.isExists(fullPath)
+      if(exists){
           this.type = await this.isFile(fullPath) ? "file" : "folder"
       }
       else{
-          console.error(`${fullPath} directory cant be read`)
+          this.type = null
+          // console.error(`${fullPath} directory cant be read`)
       }
       this.modpath = fullPath
   }

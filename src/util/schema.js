@@ -27,13 +27,22 @@ export function getSchemaField(tag, schema) {
 
 export function relations(value, schema, trace = "") {
     if(!schema)return []
+    //todo i should implement how to define it in schema
+    if(schema["%"] ){
+      let subSchemaField = value[schema["%"]]
+      schema = schema[subSchemaField]
+    }
     let result = []
     if(schema.constructor === Object){
-        for (let attribute in value) {
-            if(["index",'class', "removed" ,'id','default'].includes(attribute))continue
-            let subschema = (attribute === "parent") ? schema : schema[attribute];
+        for (let atr in value) {
+            if(["index",'class', "removed" ,'id','default'].includes(atr))continue
+
+            let subschema  = schema
+            if(atr !== "parent"){
+              subschema=schema[atr]||schema['$'+atr]||schema['%'+atr]||schema['@'+atr]||schema['*'+atr]
+            }
     
-            schema[attribute] && result.push(...relations(value[attribute], subschema, trace + "." + attribute))
+            subschema && result.push(...relations(value[atr], subschema, trace + "." + atr))
         }
     }
     else if(schema.constructor === Array){

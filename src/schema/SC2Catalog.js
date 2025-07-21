@@ -2,8 +2,8 @@ import {C} from "../types/types.js"
 import A from "../types/files.js"
 import E from "../types/enums.js"
 import F from "../types/flags.js"
-import SC2DataStructures from "./SC2DataStructures.js"
-import SC2DataClasses from "./SC2DataClasses.js"
+import SC2DataStructures, { DataStructs } from "./SC2DataStructures.js"
+import SC2DataClasses, { DataClasses } from "./SC2DataClasses.js"
 
 // -------------------------------
 // Special Types
@@ -14,6 +14,11 @@ export const SConst = {
     type: E.TypeId,
     value: C.TokenValue,
     path: C.Path,
+}
+
+export const SConstDefinition = {
+    ...SConst,
+    "@class": E.ConstId,
 }
 
 export const SStructDefinition = {
@@ -58,28 +63,38 @@ export const StructDefinitions = Object.fromEntries(
 // SCSchema["Const"] = [S.Const],
 // SCSchema["*Struct"] = [SCSchema.struct]
 // SCSchema["*Data"] = [SCSchema.classes]
-const structs = Object.fromEntries(Object.entries(SC2DataStructures).map(([k,v]) => [`S${k}`, v]));
-const classes = Object.fromEntries(Object.entries(SC2DataClasses).map(([k,v]) => [`C${k}`, v]));
+// const structs = Object.fromEntries(Object.entries(SC2DataStructures).map(([k,v]) => [`S${k}`, v]));
+// const classes = Object.fromEntries(Object.entries(SC2DataClasses).map(([k,v]) => [`C${k}`, v]));
 
-
-
+export const CatalogEntities = {
+  ...DataClasses,
+  ...StructDefinitions,
+  const: SConstDefinition
+}
+const combinedCatalogData = {
+  "%": "class", 
+  ...CatalogEntities
+}
 
 export const SCatalog = {
+    //constants will be stored in a separate array 
     "@": "Catalog",
     path: A.XML,
-    //constants will be stored in a separate array 
-    const: [SConst],
+    mod: String,
+    namespace: E.GameCatalog,
     //these are variative fields... did not find a best way to imlpement schema for the catalog.
     //if tag schema not found for example, there ar no CUnit field
     //if persist all CUNits would be saved in CUnit array
     //but instead cnverter will search for variative filds if any validate the CUnit it will be added to this array .
     //if validate method returns Schema object it will be used as schema  (VData will return CUnit from schema types it will be used instead of VData)
     //separate structures and catalogs 
-    "*Struct": [StructDefinitions],
-    "*Data": [classes],
     // "@type": C.String, //can be used to identify result json object as catalog data
     // ...SStructs, // only 1 structure element per type
     // ...Object.fromEntries(Object.entries(CatalogClasses).map(([e,c]) => ([e,[c]]))) //multiple classes
+
+    // "*Struct": [StructDefinitions],
+    // "*Data": [classes]
+    "*data": [combinedCatalogData]
 }
 
 export default {

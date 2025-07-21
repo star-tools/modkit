@@ -42,6 +42,7 @@ export default class MPQReader extends Reader {
         }
 
         this.mpq = new MPQArchive(buffer);
+        delete this.file
         await super.init('')
     }
 

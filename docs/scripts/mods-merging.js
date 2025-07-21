@@ -19,8 +19,8 @@ let wikiConfig = {
 }
 
 let modMerged = await reader.merge([
-    // "mods:Core.SC2Mod",
-    // "mods:Liberty.SC2Mod",
+    "mods:Core.SC2Mod",
+    "mods:Liberty.SC2Mod",
     // "mods:Swarm.SC2Mod",
     // "mods:Void.SC2Mod",
     // "multi/VoidMulti5014.SC2Mod",

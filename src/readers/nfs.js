@@ -29,7 +29,12 @@ export default class NodeReader extends Reader {
     }
   }
   async isExists(path){
-    return !!fs.access(path,fs.constants.R_OK)
+    try {
+      await fs.access(path, fs.constants.R_OK);
+      return true;
+    } catch {
+      return false;
+    } 
   }
 
   async list(dirPath = '') {
@@ -73,7 +78,7 @@ export default class NodeReader extends Reader {
         return await fs.readFile(fullPath);
       }
 
-      return await fs.readFile(fullPath, options.encoding);
+      return await fs.readFile(fullPath, options.encoding || 'utf-8');
     } catch (err) {
       console.error(`Failed to read file: ${fullPath}`, err.message);
       return null;

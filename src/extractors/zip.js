@@ -37,6 +37,7 @@ export default class ZipReader extends Reader {
                 this.zip = new JSZip();
             }
         }
+        delete this.file
         await super.init(modpath)
     }
     async list (dirPath = "") {

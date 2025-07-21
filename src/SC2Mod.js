@@ -3,7 +3,9 @@ import Eval from './lib/eval.js';
 import { objectsDeepMerge, applyArrayPatches, objectDeepTransform } from './util/obj-util.js';
 import { isNumeric } from './util/js-util.js';
 import SC2DataClasses from './schema/SC2DataClasses.js';
-import { C_NAMESPACES } from './types/shared.js';
+import { C_NAMESPACES, GAME_LOCALES } from './types/shared.js';
+import { CatalogEntities } from './schema/SC2Catalog.js';
+import { relations } from './util/schema.js';
 
 /**
  * SC2Mod represents a StarCraft 2 mod data container and processor.
@@ -61,7 +63,7 @@ export default class SC2Mod {
     const id = data.id;
     const tag = data.class;
     const pid = data.parent;
-    const parent = this.cache[id ? C_NAMESPACES[tag] : 'defaults']?.[pid || id || tag];
+    const parent = this.cache[id ? C_NAMESPACES[tag] : 'Classes']?.[pid || id || tag];
 
     if (parent) {
       entity.parents = [...parent.parents, parent];
@@ -76,37 +78,50 @@ export default class SC2Mod {
   /**
    * Builds the cache of entities from catalogs and dependencies.
    */
-  _make_cache() {
-    this.cache = { defaults: {} };
+  makeCache() {
+    this.cache = { Classes: {} };
     const cache = this.cache;
 
     if (this.dependencies) {
       for (const dependency of this.dependencies) {
-        objectsDeepMerge(cache, dependency.cache);
+      if(!dependency.cache)dependency.makeCache()
+        for (const cacheName in dependency.cache) {
+          if(!this.cache[cacheName])this.cache[cacheName] = {}
+          for (const cacheKey in dependency.cache[cacheName]) {
+            this.cache[cacheName][cacheKey] = dependency.cache[cacheName][cacheKey] 
+          }
+        }
       }
     }
 
-    for (const catalog of this.catalogs) {
-      if (catalog.Data) {
-        for (const data of catalog.Data) {
-          const id = data.id;
-          const tag = data.class;
-          const entity = {
-            data,
-            mod: this,
-            namespace: C_NAMESPACES[tag],
-          };
-          const namespace = id ? C_NAMESPACES[tag] : 'defaults';
-          if (!cache[namespace]) cache[namespace] = {};
-          this._calculate_parents(entity);
-          cache[namespace][id || tag] = entity;
+    //works with catalogs
+    if(this.data.catalogs){
+      for (const catalog of this.data.catalogs) {
+        if (catalog.data) {
+          for (const data of catalog.data) {
+            const id = data.id;
+            const tag = data.class;
+            let namespace;
+            if(tag[0]==="C") namespace =   id ? C_NAMESPACES[tag] : 'Classes';
+            if(tag[0]==="S") namespace =   "Structures"
+            if(tag==="const") namespace =  "Const"
+            const entity = {
+              data,
+              mod: this,
+              namespace
+          }
+
+            if (!cache[namespace]) cache[namespace] = {};
+            this._calculate_parents(entity);
+            cache[namespace][id || tag] = entity;
+          }
         }
       }
     }
 
     this.cache.String = {};
-    for (const cid in this.strings) {
-      const catalog = this.strings[cid];
+    for (const cid in this.data.strings) {
+      const catalog = this.data.strings[cid];
       for (const key in catalog) {
         this.cache.String[key] = { data: catalog[key] };
       }
@@ -161,7 +176,9 @@ export default class SC2Mod {
     let resolved;
     const parents = entity.parents;
 
-    for (const parent of [...parents, entity]) {
+    //todo deafult values can have parents too... 
+    const defaultValue = [this.cache.Classes[entity.data.class]] || []
+    for (const parent of [...defaultValue, ...parents, entity]) {
       let pvalue = parent.data[field];
       if (pvalue && !(Array.isArray(pvalue) || typeof pvalue === 'object')) {
         pvalue = { value: pvalue };
@@ -176,7 +193,7 @@ export default class SC2Mod {
 
     if (!resolved) {
       console.warn('No value found for field:', field);
-      return ' ';
+      return null;
     }
 
     const patched = applyArrayPatches(resolved);
@@ -193,17 +210,17 @@ export default class SC2Mod {
    * @param {string} locale 
    */
   calculateStrings(locale) {
-    if (!this.cache) this._make_cache();
+    if (!this.cache) this.makeCache();
 
     const cs = this.cache.String;
-    for (const cid in this.strings) {
-      const catalog = this.strings[cid];
+    for (const cid in this.data.strings) {
+      const catalog = this.data.strings[cid];
       for (const key in catalog) {
         let useLocale = locale;
         if (catalog[key][locale] === undefined) {
           console.log(`Missing string localization ${key} in locale ${locale}`);
           const keys = Object.keys(catalog[key]);
-          useLocale = keys.includes('enus') ? 'enus' : keys[0];
+          useLocale = keys.includes('enUS') ? 'enUS' : keys[0];
         }
         cs[key].calculated = catalog[key][useLocale].replace(/\/\/\/.*/, '').trim();
       }
@@ -378,7 +395,7 @@ export default class SC2Mod {
    * Links actors to their units by matching creation events.
    */
   resolveUnitsActors() {
-    if (!this.cache) this._make_cache();
+    if (!this.cache) this.makeCache();
     for (const actorId in this.cache.Actor) {
       const actor = this.cache.Actor[actorId];
       const data = actor.data;
@@ -561,20 +578,29 @@ const column = buttonData.DefaultButtonLayout?.Column || 0;
    * Sets up relations between entities based on schema references.
    */
   setEntitiesRelations() {
-    if (!this.cache) this._make_cache();
+    if (!this.cache) this.makeCache();
 
     for (const namespace in this.cache) {
       for (const id in this.cache[namespace]) {
         const entity = this.cache[namespace][id];
-        const refs = relations(entity.data, SC2DataClasses[entity.data.class.substring(1)], C_NAMESPACES[entity.data.class] + '.' + entity.data.id);
-
+        let refs = relations(entity.data, CatalogEntities[entity.data.class], C_NAMESPACES[entity.data.class] + '.' + entity.data.id);
+        //filter empty values
+        refs = refs.filter( r => r.value)
         for (const ref of refs) {
-          const target = this.cache[ref.type]?.[ref.value];
-          if (target) {
-            if (!target.relations) target.relations = [];
-            target.relations.push(ref);
-          } else {
-            console.log(`Reference ${ref.target} not found`);
+          //skip template values
+          if(!ref.value.includes("##")){
+            const target = this.cache[ref.type]?.[ref.value];
+            if (target) {
+              if (!target.relations) target.relations = [];
+              target.relations.push(ref);
+            } else {
+              if(ref.type === "File"){
+                continue;
+              }
+              else{
+                console.log(`Reference ${ref.value} not found`);
+              }
+            }
           }
         }
 
@@ -589,45 +615,41 @@ const column = buttonData.DefaultButtonLayout?.Column || 0;
   /**
    * Merge multiple catalogs into organized data structures.
    */
-  mergeCatalogs() {
-    if (!this.catalogs) return;
+  buildCatalogs() {
+    if (!this.data.catalogs) return;
 
     const outputCatalogs = {};
-    const structCatalog = [];
-    const constCatalog = [];
     let entities = 0;
 
-    for (const catalog of this.catalogs) {
-      if (catalog.Data) {
-        for (const entity of catalog.Data) {
-          const namespace = C_NAMESPACES[entity.class];
-          if (!outputCatalogs[namespace]) outputCatalogs[namespace] = [];
-          outputCatalogs[namespace].push(entity);
-          entities++;
+    for (const catalog of this.data.catalogs) {
+      if (catalog.data) {
+        if (catalog.namespace === 'Includes'){
+          for (const entity of catalog.data) {
+            const namespace = C_NAMESPACES[entity.class];
+            if(!namespace){
+              namespace = "Other"
+            }
+            if (!outputCatalogs[namespace]) outputCatalogs[namespace] = [];
+            outputCatalogs[namespace].push(entity);
+            entities++;
+          }
+        }
+        if (catalog.namespace) {
+            if (!outputCatalogs[catalog.namespace]) outputCatalogs[catalog.namespace] = [];
+            outputCatalogs[catalog.namespace].push(...catalog.data);
+            entities+= catalog.data.length
         }
       }
-      if (catalog.Struct) {
-        structCatalog.push(...catalog.Struct);
-      }
-      if (catalog.const) {
-        constCatalog.push(...catalog.const);
-      }
     }
 
-    this.catalogs = [];
-
-    if (constCatalog.length) {
-      this.catalogs.push({ path: 'GameData/ConstData', const: constCatalog });
-    }
-    if (structCatalog.length) {
-      this.catalogs.push({ path: 'GameData/StructData', Struct: structCatalog });
-    }
-    this.catalogs.push(
-      ...Object.entries(outputCatalogs).map(([name, data]) => ({
-        path: 'GameData/' + name + 'Data',
-        Data: data,
-      }))
-    );
+    this.catalogs = outputCatalogs
+    // this.catalogs.push(
+    //   ...Object.entries(outputCatalogs).map(([name, data]) => ({
+    //     path: 'GameData/' + name + 'Data',
+    //     Data: data,
+    //   }))
+    // // );
+    // console.log(entities + " entities")
   }
 
   /**
@@ -671,13 +693,25 @@ const column = buttonData.DefaultButtonLayout?.Column || 0;
     entity.calculated = resultPatched;
     return resultPatched;
   }
+  /**
+   * Calculates value for an entity, including parents.
+   * @param {object} entity 
+   * @param {string} field 
+   * @returns {object} Calculated values
+   */
+  calculateValue(entity,field) {
+    let value = this._calculate_value(entity, field)
+    if(!entity.calculated)entity.calculated = {}
+    entity.calculated[field] = value
+    return value;
+  }
 
   /**
    * Merges another mod into this one.
    * @param {SC2Mod} mod 
    */
   merge(mod) {
-    objectsDeepMerge(this, mod);
+    objectsDeepMerge(this.data, mod.data);
   }
 
   /**
@@ -687,5 +721,31 @@ const column = buttonData.DefaultButtonLayout?.Column || 0;
    */
   static fromJSON(data) {
     return new SC2Mod(data);
+  }
+
+  getLocales(){
+    return this.data.components?.DataComponent?.filter(c => c.Type.toLowerCase() === "text").map(c => c.Locale) || GAME_LOCALES
+  }
+  getTokens(){
+
+    let tokensCache = {}
+    if(options.dependencies?.length){
+        for(let dependency of options.dependencies){
+            for(let catalog of dependency.data.catalogs){
+                for(let entity of catalog.data){
+                    if(entity.token){
+                        for(let token of entity.token){
+                            let c = entity.class
+                            let ns =   C_NAMESPACES[c] 
+                            let id =  (entity.id ?  ns + "." + entity.id : c) + "." +  token.id;
+                            tokensCache[id] = token.type ? SCTypes[token.type] : String
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return tokensCache;
+
   }
 }

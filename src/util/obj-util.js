@@ -303,3 +303,30 @@ export function applyArrayPatches(data, deep = true) {
   // Primitive value
   return data;
 }
+
+
+export function groupObjectKeys(input,separator = '/') {
+    const result = {};
+
+    for (const [path, value] of Object.entries(input)) {
+        const parts = path.split(separator);
+        let current = result;
+
+        for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+
+        // If it's the last part, set the value
+        if (i === parts.length - 1) {
+            current[part] = value;
+        } else {
+            // If the key doesn't exist or isn't an object, create/replace it
+            if (typeof current[part] !== 'object' || current[part] === null) {
+            current[part] = {};
+            }
+            current = current[part];
+        }
+        }
+    }
+
+    return result;
+}

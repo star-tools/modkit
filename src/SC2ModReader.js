@@ -11,7 +11,10 @@ import SC2Mod from './SC2Mod.js';
 import { SMod } from './schema/SC2Mod.js';
 import { isNode } from './util/js-util.js';
 import { SCatalog } from './schema/SC2Catalog.js';
-import {  GAME_NAMESPACES } from './types/shared.js';
+import { C_NAMESPACES, GAME_NAMESPACES } from './types/shared.js';
+import { getSchema } from './util/schema.js';
+import { SCTypes } from './types/types.js';
+import { objectsDeepMerge } from './util/obj-util.js';
 
 
 /**
@@ -91,7 +94,7 @@ export default class SC2ModReader extends VFS {
             );
 
             this.addExtractors(
-                // {extension: ".json", class:cs.JSON, name: "json"},
+                {extension: "json", class:cs.JSON, name: "json"},
                 {extension: "zip", class:cs.ZIP, name: "zip"},
                 {extension, class:cs.MPQ, name: "mpq"}
             )
@@ -156,10 +159,7 @@ export default class SC2ModReader extends VFS {
     async _parse_file( reader , file, parser,schema) {
         const raw = await reader.get(file);
         if (!raw) return null;
-        
-        let result =  parser.parse(raw, schema, this.log);
-
-        return result
+         return parser.parse(raw, schema, this.log);
     }
 
     /**
@@ -194,17 +194,31 @@ export default class SC2ModReader extends VFS {
             scripts: true,
             editorcategories: true,
             cutscenes: true,
-            media: true
+            media: true,
+            includes: true
         };
-        const scope = { ...defaultScope, ...(options.scope || {}) };
+
+
+        const scope = options.scope || defaultScope;
         let reader = await this.init(modName);
+        if(reader.type === null){
+            //no file
+            return null
+        }
+        //for json reader
+        if(reader.data){
+            return reader.data
+        }
+
         let files = (await reader.list()).map(f => f.toLowerCase());
+        if(scope.catalogs && scope.includes !== false) scope.includes = true
 
         // Parsers per type
         const Parsers = {
+            cat: async (file,schema) => files.includes(file.toLowerCase()) && this._parse_file(reader, file, SC2XML,schema, true),
             xml: async (file,schema) => files.includes(file.toLowerCase()) && this._parse_file(reader, file, SC2XML,schema),
             env: async (file,schema)  => files.includes(file.toLowerCase()) && this._parse_file(reader, file, SC2ENV),
-            ini: async (file,schema)  => files.includes(file.toLowerCase()) &&this._parse_file(reader, file, SC2INI),
+            ini: async (file,schema)  => files.includes(file.toLowerCase()) && this._parse_file(reader, file, SC2INI),
             scTextureMap: async (file,schema)  => files.includes(file.toLowerCase()) && this._parse_file( reader, file, SC2TextureMap),
             sc2script: async (file,schema)  => files.includes(file.toLowerCase()) && this._parse_file( reader, file, SC2Script),
             bin: async (file,schema)  => {
@@ -224,7 +238,7 @@ export default class SC2ModReader extends VFS {
             objects: { parser: 'xml', files: "Objects", scope: 'objects' },
             preload: { parser: 'xml', files: ["Preload.xml", "Base.SC2Data/Preload.xml"], scope: 'preload' },
             terrain: { parser: 'xml', files: "t3Terrain.xml", scope: 'terrain' },
-            includes: { parser: 'xml', files: "Base.SC2Data/GameData.xml", scope: 'catalogs' },
+            includes: { parser: 'xml', files: "Base.SC2Data/GameData.xml", scope: 'includes' },
             texturereduction: { parser: 'scTextureMap', files: "Base.SC2Data/texturereduction/texturereductionvalues.txt", scope: 'texturereduction' },
             preloadassetdb: { parser: 'ini', files: "Base.SC2Data/preloadassetdb.txt", scope: 'preload' },
             standardinfo: { parser: 'xml', files: "Base.SC2Data/standardinfo.xml", scope: 'info' },
@@ -268,6 +282,137 @@ export default class SC2ModReader extends VFS {
             // t3TextureMasks 
             // t3VertCol 
             // t3Water
+
+
+
+
+            // localizeddata/editor/editorlayout.xml 
+                    
+            // localizeddata/editor/spellchecker/blizzard-words.txt
+            // localizeddata/editor/editorcatalogstrings.txt 
+            // localizeddata/editor/editorcatalogstringssc2.txt 
+            // localizeddata/editor/editorcategorystrings.txt 
+            // localizeddata/editor/editorstrings.txt 
+            // localizeddata/editor/editorstringssc2.txt 
+            // localizeddata/abilhints.txt 
+            // localizeddata/accumulatorhints.txt 
+            // localizeddata/achievementhints.txt 
+            // localizeddata/achievementtermhints.txt 
+            // localizeddata/actorhints.txt 
+            // localizeddata/actorsupporthints.txt 
+            // localizeddata/alerthints.txt 
+            // localizeddata/armycategoryhints.txt 
+            // localizeddata/armyunithints.txt 
+            // localizeddata/armyupgradehints.txt 
+            // localizeddata/artifacthints.txt 
+            // localizeddata/artifactslothints.txt 
+            // localizeddata/attachmethodhints.txt 
+            // localizeddata/bankconditionhints.txt 
+            // localizeddata/beamhints.txt 
+            // localizeddata/behaviorhints.txt 
+            // localizeddata/boosthints.txt 
+            // localizeddata/bundlehints.txt 
+            // localizeddata/buttonhints.txt 
+            // localizeddata/camerahints.txt 
+            // localizeddata/campaignhints.txt 
+            // localizeddata/characterhints.txt 
+            // localizeddata/cliffhints.txt 
+            // localizeddata/cliffmeshhints.txt 
+            // localizeddata/colorstylehints.txt 
+            // localizeddata/commanderhints.txt 
+            // localizeddata/confighints.txt 
+            // localizeddata/consoleskinhints.txt 
+            // localizeddata/conversationhints.txt 
+            // localizeddata/conversationstatehints.txt 
+            // localizeddata/conversationstrings.txt 
+            // localizeddata/cursorhints.txt 
+            // localizeddata/datacollectionhints.txt 
+            // localizeddata/datacollectionpatternhints.txt 
+            // localizeddata/decalpackhints.txt 
+            // localizeddata/dsphints.txt 
+            // localizeddata/effecthints.txt 
+            // localizeddata/emoticonhints.txt 
+            // localizeddata/emoticonpackhints.txt 
+            // localizeddata/errorhints.txt 
+            // localizeddata/errors.txt 
+            // localizeddata/fontstyles.sc2style 
+            // localizeddata/footprinthints.txt 
+            // localizeddata/fowhints.txt 
+            // localizeddata/gamehints.txt 
+            // localizeddata/gamehotkeys.txt 
+            // localizeddata/gamehotkeysproduct.txt 
+            // localizeddata/gamestrings.txt 
+            // localizeddata/gamestringsproduct.txt 
+            // localizeddata/gameuihints.txt 
+            // localizeddata/herdhints.txt 
+            // localizeddata/herdnodehints.txt 
+            // localizeddata/heroabilhints.txt 
+            // localizeddata/herohints.txt 
+            // localizeddata/herostathints.txt 
+            // localizeddata/itemclasshints.txt 
+            // localizeddata/itemcontainerhints.txt 
+            // localizeddata/itemhints.txt 
+            // localizeddata/kinetichints.txt 
+            // localizeddata/lensflaresethints.txt 
+            // localizeddata/lighthints.txt 
+            // localizeddata/locationhints.txt 
+            // localizeddata/loothints.txt 
+            // localizeddata/maphints.txt 
+            // localizeddata/modelhints.txt 
+            // localizeddata/mounthints.txt 
+            // localizeddata/moverhints.txt 
+            // localizeddata/objectivehints.txt 
+            // localizeddata/objectstrings.txt 
+            // localizeddata/objectstringsproduct.txt 
+            // localizeddata/physicsmaterialhints.txt 
+            // localizeddata/pinghints.txt 
+            // localizeddata/playerresponsehints.txt 
+            // localizeddata/portraitpackhints.txt 
+            // localizeddata/preloadhints.txt 
+            // localizeddata/premiummaphints.txt 
+            // localizeddata/racebannerpackhints.txt 
+            // localizeddata/racehints.txt 
+            // localizeddata/requirementhints.txt 
+            // localizeddata/requirementnodehints.txt 
+            // localizeddata/reverbhints.txt 
+            // localizeddata/rewardhints.txt 
+            // localizeddata/scoreresulthints.txt 
+            // localizeddata/scorevaluehints.txt 
+            // localizeddata/shapehints.txt 
+            // localizeddata/skinhints.txt 
+            // localizeddata/skinpackhints.txt 
+            // localizeddata/soundexclusivityhints.txt 
+            // localizeddata/soundhints.txt 
+            // localizeddata/soundmixsnapshothints.txt 
+            // localizeddata/soundtrackhints.txt 
+            // localizeddata/sprayhints.txt 
+            // localizeddata/spraypackhints.txt 
+            // localizeddata/stimpackhints.txt 
+            // localizeddata/taccooldownhints.txt 
+            // localizeddata/tacticalhints.txt 
+            // localizeddata/talenthints.txt 
+            // localizeddata/talentprofilehints.txt 
+            // localizeddata/targetfindhints.txt 
+            // localizeddata/targetsorthints.txt 
+            // localizeddata/terrainhints.txt 
+            // localizeddata/terrainobjecthints.txt 
+            // localizeddata/terraintexhints.txt 
+            // localizeddata/texturehints.txt 
+            // localizeddata/texturesheethints.txt 
+            // localizeddata/tilehints.txt 
+            // localizeddata/triggerstrings.txt 
+            // localizeddata/trophyhints.txt 
+            // localizeddata/turrethints.txt 
+            // localizeddata/unithints.txt 
+            // localizeddata/upgradehints.txt 
+            // localizeddata/userhints.txt 
+            // localizeddata/validatorhints.txt 
+            // localizeddata/voiceoverhints.txt 
+            // localizeddata/voicepackhints.txt 
+            // localizeddata/warchesthints.txt 
+            // localizeddata/warchestseasonhints.txt 
+            // localizeddata/waterhints.txt 
+            // localizeddata/weaponhints.txt
         };
 
         // Load base data
@@ -291,23 +436,219 @@ export default class SC2ModReader extends VFS {
         if (scope.catalogs) {
             const baseCatalogs = GAME_NAMESPACES.map(f => "gamedata/" + f.toLowerCase() + "data.xml");
             const includes = loadedData.includes?.Catalog?.map(c => c.path.toLowerCase()) || [];
-            const allCatalogs = [...baseCatalogs, ...includes].map(f => "base.sc2data/" + f);
+            const allCatalogs = [...baseCatalogs, ...includes].map(f => "base.sc2data/" + f).filter(f => files.includes(f))
+            
+
+            //option 1 - use schema with xml
+            //eay way, but do not support tokens schema
+            let loadedCatalogs = await this.mapToObject (allCatalogs ,file => Parsers.xml(file,SCatalog));
+            
+            loadedData.catalogs = allCatalogs.map(catalogPath => ({
+                data: loadedCatalogs[catalogPath].data,
+                mod: modName,
+                namespace: GAME_NAMESPACES.find(ns => ns.toLowerCase() === catalogPath.split("/").pop().toLowerCase().replace("data.xml","")) || "Includes",
+                path: catalogPath,
+            }))
+            
+            loadedData.catalogs
+            //attempt to load with tokens -aware schemas
+            // let loadedCatalogs = await this.mapToObject (allCatalogs.filter(f => files.includes(f)) ,file => Parsers.xml(file));
+            // let resultCatalogs = []
+            // for(let catalogPath in loadedCatalogs){
+            //     let catalog = loadedCatalogs[catalogPath]
 
 
-            loadedData.catalogs = await this.mapToObject(allCatalogs.filter(f => files.includes(f)) ,file => Parsers.xml(file,SCatalog), true);
-            loadedData.catalogs.forEach(c => (c.mod = modName));
+            //     let catalognamespace = GAME_NAMESPACES.find(ns => ns.toLowerCase() === catalogPath.split("/").pop().toLowerCase().replace("data.xml","")) || "Includes"
+            //     let resultCatalog = {
+            //         data: [],
+            //         mod: modName,
+            //         namespace: catalognamespace,
+            //         path: catalogPath,
+            //     }
+            //     if(catalog.children){
+            //         //skip catalogs
+            //         if(scope.catalogs.length && catalognamespace && !scope.catalogs.includes(catalog)){
+            //             continue
+            //         }
+            //         for(let entity of catalog.children){
+            //             let childSchema = getSchema(entity.tag,SCatalog)
+            //             childSchema = childSchema[0] || childSchema
+                        
+            //             let isClass  = entity.tag[0] === "C"
+            //             let tokensData = null;
+
+
+            //             // if(isClass){
+            //             //     let _c = entity.tag
+            //             //     let ns =   C_NAMESPACES[_c] 
+            //             //     if(entity.attributes?.parent)_c += "." + entity.attributes?.parent
+            //             //     if(tokensCache[_c]){
+            //             //         let parentSchema = tokensCache[_c]
+            //             //         tokensData = parentSchema
+            //             //     }
+            //             //     //parent classes
+            //             //     else if( "C" + ns !== _c){
+            //             //         let parentSchema = tokensCache[ns]
+            //             //         tokensData = parentSchema
+            //             //     }
+            //             //     if(entity.directives){
+            //             //         let newTokenData = {...tokensData}
+            //             //         for(let directive of entity.directives){
+            //             //             newTokenData[directive.id] = directive.type ? SCTypes[directive.type] : String
+            //             //         }
+            //             //         tokensData = newTokenData
+            //             //     }
+
+            //             //     let _id =  entity.attributes?.id ? ns : entity.tag
+            //             //     if(entity.attributes?.id)_id += "." + entity.attributes?.id
+            //             //     tokensCache[_id] = tokensData
+            //             // }
+
+            //             SC2XML.applySchema(entity, childSchema , [], this.log, tokensData);
+            //             resultCatalog.data.push(entity)
+            //         }
+            //     }
+            //     resultCatalogs.push(resultCatalog)
+            // }
+
         }
 
         // Parse localized strings
-        if (scope.strings && scope.locales) {
+        if (scope.strings) {
 
             const textFileMap = {
-                Hotkeys: "gamehotkeys",
-                Game: "gamestrings",
-                Objects: "objectstrings",
-                Trigger: "triggerstrings",
-                Conversation: "conversationstrings",
-                EditorCategory: "editor/editorcategorystrings"
+                objectstrings: "objectstrings",
+                gamestrings: "gamestrings",
+                triggerstrings: "triggerstrings",
+                gamehotkeys: "gamehotkeys",
+                conversationstrings: "conversationstrings",
+                // Hotkeys: "gamehotkeys",
+                // Game: "gamestrings",
+                // Objects: "objectstrings",
+                // Trigger: "triggerstrings",
+                // Conversation: "conversationstrings",
+
+                spellchecker: "editor/spellchecker/blizzard-words",
+                editorcatalogstrings: "editor/editorcatalogstrings",
+                editorcatalogstringssc2: "editor/editorcatalogstringssc2",
+                editorcategorystrings: "editor/editorcategorystrings",
+                editorstrings: "editor/editorstrings",
+                editorstringssc2: "editor/editorstringssc2",
+
+                abilhints: "abilhints",
+                accumulatorhints: "accumulatorhints",
+                achievementhints: "achievementhints",
+                achievementtermhints: "achievementtermhints",
+                actorhints: "actorhints",
+                actorsupporthints: "actorsupporthints",
+                alerthints: "alerthints",
+                armycategoryhints: "armycategoryhints",
+                armyunithints: "armyunithints",
+                armyupgradehints: "armyupgradehints",
+                artifacthints: "artifacthints",
+                artifactslothints: "artifactslothints",
+                attachmethodhints: "attachmethodhints",
+                bankconditionhints: "bankconditionhints",
+                beamhints: "beamhints",
+                behaviorhints: "behaviorhints",
+                boosthints: "boosthints",
+                bundlehints: "bundlehints",
+                buttonhints: "buttonhints",
+                camerahints: "camerahints",
+                campaignhints: "campaignhints",
+                characterhints: "characterhints",
+                cliffhints: "cliffhints",
+                cliffmeshhints: "cliffmeshhints",
+                colorstylehints: "colorstylehints",
+                commanderhints: "commanderhints",
+                confighints: "confighints",
+                consoleskinhints: "consoleskinhints",
+                conversationhints: "conversationhints",
+                conversationstatehints: "conversationstatehints",
+                cursorhints: "cursorhints",
+                datacollectionhints: "datacollectionhints",
+                datacollectionpatternhints: "datacollectionpatternhints",
+                decalpackhints: "decalpackhints",
+                dsphints: "dsphints",
+                effecthints: "effecthints",
+                emoticonhints: "emoticonhints",
+                emoticonpackhints: "emoticonpackhints",
+                errorhints: "errorhints",
+                errors: "errors",
+                fontstyles: "fontstyles",
+                footprinthints: "footprinthints",
+                fowhints: "fowhints",
+                gamehints: "gamehints",
+                gamehotkeysproduct: "gamehotkeysproduct",
+                gamestringsproduct: "gamestringsproduct",
+                gameuihints: "gameuihints",
+                herdhints: "herdhints",
+                herdnodehints: "herdnodehints",
+                heroabilhints: "heroabilhints",
+                herohints: "herohints",
+                herostathints: "herostathints",
+                itemclasshints: "itemclasshints",
+                itemcontainerhints: "itemcontainerhints",
+                itemhints: "itemhints",
+                kinetichints: "kinetichints",
+                lensflaresethints: "lensflaresethints",
+                lighthints: "lighthints",
+                locationhints: "locationhints",
+                loothints: "loothints",
+                maphints: "maphints",
+                modelhints: "modelhints",
+                mounthints: "mounthints",
+                moverhints: "moverhints",
+                objectivehints: "objectivehints",
+                objectstringsproduct: "objectstringsproduct",
+                physicsmaterialhints: "physicsmaterialhints",
+                pinghints: "pinghints",
+                playerresponsehints: "playerresponsehints",
+                portraitpackhints: "portraitpackhints",
+                preloadhints: "preloadhints",
+                premiummaphints: "premiummaphints",
+                racebannerpackhints: "racebannerpackhints",
+                racehints: "racehints",
+                requirementhints: "requirementhints",
+                requirementnodehints: "requirementnodehints",
+                reverbhints: "reverbhints",
+                rewardhints: "rewardhints",
+                scoreresulthints: "scoreresulthints",
+                scorevaluehints: "scorevaluehints",
+                shapehints: "shapehints",
+                skinhints: "skinhints",
+                skinpackhints: "skinpackhints",
+                soundexclusivityhints: "soundexclusivityhints",
+                soundhints: "soundhints",
+                soundmixsnapshothints: "soundmixsnapshothints",
+                soundtrackhints: "soundtrackhints",
+                sprayhints: "sprayhints",
+                spraypackhints: "spraypackhints",
+                stimpackhints: "stimpackhints",
+                taccooldownhints: "taccooldownhints",
+                tacticalhints: "tacticalhints",
+                talenthints: "talenthints",
+                talentprofilehints: "talentprofilehints",
+                targetfindhints: "targetfindhints",
+                targetsorthints: "targetsorthints",
+                terrainhints: "terrainhints",
+                terrainobjecthints: "terrainobjecthints",
+                terraintexhints: "terraintexhints",
+                texturehints: "texturehints",
+                texturesheethints: "texturesheethints",
+                tilehints: "tilehints",
+                trophyhints: "trophyhints",
+                turrethints: "turrethints",
+                unithints: "unithints",
+                upgradehints: "upgradehints",
+                userhints: "userhints",
+                validatorhints: "validatorhints",
+                voiceoverhints: "voiceoverhints",
+                voicepackhints: "voicepackhints",
+                warchesthints: "warchesthints",
+                warchestseasonhints: "warchestseasonhints",
+                waterhints: "waterhints",
+                weaponhints: "weaponhints",
             };
 
             const requestedTexts = scope.strings === true
@@ -316,12 +657,10 @@ export default class SC2ModReader extends VFS {
                     .filter(([key]) => scope.strings.includes(key))
                     .map(([_, val]) => val);
 
-            const availableLocales = loadedData.components?.DataComponent?.filter(c => c.Type.toLowerCase() === "text").map(c => c.Locale.toLowerCase()) || [
-                "dede", "enus", "eses", "esmx", "frfr", "itit", "kokr", "plpl", "ptbr", "ruru", "zhcn", "zhtw"
-            ];
+            const availableLocales = loadedData.components?.DataComponent?.filter(c => c.Type.toLowerCase() === "text").map(c => c.Locale) || ['frFR', 'deDE', 'esES', 'esMX', 'ruRU', 'koKR', 'zhCN', 'zhTW', 'plPL', 'itIT', 'ptBR']
 
             const locales = scope.locales?.length
-                ? availableLocales.filter(l => scope.locales.map(c => c.toLowerCase()).includes(l))
+                ? availableLocales.filter(l => scope.locales.includes(l))
                 : availableLocales;
 
             const regexp = new RegExp(`(${locales.join("|")}).sc2data/localizeddata/`, "i");
@@ -340,12 +679,12 @@ export default class SC2ModReader extends VFS {
             for (const [file, data] of Object.entries(stringsRaw)) {
                 const namespace = file.replace('.sc2data/localizeddata', '').replace(".txt", '');
                 const [locale, catalog] = namespace.split("/");
-
+                let localeID = availableLocales.find(l => l.toLowerCase() === locale)
                 if (!result[catalog]) result[catalog] = {};
 
                 for (const [key, value] of Object.entries(data)) {
                 if (!result[catalog][key]) result[catalog][key] = {};
-                result[catalog][key][locale] = value;
+                result[catalog][key][localeID] = value;
                 }
             }
 
@@ -438,13 +777,15 @@ export default class SC2ModReader extends VFS {
 
 
         // Filter out nulls and empty data
-        return Object.fromEntries(
+        let result = Object.fromEntries(
             Object.entries(loadedData).filter(([_, v]) =>
             v != null &&
             !(Array.isArray(v) && v.length === 0) &&
             !(typeof v === "object" && Object.keys(v).length === 0)
             )
         );
+
+        return result
     }
 
     async _writeModData( modName, obj , options) {
@@ -563,22 +904,30 @@ export default class SC2ModReader extends VFS {
     }
 
 
-    async write(modName, modData, options){                                                              
-        await this._writeModData(modName,modData,options);
+    async write(modName, mod, options){                                                              
+        await this._writeModData(modName,mod.data,options);
     }
 
     async read(mod, options){
-        let modData = await this._readModData(mod,options);
-        return new SC2Mod(modData)
+        let data = await this._readModData(mod,options);
+
+        let modOptions = {data}
+        if(options?.dependencies){
+            modOptions.dependencies = options.dependencies
+        }
+        return new SC2Mod(modOptions)
     }
 
     async merge( mods, options ){
-        let merged = new SC2Mod()
+        let data = {}
         for(let mod of mods){
             let modData = await this._readModData(mod,options);
-            merged.merge(modData)
+            // merged.merge(modData)
+
+            objectsDeepMerge(data, modData);
         }
-        merged.mergeCatalogs();
+        let merged = new SC2Mod({data})
+        merged.buildCatalogs();
         return merged
     }
 

@@ -39,7 +39,7 @@ const CAbil = {
     SharedFlags: F.AbilShared,
     DebugTrace: C.Bit,
     AbilityCategories: F.Unknown,
-    TacticalAIFunc: T.GalaxyFunction,
+    TafcticalAIFunc: T.GalaxyFunction,
     StateBehavior: L.Behavior,
     DefaultButtonCardId: C.FourCC,
     DataCollection: L.DataCollection,
@@ -5022,7 +5022,7 @@ const CSound = {
     LocalVolumeAdjustment: C.VolumeRange,
     NonLocalVolumeAdjustment: C.VolumeRange,
     CategoryDuckingLocal: L.SoundMixSnapshot,
-    CategoryDuckingNonLocal: L.SoundMixSnapshot,
+    CategoryDuckingNonLocal: L.SoundMixSnapshot
 }
 const CSoundExclusivity = {
     ...CData,

@@ -73,7 +73,7 @@ import { getSchemaField} from '../util/schema.js';
  * 
  * Advanced Utilities:
  * --------------------
- * - `_applySchema(obj, schema, trace, log)` : Applies schema recursively.
+ * - `applySchema(obj, schema, trace, log)` : Applies schema recursively.
  * - `_revertSchema(obj, schema)` : Converts JSON back to XML-like structure.
  * - `_attachLeadingComments(arr)` : Collects leading XML comments.
  * - `_log_missing_enum`, `_log_missing_schema` : Trace missing data.
@@ -98,11 +98,12 @@ export default class SC2XML {
   static parse(xmlText, schema = null, log = null) {
     const xmlDocument = parseXML(xmlText);
     const jsonObject = this._parse_base(xmlDocument);
-    if (!schema) {
-      console.error("no schema!")
-      // schema = getSchema(jsonObject.tag);
+    // if (!schema) {
+    //   // schema = getSchema(jsonObject.tag);
+    // }
+    if (schema) {
+      this.applySchema(jsonObject, schema , [], log);
     }
-    if (schema) this._applySchema(jsonObject, schema , [], log);
     return jsonObject;
   }
 
@@ -181,6 +182,9 @@ export default class SC2XML {
       if (directives.length > 0) {
         result.directives = directives;
       }
+
+
+      this._attachLeadingComments(children);
 
       return result;
     }
@@ -299,18 +303,17 @@ export default class SC2XML {
    */
   static _attachLeadingComments(arr) {
     let i = 0;
-    let commentBlock = '';
+    let comments = []
     while (i < arr.length) {
       const item = arr[i];
       if (typeof item === 'string' && item.startsWith('<!--')) {
-        if (commentBlock) commentBlock += ';;';
-        commentBlock += item.slice(4, -3);
+        comments.push(item.slice(4, -3))
         arr.splice(i, 1);
         continue;
       }
-      if (commentBlock) {
-        item.comment = (item.comment || '') + commentBlock;
-        commentBlock = '';
+      if (comments.length) {
+        item.comments = comments
+        comments = []
       }
       i++;
     }
@@ -321,7 +324,7 @@ export default class SC2XML {
    * Apply schema to a parsed JSON object recursively.
    * @private
    */
-  static _applySchema(obj, schema, trace = [], log) {
+  static applySchema(obj, schema, trace = [], log, tokensData) {
     trace.push(obj.tag);
 
     const { children, attributes, tag, directives, comment, value } = obj;
@@ -333,6 +336,13 @@ export default class SC2XML {
     delete obj.comment;
     delete obj.value;
 
+    // if (directives?.length) {
+    //   for (const directive of directives) {
+    //     if(!this._temp.directives)this._temp.directives = []
+    //     this._temp.directives.push([...trace,directive.id].join("."))
+    //   }
+    // }
+    
     for (const key in schema) {
       if (key === "@") continue; // skip special key
 
@@ -354,7 +364,7 @@ export default class SC2XML {
             for (const dir of directives) {
               if (dir.directive === field) {
                 delete dir.directive;
-                this._applySchemaForChild(obj, { tag: field, attributes: dir }, schema,trace, log);
+                this.applySchemaForChild(obj, { tag: field, attributes: dir }, schema,trace, log);
               }
             }
           }
@@ -374,9 +384,12 @@ export default class SC2XML {
         } else if (key === 'removed') {
           obj.removed = +value;
         } else {
-          let fieldSchema = schema[key]?.value || schema[key];
-
-
+          let fieldSchema = schema[key]?.value || schema[key] || tokensData?.[key]
+          //todo . need to improve token-aware parsing
+          if(!fieldSchema){
+              fieldSchema = String;
+              // console.log("missing token " + key)
+          }
           if(!fieldSchema){
             this._log_missing_schema(obj, key, trace, log, {children, attributes, tag})
           }
@@ -392,13 +405,12 @@ export default class SC2XML {
     }
 
     if (children?.length) {
-      this._attachLeadingComments(children);
       for (const child of children) {
         if (typeof child === 'string') {
           console.warn('Unexpected string child node:', child);
           continue;
         }
-        this._applySchemaForChild(obj, child, schema, trace, log);
+        this.applySchemaForChild(obj, child, schema, trace, log);
       }
     }
 
@@ -450,7 +462,8 @@ export default class SC2XML {
           current[part] = []
           
           // if(original.attributes[field]){}
-          console.log('No schema found for tag: ', tag);
+          let id = original.attributes?.id
+          console.log('No schema found for tag: ', tag + (id? (" (" + original.attributes.id  + ")"): ""));
         }
 
         if (value !== undefined) {
@@ -470,7 +483,7 @@ export default class SC2XML {
    * Apply schema rules for a child node.
    * @private
    */
-  static _applySchemaForChild(obj, child, schema, trace, log) {
+  static applySchemaForChild(obj, child, schema, trace, log) {
     const { field, schema: subSchema } = getSchemaField(child.tag, schema);
 
     if (!subSchema && schema) {
@@ -495,7 +508,7 @@ export default class SC2XML {
     let value;
 
     if (!isIndexedArray && typeof schemaClass === 'object') {
-      this._applySchema(child, schemaClass, trace, log);
+      this.applySchema(child, schemaClass, trace, log);
       value = child;
     } else {
       if (typeof schemaClass !== 'object') {
@@ -503,7 +516,7 @@ export default class SC2XML {
           value = schemaClass?.parse(child.attributes?.value);
         }
       } else {
-        this._applySchema(child, schemaClass, trace, log);
+        this.applySchema(child, schemaClass, trace, log);
         value = child;
       }
 
