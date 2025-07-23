@@ -1,10 +1,11 @@
 
+
 /**
  * Checks if a value is a plain object (non-null, not an array, not a function).
  * @param {any} val 
  * @returns {boolean}
  */
-function isPlainObject(val) {
+export function isPlainObject(val) {
   return val && typeof val === 'object' && !Array.isArray(val);
 }
 
@@ -13,12 +14,23 @@ function isPlainObject(val) {
  * @param {any} val 
  * @returns {any}
  */
-function cloneValue(val) {
-  if (Array.isArray(val)) return val.map(cloneValue);
-  if (isPlainObject(val)) return deepMergeFlexible({}, val, 'merge');
-  return val; // Primitive
+export function cloneValue(val) {
+  if (Array.isArray(val)) {
+    const out = new Array(val.length);
+    for (let i = 0; i < val.length; i++) {
+      out[i] = cloneValue(val[i]);
+    }
+    return out;
+  }
+  if (isPlainObject(val)) {
+    const out = {};
+    for (const k in val) {
+      out[k] = cloneValue(val[k]);
+    }
+    return out;
+  }
+  return val;
 }
-
 
 /**
  * objectsDeepMerge
@@ -51,70 +63,72 @@ function cloneValue(val) {
  * // => { foo: [3, 4], bar: { x: 1, y: 2 } }
  */
 export function objectsDeepMerge(target, source, mode = 'merge', options = {}) {
-  const { clone = false } = options;
+  if (source == null) return options.clone ? cloneValue(target) : target;
+  if (target == null) return cloneValue(source);
 
-  if (target === undefined || target === null) return cloneValue(source);
-  if (source === undefined || source === null) return cloneValue(target);
+  const clone = options.clone;
+  const result = clone
+    ? (Array.isArray(target) ? target.slice() : Object.assign({}, target))
+    : target;
 
-  // Create initial clone if needed
-  if (clone) {
-    target = Array.isArray(target) ? [...target] : { ...target };
-  }
+  for (const key in source) {
+    const sVal = source[key];
+    if (sVal == null) continue;
 
-  for (const key of Object.keys(source)) {
-    let sourceVal = source[key];
-    let targetVal = target[key];
+    const tVal = result[key];
+    const sArr = Array.isArray(sVal);
+    const sObj = isPlainObject(sVal);
+    const tArr = Array.isArray(tVal);
+    const tObj = isPlainObject(tVal);
 
-    if (sourceVal === undefined || sourceVal === null) continue;
-
-    const sourceIsArray = Array.isArray(sourceVal);
-    const sourceIsObject = isPlainObject(sourceVal);
-
-    if (sourceIsArray) {
-      sourceVal = objectsDeepMerge([], sourceVal, mode); // Clone array
-    } else if (sourceIsObject) {
-      sourceVal = objectsDeepMerge({}, sourceVal, mode); // Clone object
+    if (tVal == null) {
+      result[key] = sArr || sObj ? cloneValue(sVal) : sVal;
+      continue;
     }
 
-    if (targetVal === undefined || targetVal === null) {
-      target[key] = sourceVal;
-    } else {
-      const targetIsArray = Array.isArray(targetVal);
-      const targetIsObject = isPlainObject(targetVal);
+    // Type mismatch → overwrite
+    if (typeof sVal !== typeof tVal || sArr !== tArr || sObj !== tObj) {
+      result[key] = sArr || sObj ? cloneValue(sVal) : sVal;
+      continue;
+    }
 
-      if (typeof sourceVal !== typeof targetVal ||
-          (sourceIsArray !== targetIsArray) ||
-          (sourceIsObject !== targetIsObject)) {
-        // Type mismatch: overwrite
-        target[key] = sourceVal;
-      } else if (sourceIsArray) {
-        if (mode === 'replace') {
-          target[key] = sourceVal;
-        } else if (mode === 'unite') {
-          const length = Math.max(targetVal.length, sourceVal.length);
-          const united = [];
-          for (let i = 0; i < length; i++) {
-            if (targetVal[i] !== undefined && sourceVal[i] !== undefined) {
-              united[i] = objectsDeepMerge(targetVal[i], sourceVal[i], mode);
-            } else {
-              united[i] = targetVal[i] !== undefined ? targetVal[i] : sourceVal[i];
-            }
-          }
-          target[key] = united;
-        } else { // Default 'merge'
-          target[key] = [...targetVal, ...sourceVal];
+    // Arrays
+    if (sArr) {
+      if (mode === 'replace') {
+        result[key] = sVal.length ? cloneValue(sVal) : [];
+      } else if (mode === 'unite') {
+        const len = Math.max(tVal.length, sVal.length);
+        const merged = new Array(len);
+        for (let i = 0; i < len; i++) {
+          const sItem = sVal[i];
+          const tItem = tVal[i];
+          merged[i] =
+            sItem != null && tItem != null
+              ? objectsDeepMerge(tItem, sItem, mode)
+              : sItem != null
+              ? (Array.isArray(sItem) || isPlainObject(sItem) ? cloneValue(sItem) : sItem)
+              : tItem;
         }
-      } else if (targetIsObject) {
-        target[key] = objectsDeepMerge(targetVal, sourceVal, mode);
-      } else {
-        // Primitive overwrite
-        target[key] = sourceVal;
+        result[key] = merged;
+      } else { // merge mode
+        result[key] = sVal.length ? tVal.concat(sVal) : tVal;
       }
+      continue;
     }
+
+    // Plain objects
+    if (sObj) {
+      result[key] = objectsDeepMerge(tVal, sVal, mode);
+      continue;
+    }
+
+    // Primitives (number, string, etc.)
+    result[key] = sVal;
   }
 
-  return target;
+  return result;
 }
+
 
 /**
  * objectDeepTransform
@@ -170,24 +184,53 @@ export function objectsDeepMerge(target, source, mode = 'merge', options = {}) {
  * });
  * 
  */
-export function objectDeepTransform(obj, testVal, testProp, cb, id, _path = [], _pathids = []) {
-    const keys = Object.keys(obj)
-    for (let i = 0, len = keys.length; i < len; i++) {
-        let prop = keys[i], val = obj[prop]
-        let path = [..._path, obj]
-        let crumbs = [..._pathids, prop]
-        if ((!testVal || testVal(val)) && (!testProp || testProp(prop))){
-            let result = cb({val, value: val,property: prop, object: obj, prop, obj, id, path,crumbs})
-            if(result !== undefined) {
-                obj[prop] = result;
-                val = result;
-            }
-        }
-        if (val && typeof val === 'object'){
-            objectDeepTransform(val, testVal, testProp, cb, prop, path,crumbs)
-        }
+export function objectDeepTransform(obj, testVal, testKey, cb, id, path = null, crumbs = null) {
+  if (obj == null || typeof obj !== 'object') return;
+
+  for (const key in obj) {
+    let value = obj[key];
+
+    // Run tests
+    const shouldTestVal = !testVal || testVal(value);
+    const shouldTestKey = !testKey || testKey(key);
+
+    if (shouldTestVal && shouldTestKey) {
+      const result = cb(key, value, obj, id, path, crumbs);
+      if (result !== undefined) {
+        obj[key] = value = result;
+      }
     }
+
+    if (value && typeof value === 'object') {
+      if (path) path.push(obj);
+      if (crumbs) crumbs.push(key);
+      objectDeepTransform(value, testVal, testKey, cb, key, path, crumbs);
+      if (crumbs) crumbs.pop();
+      if (path) path.pop();
+    }
+  }
 }
+
+
+
+// export function objectDeepTransform(obj, testVal, testProp, cb, id, _path = [], _pathids = []) {
+//     const keys = Object.keys(obj)
+//     for (let i = 0, len = keys.length; i < len; i++) {
+//         let prop = keys[i], val = obj[prop]
+//         let path = [..._path, obj]
+//         let crumbs = [..._pathids, prop]
+//         if ((!testVal || testVal(val)) && (!testProp || testProp(prop))){
+//             let result = cb({val, value: val,property: prop, object: obj, prop, obj, id, path,crumbs})
+//             if(result !== undefined) {
+//                 obj[prop] = result;
+//                 val = result;
+//             }
+//         }
+//         if (val && typeof val === 'object'){
+//             objectDeepTransform(val, testVal, testProp, cb, prop, path,crumbs)
+//         }
+//     }
+// }
 
 /**
  * applyArrayPatches
@@ -289,7 +332,7 @@ export function applyArrayPatches(data, deep = true) {
       }
     }
 
-    return result;
+    return trimTrailingNulls(result)
   }
 
   if (typeof data === 'object' && data !== null) {
@@ -302,6 +345,14 @@ export function applyArrayPatches(data, deep = true) {
 
   // Primitive value
   return data;
+}
+
+export function trimTrailingNulls(arr) {
+  let i = arr.length - 1;
+  while (i >= 0 && arr[i] === null) {
+    i--;
+  }
+  return arr.slice(0, i + 1);
 }
 
 

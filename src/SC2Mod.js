@@ -1,6 +1,6 @@
 import { EUnitAttribute, EUnitVital } from './types/enums.js';
 import Eval from './lib/eval.js';
-import { objectsDeepMerge, applyArrayPatches, objectDeepTransform } from './util/obj-util.js';
+import { objectsDeepMerge, applyArrayPatches, objectDeepTransform, cloneValue } from './util/obj-util.js';
 import { isNumeric } from './util/js-util.js';
 import SC2DataClasses from './schema/SC2DataClasses.js';
 import { C_NAMESPACES, GAME_LOCALES } from './types/shared.js';
@@ -109,7 +109,10 @@ export default class SC2Mod {
               data,
               mod: this,
               namespace
-          }
+            }
+            if(id){
+              entity.id = id
+            }
 
             if (!cache[namespace]) cache[namespace] = {};
             this._calculate_parents(entity);
@@ -135,13 +138,14 @@ export default class SC2Mod {
    * @returns {string}
    */
   _calculate_value_tokens(val, entity) {
+    if(!val)return null
     return val.replace(/##(\w+)##/g, (_, token) => {
       let lookup = entity;
       while (lookup) {
-        if (lookup.data[token]) {
-          return this._calculate_value_tokens(lookup.data[token], entity);
+        if (lookup.calculated[token]) {
+          return this._calculate_value_tokens(lookup.calculated[token], entity);
         }
-        const tokenDef = lookup.data.token?.find(t => t.id === token);
+        const tokenDef = lookup.calculated.token?.find(t => t.id === token);
         if (tokenDef) {
           return this._calculate_value_tokens(tokenDef.value, entity);
         }
@@ -161,8 +165,8 @@ export default class SC2Mod {
       obj,
       val => typeof val === 'string' && val.includes('##'),
       null,
-      ({ val, obj, prop }) => {
-        obj[prop] = this._calculate_value_tokens(val, entity);
+      (key, value, obj) => {
+        obj[key] = this._calculate_value_tokens(value, entity);
       }
     );
   }
@@ -173,11 +177,15 @@ export default class SC2Mod {
    * @param {string} field 
    */
   _calculate_value(entity, field) {
+    if(entity.calculated?.field !== undefined){
+      return entity.calculated?.field
+    }
     let resolved;
     const parents = entity.parents;
 
     //todo deafult values can have parents too... 
-    const defaultValue = [this.cache.Classes[entity.data.class]] || []
+    let defaultClassValue = this.cache.Classes[entity.data.class]
+    const defaultValue = defaultClassValue ? [defaultClassValue] : []
     for (const parent of [...defaultValue, ...parents, entity]) {
       let pvalue = parent.data[field];
       if (pvalue && !(Array.isArray(pvalue) || typeof pvalue === 'object')) {
@@ -187,21 +195,27 @@ export default class SC2Mod {
         resolved = Array.isArray(pvalue) ? [] : {};
       }
       if (pvalue) {
-        objectsDeepMerge(resolved, pvalue);
+        if(Array.isArray(resolved)){
+          resolved.push(...pvalue)
+        }
+        else{
+          objectsDeepMerge(resolved, pvalue);
+        }
       }
     }
 
     if (!resolved) {
-      console.warn('No value found for field:', field);
+      // console.warn('No value found for field:', field);
       return null;
     }
 
     const patched = applyArrayPatches(resolved);
-    this._calculate_object_tokens(patched);
+    this._calculate_object_tokens(patched,entity);
 
     if (Object.keys(patched).length === 1 && 'value' in patched) {
       return patched.value;
     }
+    
     return patched;
   }
 
@@ -401,13 +415,16 @@ export default class SC2Mod {
       const data = actor.data;
       if (data.default) continue;
       if (!['CActorUnit', 'CActorMissile'].includes(data.class)) continue;
-
-      const entityOn = this._calculate_value(actor, 'On');
-      const creationEvents = entityOn
-        .filter(e => e.Send === 'Create')
-        .map(e => e.Terms.split('.'))
-        .filter(e => e[0] === 'UnitBirth')
-        .map(e => e[1]);
+        const entityOn = this._calculate_value(actor, 'On');
+        if(!entityOn)continue;
+        if(entityOn.includes(null)){
+        console.log(entityOn)
+        }
+        const creationEvents = entityOn
+          .filter(e => e.Send === 'Create' && e.Terms)
+          .map(e => e.Terms.split('.'))
+          .filter(e => e[0] === 'UnitBirth')
+          .map(e => e[1]);
 
       if (!creationEvents.length) continue;
 
@@ -419,7 +436,7 @@ export default class SC2Mod {
           if (unit.actor) {
             console.warn(`Multiple actors in same scope: ${unitId}`);
           }
-          unit.actor = actor;
+          unit.actor = actor
         }
       }
     }
@@ -467,7 +484,7 @@ export default class SC2Mod {
             if (buttonData) {
               const cardId = buttonData.DefaultButtonLayout?.CardId || abilData.DefaultButtonCardId || null;
               const row = buttonData.DefaultButtonLayout?.Row || 0;
-const column = buttonData.DefaultButtonLayout?.Column || 0;
+              const column = buttonData.DefaultButtonLayout?.Column || 0;
 
               if (!this.CardLayouts) {
                 this.CardLayouts = [];
@@ -574,42 +591,53 @@ const column = buttonData.DefaultButtonLayout?.Column || 0;
     };
   }
 
+  _calculate_entity_relations(entity,callback, deepTrace){
+    //use calculated values
+    let refs = relations(entity.calculated, CatalogEntities[entity.data.class], C_NAMESPACES[entity.data.class] + '.' + entity.data.id, callback , null, null, deepTrace);
+    //filter empty values
+    refs = refs.filter( r => r.value)
+    for (const ref of refs) {
+      //skip template values
+      if(!ref.value.includes("##")){
+        const target = this.cache[ref.type]?.[ref.value];
+        if (target) {
+          if (!target.relations) target.relations = [];
+          target.relations.push(ref);
+        } else {
+          if(ref.type === "File"){
+            continue;
+          }
+          // else{
+          //   //console.log(`Reference ${ref.value} not found`);
+          // }
+        }
+      }
+    }
+
+    entity.references = refs.map(ref => ({
+      type: ref.schema,
+      origin: ref.trace,
+      target: `${ref.type}.${ref.value}`,
+    }));
+    return entity.references
+  }
   /**
    * Sets up relations between entities based on schema references.
    */
-  setEntitiesRelations() {
+  calculateEntitiesRelations() {
     if (!this.cache) this.makeCache();
+    let refs = []
 
     for (const namespace in this.cache) {
       for (const id in this.cache[namespace]) {
-        const entity = this.cache[namespace][id];
-        let refs = relations(entity.data, CatalogEntities[entity.data.class], C_NAMESPACES[entity.data.class] + '.' + entity.data.id);
-        //filter empty values
-        refs = refs.filter( r => r.value)
-        for (const ref of refs) {
-          //skip template values
-          if(!ref.value.includes("##")){
-            const target = this.cache[ref.type]?.[ref.value];
-            if (target) {
-              if (!target.relations) target.relations = [];
-              target.relations.push(ref);
-            } else {
-              if(ref.type === "File"){
-                continue;
-              }
-              else{
-                console.log(`Reference ${ref.value} not found`);
-              }
-            }
-          }
-        }
-
-        entity.references = refs.map(ref => ({
-          origin: ref.trace,
-          target: `${ref.type}.${ref.value}`,
-        }));
+        refs.push(...this._calculate_entity_relations(this.cache[namespace][id]))
       }
     }
+    return refs
+  }
+  calculateEntityRelations(entity) {
+    if (!this.cache) this.makeCache();
+    return this._calculate_entity_relations(entity)
   }
 
   /**
@@ -669,29 +697,80 @@ const column = buttonData.DefaultButtonLayout?.Column || 0;
     }
   }
 
+  clearCalculatedValues(){
+    for(let cacheid in this.cache){
+      let cache = this.cache[cacheid]
+      for(let entityid in cache){
+        let entity = cache[entityid]
+        delete entity.calculated
+      }
+    }
+  }
+  calculateAllValues(){
+    if(!this.cache)this.makeCache()
+    for(let cacheid in this.cache){
+      let cache = this.cache[cacheid]
+      for(let entityid in cache){
+        let entity = cache[entityid]
+        if(entity.parents.find(e => e.ignored)){
+          entity.ignored = true
+          continue
+        }
+        if(entity.ignored){
+          continue
+        }
+        this._calculate_all_entityvalues(entity)
+      }
+    }
+    for(let cacheid in this.cache){
+      let cache = this.cache[cacheid]
+      for(let entityid in cache){
+        let entity = cache[entityid]
+        if(entity.ignored){continue}
+        this._calculate_object_tokens(entity.calculated,entity);
+      }
+    }
+  
+  }
+  ignoreEntities(ignored){
+    for(let cacheid in ignored){
+      for(let entityid of ignored[cacheid]){
+        this.cache[cacheid][entityid].ignored = true
+      }
+    }
+  }
   /**
    * Calculates all merged values for an entity, including parents.
    * @param {object} entity 
    * @returns {object} Calculated values
    */
-  calculateAllValues(entity) {
-    const result = {};
-    for (const parent of entity.parents) objectsDeepMerge(result, parent.data);
+  _calculate_all_entityvalues(entity) {
+    if(entity.calculated) {
+      return entity.calculated
+    }
+    let parent = entity.parents?.[entity.parents.length - 1]
+    const result = parent ? cloneValue(parent.calculated || this._calculate_all_entityvalues(parent)) : {}
     objectsDeepMerge(result, entity.data);
 
     if (entity.data.default) result.default = entity.data.default;
     else delete result.default;
-
     if (entity.data.comment !== undefined) result.comment = entity.data.comment;
     else delete result.comment;
 
     delete result.parent;
-
     const resultPatched = applyArrayPatches(result);
-    this._calculate_object_tokens(resultPatched);
-
     entity.calculated = resultPatched;
     return resultPatched;
+  }
+  /**
+   * Calculates all merged values for an entity, including parents.
+   * @param {object} entity 
+   * @returns {object} Calculated values
+   */
+  calculateAllEntityValues(entity) {
+    let result = this._calculate_all_entityvalues(entity)
+    this._calculate_object_tokens(result,entity);
+    return result;
   }
   /**
    * Calculates value for an entity, including parents.
@@ -748,4 +827,268 @@ const column = buttonData.DefaultButtonLayout?.Column || 0;
     return tokensCache;
 
   }
+
+  isPlacableUnit(unit){
+
+      let dFlagArray = this.calculateValue(unit,"FlagArray")
+      let dGlossaryPriority = this.calculateValue(unit,"GlossaryPriority")
+      let dEditorFlags = this.calculateValue(unit,"EditorFlags")
+      let dRace = this.calculateValue(unit,"Race")
+
+      if( !dFlagArray || 
+          dFlagArray.Unselectable || dFlagArray.NoDraw || 
+          //skip units without defined race
+          //!dRace || dRace === 'Neut' 
+          //skip units without required fields
+          // !dGlossaryPriority 
+           dEditorFlags?.NoPalettes// || dEditorFlags?.NoPlacement
+      ){
+          return false;
+      }
+      return true
+  }
+
+
+
+
+  getUnitAbilCmds (unit) {
+      return this.calculateValue(unit,"CardLayouts")?.map(cl => cl.LayoutButtons).flat().filter(Boolean).filter(lb => lb.AbilCmd && lb.Face && lb.Type && lb.Type !== 'Undefined' && (!lb.Row || lb.Row < 3) && (!lb.Column || lb.Column < 5))
+          .map(lb => ({AbilCmd: lb.AbilCmd, Button: lb.Face}))
+  }
+  _calculate_entity_relations_deep (entity,callback,targets = [], deepTrace = []) {
+      if(targets.includes(entity))return;//refrence already added to the array
+      targets.push(entity)
+      // deepTrace = [...deepTrace,entity]
+      let refs = this._calculate_entity_relations(entity ,callback, deepTrace)
+      for(let ref of refs){
+          let [namespace,target] = ref.target.split(".")
+          let targetEntity = this.cache[namespace]?.[target]
+          if(targetEntity){
+              this._calculate_entity_relations_deep(targetEntity,callback, targets, [...deepTrace,[ref, entity]])
+          }
+      }
+      return targets
+  }
+  calculateEntityRelationsDeep (entity,cb) {
+      if (!this.cache) this.makeCache();
+      return this._calculate_entity_relations_deep(entity, cb,[])
+  }
+  calculateUnitProduction (unit){
+      if(!this.cache)this.makeCache();
+      let abilCmds = this.getUnitAbilCmds(unit)
+      let abilLinks = this.calculateValue(unit,"AbilArray")?.map(a => a.Link)
+      let units =[], upgrades = []
+
+      if(abilCmds?.length && abilLinks?.length){
+          for(let {Button,AbilCmd} of abilCmds){
+              let [abilId, cmd] = AbilCmd.split(",");
+              //skip if unit do not have this ability  even if it has button and command (example - zerg burrow)
+              if(!abilLinks.includes(abilId)) continue
+              let abil = this.cache.Abil[abilId]
+              let button = this.cache.Button[Button]
+              if(!abil) {
+                  console.log("ability not found: " + abilId)
+                  continue;
+              }
+                  
+              let dInfoArray = this.calculateValue(abil,"InfoArray");
+              if(!dInfoArray)continue
+              let unitinfo = dInfoArray?.[cmd]?.Unit;
+              if(unitinfo){
+                  if(unitinfo.constructor !== Array) unitinfo = [unitinfo]
+                  for(let unitId of unitinfo) {
+                      let pu = this.cache.Unit[unitId]
+                      if(pu && !units.includes(pu)) {
+                          units.push([pu,abil])
+                          pu.abilityButton = button
+                          // console.log(unit.id + " --> " + pu.id)
+                      }
+                  }
+              }
+              let upgradeId = dInfoArray?.[cmd]?.Upgrade;
+              if(upgradeId){
+                  let upgrade = this.cache.Upgrade[upgradeId]
+                  if(!upgrade){
+                      // console.log(`upgrade not found ` + upgradeId)
+                  }
+                  else if(!upgrades.includes(upgrade)){
+                      units.push([upgrade,abil])
+                      upgrade.abilityButton = button
+                  }
+              }
+          }
+      }
+      
+
+      let behLinks = this.calculateValue(unit,"BehaviorArray")?.map(a => a.Link)
+      let wepLinks = this.calculateValue(unit,"WeaponArray")?.map(a => a.Link)
+
+      if(behLinks?.length){
+          for(let behaviorId of behLinks){
+              let behavior = this.cache.Behavior[behaviorId]
+              if(!behavior)continue;
+              //search units in behaviors. example - larva from hatchery, broodlng from hatchery on death
+              let refs = this.calculateEntityRelationsDeep(behavior,  (ref)=> {
+                  let entity = this.cache.Unit[ref.value]
+                      if(!entity){
+                          // console.log(`Unit not found ` + ref.value)
+                          return false
+                      }
+                  if(ref.type === 'Unit' ){
+                      if(this.isPlacableUnit(entity)){
+                          if(!units.find(u=> u[0] ===entity)){
+                              // console.log(unit.id + " --> " + entity.id)
+                              // let log = [...deepTrace.map(a =>  a[1].data.class + a[0].origin.substring(a[0].origin.indexOf("."))),entity.data.class + ref.trace.substring(ref.trace.indexOf("."))]
+                              // console.log(log)
+                              units.push([entity,behavior])
+                          }
+                          return false;
+                      }
+                      else{
+                          if(!units.find(u=> u[0] ===entity))units.push([entity,behavior])
+                          // console.log("unplacable " + entity.id)
+                      }
+                  }
+                  return !['TEditorCategories'].includes(ref.schema) && !['Race'].includes(ref.type)
+              })
+          }
+      }
+
+
+      if(wepLinks?.length){
+          let behUnits = [];
+          for(let behaviorId of wepLinks){
+              let behavior = this.cache.Weapon[behaviorId]
+              if(!behavior)continue;
+              //search units in behaviors. example - larva from hatchery, broodlng from hatchery on death
+              let refs = this.calculateEntityRelationsDeep(behavior,  (ref)=> {
+                  let entity = this.cache.Unit[ref.value]
+                      if(!entity){
+                          // console.log(`Unit not found ` + ref.value)
+                          return false
+                      }
+                  if(ref.type === 'Unit' ){
+                      if(this.isPlacableUnit(entity)){
+                          if(!units.find(u=> u[0] ===entity)){
+                              // console.log(unit.id + " --> " + entity.id)
+                              // let log = [...deepTrace.map(a =>  a[1].data.class + a[0].origin.substring(a[0].origin.indexOf("."))),entity.data.class + ref.trace.substring(ref.trace.indexOf("."))]
+                              // console.log(log)
+                              units.push([entity,behavior])
+                          }
+                          return false;
+                      }
+                      else{
+                          if(!units.find(u=> u[0] ===entity))units.push([entity,behavior])
+                          console.log("unplacable " + entity.id)
+                      }
+                  }
+                  return !['TEditorCategories'].includes(ref.schema) && !['Race'].includes(ref.type)
+              })
+          }
+      }
+
+
+      if(abilLinks?.length){
+          for(let behaviorId of abilLinks){
+              let behavior = this.cache.Abil[behaviorId]
+              if(!behavior)continue;
+              //search units in behaviors. example - larva from hatchery, broodlng from hatchery on death
+              this.calculateEntityRelationsDeep(behavior,  (ref, value,parent,parentIndex , schema , trace, deepTrace)=> {
+
+                  let entity = this.cache[ref.type]?.[ref.value]
+                  if(!entity)return false;
+
+                  if(['CRequirement','CUpgrade'].includes(entity.data.class)){
+                      // entity.data
+                      return false
+                  }
+                  
+                  if(['CEffectRemoveBehavior','CEffectDestroyPersistent'].includes(entity.data.class)){
+                      return false
+                  }
+                  if(['CEffectCreateUnit'].includes(entity.data.class)){
+                      if(entity.calculated.CreateFlags?.Precursor){
+                          return false
+                      }
+                  }
+                  if(['CEffectIssueOrder'].includes(entity.data.class)){
+                      if(!abilLinks.includes(entity.data.Abil)){
+                          return false
+                      }
+                  }
+                  if(ref.trace.includes('AbilLinkDisableArray') || 
+                    ref.trace.includes('DisableValidatorArray') || 
+                    ref.trace.includes('RemoveValidatorArray')){
+                      return false
+                  }
+                  
+                  if(['Validator'].includes(ref.trace.split(".")[0])){
+                      return false
+                  }
+                  if(ref.type === 'Unit' ){
+                      if(this.isPlacableUnit(entity)){
+                          if(!units.find(u=> u[0] ===entity)){
+                              // console.log(unit.id + " --> " + entity.id)
+                              // let log = [...deepTrace.map(a =>  a[1].data.class + a[0].origin.substring(a[0].origin.indexOf("."))),entity.data.class + ref.trace.substring(ref.trace.indexOf("."))]
+                              // console.log(log)
+                              units.push([entity,behavior])
+                          }
+                          return false;
+                      }
+                      else{
+                          if(!units.find(u=> u[0] ===entity))units.push([entity,behavior])
+                          // console.log("unplacable " + entity.id)
+                      }
+                  }
+                  return !['TEditorCategories'].includes(ref.schema) && !['Race'].includes(ref.type)
+              })
+          }
+      }
+
+
+      unit.producedUnits = units
+      unit.producedUpgrades = upgrades
+      return {units,upgrades}
+  }
+  calculateProduction (){
+      for(let unit in this.cache.Unit){
+          this.calculateUnitProduction(this.cache.Unit[unit])
+      }
+
+      for(let unitId in this.cache.Unit){
+          let unit = this.cache.Unit[unitId]
+          for(let prodPair of unit.producedUnits){
+              let [prod,prodAbility] = prodPair
+              if(['CAbilMorph'].includes(prodAbility.data.class)){
+                  //most likely morph
+              }
+              if(['CAbilBuild','CAbilTrain','CAbilWrapTrain'].includes(prodAbility.data.class)){
+                  continue;
+              }
+              //usually unit replacement. any exceptions?
+              else if(prod === unit){
+                  unit.producedUnits.splice(unit.producedUnits.indexOf(prodPair),1)
+              }
+              else if(['CBehaviorJump'].includes(prodAbility.data.class)){
+                  unit.producedUnits.splice(unit.producedUnits.indexOf(prodPair),1)
+              }
+
+              let prodPair2 = prod.producedUnits?.find(p => p[0] === unit)
+              if(prodPair2){
+                  unit.producedUnits.splice(unit.producedUnits.indexOf(prodPair),1)
+                  if(!unit.morphs){
+                      unit.morphs = []
+                  }
+                  unit.morphs.push(prodPair)
+                  prod.producedUnits.splice(prod.producedUnits.indexOf(prodPair2),1)
+                  if(!prod.morphs){
+                      prod.morphs = []
+                  }
+                  prod.morphs.push(prodPair2)
+              }
+          }
+      }
+  }
+
+
 }

@@ -41,5 +41,5 @@ let modMerged = await reader.merge([
     // "exo:Warzone.SC2Mod"
   ]/*, wikiConfig*/)
   
-  reader.write("output/Merged",modMerged)
+  await reader.write("output/Merged",modMerged)
   console.log("finished")

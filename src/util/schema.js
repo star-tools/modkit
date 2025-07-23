@@ -25,7 +25,7 @@ export function getSchemaField(tag, schema) {
   return { schema: null, field: null };
 }
 
-export function relations(value, schema, trace = "") {
+export function relations(value, schema, trace = "", callback,parent, parentIndex , deepTrace) {
     if(!schema)return []
     //todo i should implement how to define it in schema
     if(schema["%"] ){
@@ -42,19 +42,26 @@ export function relations(value, schema, trace = "") {
               subschema=schema[atr]||schema['$'+atr]||schema['%'+atr]||schema['@'+atr]||schema['*'+atr]
             }
     
-            subschema && result.push(...relations(value[atr], subschema, trace + "." + atr))
+            subschema && result.push(...relations(value[atr], subschema, trace + "." + atr,callback, value,atr , deepTrace))
         }
     }
     else if(schema.constructor === Array){
         for(let index in value){
-            result.push(...relations(value[index], schema[0], trace + "." + index))
+            result.push(...relations(value[index], schema[0], trace + "." + index,callback,value, index, deepTrace))
         }
     }
     else if(schema.constructor === String || schema.constructor === Number){
         return result;
     }
-    else{
-        schema.relations && result.push(...schema.relations(value, trace))
+    else if(schema.relations){
+      let rels = schema.relations(value, trace)
+      for(let rel of rels){
+        rel.schema = schema.name || schema
+      }
+      if(callback){
+        rels = rels.filter(rel => callback(rel, value,parent,parentIndex , schema , trace,deepTrace))
+      }
+      result.push(...rels)
     }
     return result
 }

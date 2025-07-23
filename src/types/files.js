@@ -39,6 +39,7 @@
 import { CDataType } from "./core.js";
 
 export class CFile extends CDataType {
+  static isFile = true
   constructor() {
     super("File");
   }

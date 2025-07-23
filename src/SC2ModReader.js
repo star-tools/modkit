@@ -910,6 +910,7 @@ export default class SC2ModReader extends VFS {
 
     async read(mod, options){
         let data = await this._readModData(mod,options);
+        if(!data) return null
 
         let modOptions = {data}
         if(options?.dependencies){
@@ -926,8 +927,14 @@ export default class SC2ModReader extends VFS {
 
             objectsDeepMerge(data, modData);
         }
-        let merged = new SC2Mod({data})
+
+        let modOptions = {data}
+        if(options?.dependencies){
+            modOptions.dependencies = options.dependencies
+        }
+        let merged = new SC2Mod(modOptions)
         merged.buildCatalogs();
+        
         return merged
     }
 

@@ -4,6 +4,8 @@ import SC2Mod from '../../src/SC2Mod.js';
 import fs from 'fs/promises';
 import { groupObjectKeys } from '../../src/util/obj-util.js';
 import { flattenToIni, sectionsToIniString } from '../../src/util/ini-util.js';
+import { relations } from '../../src/util/schema.js';
+import SC2Schema from '../../src/schema/SC2Schema.js';
 
 let reader = new SC2ModReader({
   base: "/Applications/StarCraft II/",
@@ -129,7 +131,7 @@ SC2Mod.prototype.getCalculatedStrings = function (locale,calculate){
   return gcs
 }
 
-async function collectCustomFactionModData(scmod, modName,dependencies){
+async function collectModData(scmod, modName,dependencies){
   let dir = modName
   // Ensure directory exists
   await fs.mkdir(`./wiki/data.v3/${dir}/`, { recursive: true });
@@ -163,8 +165,13 @@ async function collectCustomFactionModData(scmod, modName,dependencies){
 
 
   }
-
-  // const refs = relations(scmod.data, SC2Schema.Mod);
+  //modify file paths
+  relations(scmod.data, SC2Schema.Mod ,"", (rel, value,parent,parentIndex , schema) => {
+    if(rel.type === "File"){
+      parent[parentIndex] = value.replace(/\\/g,"/").split("/").pop().replace(".dds","").replace(".m3","")
+      return true;
+    }
+  });
   // scmod.setEntitiesRelations()
   // await reader.write(`output:core/data.json`,scmod,{scope: ["catalogs","locales"]})
   await fs.writeFile(`/Applications/StarCraft II/tools/wiki/data.v3/${dir}/data.json`, JSON.stringify(output)); // save to file
@@ -180,29 +187,44 @@ let options = {
   }
 }
 
-let coreMod = await reader.read(`output:Core/data.json`,options)
+let forceUpdate = true
+
+let coreMod = !forceUpdate && await reader.read(`output:Core/data.json`,options)
 if(!coreMod) {
   coreMod = await reader.read(`input:mods/Core.sc2mod`,options)
-  await collectCustomFactionModData(coreMod,"Core")
+  await collectModData(coreMod,"Core")
 }
 
 let baseModOptions = {dependencies: [coreMod], ...options}
-let baseMod = await reader.read(`output:Base/data.json`,baseModOptions)
+let baseMod = !forceUpdate && await reader.read(`output:Base/data.json`,baseModOptions)
 if(!baseMod) {
-  baseMod = await reader.read(`input:mods/Base.sc2mod`,baseModOptions)
-  await collectCustomFactionModData(baseMod,"Base")
+  baseMod = await reader.read(`input:bundles/Base.sc2mod`,baseModOptions)
+  await collectModData(baseMod,"Base")
 }
 
 let voidModOptions = {dependencies: [baseMod], ...options}
-let voidMod = await reader.read(`output:Void/data.json`,voidModOptions)
+let voidMod = !forceUpdate && await reader.read(`output:Void/data.json`,voidModOptions)
 if(!voidMod) {
-  voidMod = await reader.read(`input:mods/Void.sc2mod`,voidModOptions)
-  await collectCustomFactionModData(voidMod,"Void")
+  voidMod = await reader.read(`input:bundles/VoidMulti5014.SC2Mod`,voidModOptions)
+  await collectModData(voidMod,"Void")
+}
+let multiMod = await reader.read(`output:Multi/data.json`,voidModOptions)
+if(!multiMod) {
+  multiMod = await reader.merge([
+    `input:mods/Core.sc2mod`,
+    `input:bundles/Base.sc2mod`,
+    `input:bundles/VoidMulti5014.SC2Mod`
+  ],options)
+  await collectModData(multiMod,"Multi")
 }
 
+
+
+
+let customModOptions = {dependencies: [multiMod], ...options}
 async function collectCustomModData(modName){
-  let bwMod = await reader.read(`input:custom/${modName}.sc2mod`, {dependencies: [voidMod], ...options})
-  await collectCustomFactionModData(bwMod,modName)
+  let customMod = await reader.read(`input:custom/${modName}.sc2mod`, customModOptions)
+  await collectModData(customMod,modName)
 }
 
 await collectCustomModData("BroodWar")

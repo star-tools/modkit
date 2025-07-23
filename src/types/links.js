@@ -61,19 +61,21 @@ for (const name of catalogNames) {
   Links[className] = class extends CLink {
     static catalog = name;
   };
+  Object.defineProperty(Links[className], 'name', { value: className });
+
 }
 
 
-Links["CStringLink"] = class extends CLink {
+Links["CStringLink"] = class CStringLink extends CLink {
   static catalog = "String"
 };
-Links["CHotkeyLink"] = class extends CLink {
+Links["CHotkeyLink"] = class CHotkeyLink extends CLink {
   static catalog = "Hotkey"
 };
-Links["CAssetLink"] = class extends CLink {
+Links["CAssetLink"] = class CAssetLink extends CLink {
   static catalog = "Asset"
 };
-Links["CBankLink"] = class extends CLink {
+Links["CBankLink"] = class CBankLink extends CLink {
   static catalog = "Bank"
 };
 
